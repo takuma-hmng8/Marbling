@@ -75,7 +75,7 @@ vec3 rgb2hsv(vec3 c)
 		// 出力レベル補正
 		outputColor = outputColor * (vec4(u_outputMax) - vec4(u_outputMin)) + vec4(u_outputMin);
 		/*===============================================
-		// コントラスト
+		// コントラスト TODO これもvec4でuniformを渡す！ alphaだけコントラストかけたり！
 		===============================================*/
 		// コントラスト
 		float contrastFactor = 20.;

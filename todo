@@ -11,7 +11,7 @@
 	- deltaTimeも操作できるように
 	- transparencyを選択できるように
 	- transparencyにして、0~1でmixする方式で
-	- 粘性の追加
+	- 粘性の追加！
 
 - basic fx
 	- basicFxに色調補正系

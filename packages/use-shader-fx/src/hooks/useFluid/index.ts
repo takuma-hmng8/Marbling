@@ -19,6 +19,7 @@ export type FluidValues = {
 	- params
 	 - velocity dissipation
 	 - color dissipation (color map　/ pressure disippation的なこと？)　
+	 
 	===============================================*/
 };
 
