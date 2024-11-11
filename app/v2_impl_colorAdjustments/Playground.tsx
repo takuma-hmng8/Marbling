@@ -63,7 +63,7 @@ vec3 rgb2hsv(vec3 c)
 		float u_shadows = 1.2;         // シャドウ値 
 		float u_midtones = 1.1;        // ミッドトーン値
 		float u_highlights = 1.4;      // ハイライト値 
-		float u_outputMin = 0.0;     // 出力の最小値 
+		float u_outputMin = 0.0;       // 出力の最小値 
 		float u_outputMax = 1.0;       // 出力の最大値
 
 		// 入力レベル補正

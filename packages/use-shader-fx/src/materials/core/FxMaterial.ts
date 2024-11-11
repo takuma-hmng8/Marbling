@@ -16,7 +16,7 @@ export type DefaultUniforms = {
 
 export type FxMaterialProps<T = {}> = {
    uniformValues?: T;
-   materialParameters?: {};
+   materialParameters?: THREE.ShaderMaterialParameters;
 } & ShaderWithUniforms;
 
 export class FxMaterial extends THREE.ShaderMaterial {
@@ -29,7 +29,7 @@ export class FxMaterial extends THREE.ShaderMaterial {
       vertexShader,
       fragmentShader,
    }: FxMaterialProps = {}) {
-      super();
+      super(materialParameters);
 
       this.uniforms = THREE.UniformsUtils.merge([
          {
@@ -44,7 +44,6 @@ export class FxMaterial extends THREE.ShaderMaterial {
       this.setupDefaultShaders(vertexShader, fragmentShader);
 
       this.setUniformValues(uniformValues);
-      this.setValues(materialParameters);
 
       this.defineUniformAccessors();
    }

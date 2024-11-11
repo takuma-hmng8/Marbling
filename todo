@@ -2,10 +2,6 @@
 	- createMaterialImplにして、引数に関数で引数にチャンクとれるみたいな。第二引数でマテリアルの種類選べるみたいな。
 	- 実装クラスを生成する関数
 
-- SamplingFxMaterialの実装
-	- rgbShiftなど
-	- basicFxLibを拡張する
-
 - fluid
 	- advectionのdisipationを追加する
 	- deltaTimeも操作できるように
@@ -16,7 +12,6 @@
 - basic fx
 	- basicFxに色調補正系
 		- fluid contrastを参考に
-	- mixSrc,mixDstのblendingMode
 	- micSrc => 色調補正系 => micDstの順
 
 

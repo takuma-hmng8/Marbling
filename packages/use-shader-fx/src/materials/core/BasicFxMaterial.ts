@@ -104,7 +104,9 @@ export class BasicFxMaterial extends FxMaterial {
 	override super class method
 	===============================================*/
    setUniformValues(values?: { [key: string]: any }) {
+      // THINK : `flattenUniformValues`するのはこのレイヤーの方がいいかも
       super.setUniformValues(values);
+      // THINK : flattenUniformValuesしたあとで、containsBasicFxValuesに渡せばいい。containsBasicFxValuesでflattenUniformValuesを実行してるので、二度手間になっている
       if (BasicFxLib.containsBasicFxValues(values)) {
          this.updateBasicFx();
       }

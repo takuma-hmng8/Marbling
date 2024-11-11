@@ -48,8 +48,10 @@ export type BasicFxFlag = {
 };
 
 /** valuesのkeyにbasicFxが含まれているかどうかの判定 */
+// TODO : rename to isContainsBasicFxValues
 function containsBasicFxValues(values?: { [key: string]: any }): boolean {
    if (!values) return false;
+   // THINK : ここでflattenUniformValuesを呼び出すべき？
    const _values = flattenUniformValues(values);
    return Object.keys(_values).some((key) =>
       Object.keys(DEFAULT_BASICFX_VALUES).includes(key as keyof BasicFxValues)
@@ -58,6 +60,8 @@ function containsBasicFxValues(values?: { [key: string]: any }): boolean {
 
 function setupDefaultFlag(uniformValues?: BasicFxValues): BasicFxFlag {
    return {
+      // THINK : `handleUpdateBasicFx`での判定は、uniformの値で行っている.例えばsaturation・brightnessとかはどう判定する？
+      // THINK : `isMixSrc` みたいなuniform値をつくる？ uniformValues?.mixSrcを判定するイメージ
       mixSrc: uniformValues?.mixSrc ? true : false,
       mixDst: uniformValues?.mixDst ? true : false,
    };
@@ -70,6 +74,8 @@ function handleUpdateBasicFx(
    validCount: number;
    updatedFlag: BasicFxFlag;
 } {
+   // THINK : `handleUpdateBasicFx`での判定は、uniformの値で行っている.例えばsaturation・brightnessとかはどう判定する？
+   // THINK : `isMixSrc` みたいなuniform値をつくる？ uniformValues?.mixSrcを判定するイメージ
    const isMixSrc = uniforms.mixSrc_src.value ? true : false;
    const isMixDst = uniforms.mixDst_src.value ? true : false;
 
