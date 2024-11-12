@@ -6,7 +6,7 @@ import { useFrame, useThree, extend, createPortal } from "@react-three/fiber";
 import {
    useNoise,
    NoiseValues,
-   useBlur,
+   useBoxBlur,
    useSingleFBO,
    createFxMaterialImpl,
    createBasicFxMaterialImpl,
@@ -49,7 +49,7 @@ export const Playground = () => {
       depthBuffer: true,
    });
 
-   // const blur = useBlur({
+   // const blur = useBoxBlur({
    //    size,
    //    dpr: 1,
    //    src: renderTarget.texture,

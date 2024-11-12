@@ -5,4 +5,5 @@ export * from "./impl/noise/NoiseMaterial";
 export * from "./impl/rawBlank/RawBlankMaterial";
 export * from "./impl/fluid";
 export * from "./impl/blur/BlurMaterial";
+export * from "./impl/boxBlur/BoxBlurMaterial";
 export * from "./impl/cover/CoverTextureMaterial";

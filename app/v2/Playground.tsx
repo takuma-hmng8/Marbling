@@ -3,7 +3,7 @@
 import * as THREE from "three";
 import { useRef, useState } from "react";
 import { useFrame, useThree, extend, createPortal } from "@react-three/fiber";
-import { useNoise, useBlur, useSingleFBO } from "@/packages/use-shader-fx/src";
+import { useNoise, useBoxBlur, useSingleFBO } from "@/packages/use-shader-fx/src";
 import { FxMaterial } from "./FxMaterial";
 import { Float, OrbitControls } from "@react-three/drei";
 
@@ -22,7 +22,7 @@ export const Playground = () => {
       depthBuffer: true,
    });
 
-   const blur = useBlur({
+   const blur = useBoxBlur({
       size,
       dpr: 0.4,
       blurSize: 4,
@@ -30,7 +30,7 @@ export const Playground = () => {
       src: renderTarget.texture,
    });
 
-   const gooey = useBlur({
+   const gooey = useBoxBlur({
       size,
       dpr: 2,
       blurSize: 4,

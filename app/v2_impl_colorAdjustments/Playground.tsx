@@ -6,7 +6,6 @@ import { useFrame, useThree, extend, createPortal } from "@react-three/fiber";
 import {
    useNoise,
    NoiseValues,
-   useBlur,
    useSingleFBO,
    createFxMaterialImpl,
    createBasicFxMaterialImpl,

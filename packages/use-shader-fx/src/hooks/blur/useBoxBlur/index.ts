@@ -1,21 +1,21 @@
 import { useCallback } from "react";
-import { HooksProps, HooksReturn } from "../types";
-import { getDpr } from "../../utils/getDpr";
-import { RootState } from "../types";
-import { BlurMaterial, BlurValues } from "../../materials";
-import { useFxScene } from "../../utils/useFxScene";
-import { useDoubleFBO } from "../../utils/useDoubleFBO";
+import { HooksProps, HooksReturn } from "../../types";
+import { getDpr } from "../../../utils/getDpr";
+import { RootState } from "../../types";
+import { BoxBlurMaterial, BoxBlurValues } from "../../../materials";
+import { useFxScene } from "../../../utils/useFxScene";
+import { useDoubleFBO } from "../../../utils/useDoubleFBO";
 
-type BlurConfig = {
+type BoxBlurConfig = {
    blurIteration?: number;
 };
 
-export type BlurProps = HooksProps & BlurValues & BlurConfig;
+export type BoxBlurProps = HooksProps & BoxBlurValues & BoxBlurConfig;
 
 /**
  * @link https://github.com/FunTechInc/use-shader-fx?tab=readme-ov-file#usage
  */
-export const useBlur = ({
+export const useBoxBlur = ({
    size,
    dpr,
    fboAutoSetSize,
@@ -23,13 +23,13 @@ export const useBlur = ({
    materialParameters,
    blurIteration = 5,
    ...uniformValues
-}: BlurProps): HooksReturn<BlurValues, BlurMaterial> => {
+}: BoxBlurProps): HooksReturn<BoxBlurValues, BoxBlurMaterial> => {
    const _dpr = getDpr(dpr);
 
    const { scene, material, camera } = useFxScene({
       size,
       dpr: _dpr.shader,
-      material: BlurMaterial,
+      material: BoxBlurMaterial,
       uniformValues,
       materialParameters,
    });
@@ -44,14 +44,14 @@ export const useBlur = ({
    });
 
    const setValues = useCallback(
-      (newValues: BlurValues) => {
+      (newValues: BoxBlurValues) => {
          material.setUniformValues(newValues);
       },
       [material]
    );
 
    const render = useCallback(
-      (rootState: RootState, newValues?: BlurValues) => {
+      (rootState: RootState, newValues?: BoxBlurValues) => {
          const { gl } = rootState;
          newValues && setValues(newValues);
 
