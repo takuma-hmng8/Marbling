@@ -1,4 +1,4 @@
-import { ShaderLib } from "../../../shaders/ShaderLib";
+import { ShaderLib } from "../../../../shaders/ShaderLib";
 
 export const vertex = `
 	void main() {

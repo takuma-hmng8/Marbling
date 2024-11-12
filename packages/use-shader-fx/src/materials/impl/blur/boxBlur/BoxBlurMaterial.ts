@@ -1,9 +1,9 @@
 import { fragment, vertex } from "./boxBlur.glsl";
-import { BasicFxMaterial } from "../../core/BasicFxMaterial";
-import { FxMaterialProps } from "../../core/FxMaterial";
-import { BasicFxUniforms, BasicFxValues } from "../../core/BasicFxLib";
-import { NestUniformValues } from "../../../shaders/uniformsUtils";
-import { TexturePipelineSrc } from "../../../misc";
+import { BasicFxMaterial } from "../../../core/BasicFxMaterial";
+import { FxMaterialProps } from "../../../core/FxMaterial";
+import { BasicFxUniforms, BasicFxValues } from "../../../core/BasicFxLib";
+import { NestUniformValues } from "../../../../shaders/uniformsUtils";
+import { TexturePipelineSrc } from "../../../../misc";
 
 type BoxBlurUniforms = {
    /**  */
