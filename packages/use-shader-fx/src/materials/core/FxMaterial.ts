@@ -5,7 +5,7 @@ import {
    flattenUniformValues,
    ShaderWithUniforms,
 } from "../../shaders/uniformsUtils";
-import { warn } from "../../utils/warn";
+import { warn } from "../../utils";
 
 export type DefaultUniforms = {
    resolution: { value: THREE.Vector2 };

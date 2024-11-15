@@ -1,11 +1,8 @@
 import { useCallback } from "react";
-import { useSingleFBO } from "../../utils/useSingleFBO";
-import { HooksProps, HooksReturn } from "../types";
-import { getDpr } from "../../utils/getDpr";
-import { RootState } from "../types";
+import { useSingleFBO, useFxScene, getDpr } from "../../utils";
+import { HooksProps, HooksReturn, RootState } from "../types";
 import { RawBlankMaterial, RawBlankValues } from "../../materials";
-import { useFxScene } from "../../utils/useFxScene";
-import { ShaderWithUniforms } from "../../materials/core/FxMaterial";
+import { ShaderWithUniforms } from "../../shaders/uniformsUtils";
 
 type RawBlankConfig = ShaderWithUniforms;
 

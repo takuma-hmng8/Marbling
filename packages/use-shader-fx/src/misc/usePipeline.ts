@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { useCallback, useState } from "react";
 import { RootState } from "../hooks/types";
 import { FxTypes, FxProps } from "../hooks";
-import { warn } from "../utils/warn";
+import { warn } from "../utils";
 
 export type FxConfig<T extends FxTypes = FxTypes> = {
    fx: T;

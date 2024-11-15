@@ -1,14 +1,11 @@
 import { useCallback } from "react";
-import { useSingleFBO } from "../../utils/useSingleFBO";
-import { HooksProps, HooksReturn } from "../types";
-import { getDpr } from "../../utils/getDpr";
-import { RootState } from "../types";
+import { useSingleFBO, getDpr, useFxScene } from "../../utils";
+import { HooksProps, HooksReturn, RootState } from "../types";
 import {
    NoiseMaterial,
    NoiseMaterialProps,
    NoiseValues,
 } from "../../materials";
-import { useFxScene } from "../../utils/useFxScene";
 
 export type NoiseProps = HooksProps & NoiseValues;
 

@@ -1,10 +1,7 @@
 import * as THREE from "three";
 import { useCallback } from "react";
-import { useSingleFBO } from "../../utils/useSingleFBO";
-import { HooksProps, HooksReturn } from "../types";
-import { getDpr } from "../../utils/getDpr";
-import { RootState } from "../types";
-import { useDoubleFBO } from "../../utils/useDoubleFBO";
+import { useSingleFBO, useDoubleFBO, getDpr } from "../../utils";
+import { HooksProps, HooksReturn, RootState } from "../types";
 import { useAdvection } from "./scenes/useAdvection";
 import { useSplat } from "./scenes/useSplat";
 import { useDivergence } from "./scenes/useDivergence";

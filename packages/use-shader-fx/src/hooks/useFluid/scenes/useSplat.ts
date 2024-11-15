@@ -1,9 +1,8 @@
 import { useCallback } from "react";
 import { RootState, Size } from "../../types";
-import { SingleFBOUpdateFunction } from "../../../utils/useSingleFBO";
+import { SingleFBOUpdateFunction, useFxScene } from "../../../utils";
 import { SplatMaterial } from "../../../materials";
 import { usePointerTracker } from "../../../misc/usePointerTracker";
-import { useFxScene } from "../../../utils/useFxScene";
 
 export const useSplat = (
    {

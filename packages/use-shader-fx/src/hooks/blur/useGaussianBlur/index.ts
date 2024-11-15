@@ -1,12 +1,9 @@
+import * as THREE from "three";
 import { useCallback } from "react";
 import { HooksProps, HooksReturn } from "../../types";
-import { getDpr } from "../../../utils/getDpr";
+import { getDpr, useFxScene, useDoubleFBO, useRefState } from "../../../utils";
 import { RootState } from "../../types";
 import { GaussianBlurMaterial, GaussianBlurValues } from "../../../materials";
-import { useFxScene } from "../../../utils/useFxScene";
-import { useDoubleFBO } from "../../../utils/useDoubleFBO";
-import * as THREE from "three";
-import { useMutableConfig } from "../../../utils/useMutableConfig";
 
 type GaussianBlurConfig = {
    radius?: number;
@@ -56,7 +53,7 @@ export const useGaussianBlur = ({
       ...renderTargetOptions,
    });
 
-   const [config, setConfig] = useMutableConfig<GaussianBlurConfig>({
+   const [config, setConfig] = useRefState<GaussianBlurConfig>({
       radius,
    });
 
@@ -65,7 +62,6 @@ export const useGaussianBlur = ({
          const { radius, ...rest } = newValues;
          if (radius) {
             setConfig((prev) => {
-               // 変更がある場合だけsetBlurRadiusを実行する
                if (radius !== prev.radius) material.setBlurRadius(radius);
                return { radius };
             });

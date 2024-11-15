@@ -2,7 +2,6 @@ export * from "./hooks";
 
 export * from "./materials";
 
-export * from "./utils/useDoubleFBO";
-export * from "./utils/useSingleFBO";
+export { useDoubleFBO, useSingleFBO } from "./utils";
 
 export * from "./misc";

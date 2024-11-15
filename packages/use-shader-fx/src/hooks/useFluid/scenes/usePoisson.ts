@@ -1,9 +1,8 @@
 import * as THREE from "three";
 import { useCallback } from "react";
 import { RootState, Size } from "../../types";
-import { SingleFBOUpdateFunction } from "../../../utils/useSingleFBO";
+import { SingleFBOUpdateFunction, useFxScene } from "../../../utils";
 import { PoissonMaterial } from "../../../materials";
-import { useFxScene } from "../../../utils/useFxScene";
 
 export const usePoisson = (
    {

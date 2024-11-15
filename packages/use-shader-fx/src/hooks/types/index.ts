@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { BasicFxMaterial } from "../../materials/core/BasicFxMaterial";
-import { DoubleRenderTarget } from "../../utils/useDoubleFBO";
+import { DoubleRenderTarget } from "../../utils";
 
 export type Size = {
    width: number;

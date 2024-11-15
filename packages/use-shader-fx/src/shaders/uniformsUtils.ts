@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { warn } from "../utils/warn";
+import { warn } from "../utils";
 import { THREE_TYPES } from "../libs/constants";
 
 export type Uniforms = { [uniform: string]: THREE.IUniform<any> };

@@ -4,16 +4,10 @@ import * as THREE from "three";
 import { useEffect, useRef, useState } from "react";
 import { useFrame, useThree, extend, createPortal } from "@react-three/fiber";
 import {
-   useNoise,
-   NoiseValues,
-   useBoxBlur,
-   useSingleFBO,
    createFxMaterialImpl,
    createBasicFxMaterialImpl,
    FxMaterialImplValues,
    BasicFxMaterialImplValues,
-   useFluid,
-   useCoverTexture,
 } from "@/packages/use-shader-fx/src";
 import { Float, OrbitControls, useTexture } from "@react-three/drei";
 import { useGaussianBlur } from "@/packages/use-shader-fx/src/hooks/blur/useGaussianBlur";
@@ -42,17 +36,17 @@ export const Playground = () => {
 
    const [app] = useTexture(["/app-head.jpg"]);
 
-   const blur = useBoxBlur({
+   const blur = useGaussianBlur({
       size,
       dpr: 1,
-      // radius: 19,
+      radius: 21,
       // blurIteration: 1,
       src: app,
    });
 
    blur.setValues({
-      // radius: 9,
-      blurIteration: 20,
+      radius: 41,
+      // blurIteration: 20,
    });
 
    useFrame((state) => {

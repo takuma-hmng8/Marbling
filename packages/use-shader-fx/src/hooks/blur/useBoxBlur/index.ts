@@ -1,11 +1,8 @@
 import { useCallback } from "react";
 import { HooksProps, HooksReturn } from "../../types";
-import { getDpr } from "../../../utils/getDpr";
+import { getDpr, useFxScene, useDoubleFBO, useRefState } from "../../../utils";
 import { RootState } from "../../types";
 import { BoxBlurMaterial, BoxBlurValues } from "../../../materials";
-import { useFxScene } from "../../../utils/useFxScene";
-import { useDoubleFBO } from "../../../utils/useDoubleFBO";
-import { useMutableConfig } from "../../../utils/useMutableConfig";
 
 type BoxBlurConfig = {
    blurIteration?: number;
@@ -45,14 +42,14 @@ export const useBoxBlur = ({
       ...renderTargetOptions,
    });
 
-   const [config, setConfig] = useMutableConfig<BoxBlurConfig>({
+   const [config, setConfig] = useRefState<BoxBlurConfig>({
       blurIteration,
    });
 
    const setValues = useCallback(
       (newValues: BoxBlurValuesAndConfig) => {
          const { blurIteration, ...rest } = newValues;
-         setConfig({ blurIteration });
+         if (blurIteration) setConfig({ blurIteration });
          material.setUniformValues(rest);
       },
       [material, setConfig]
@@ -69,7 +66,11 @@ export const useBoxBlur = ({
 
          updateRenderTarget({ gl });
 
-         for (let i = 0; i < config.current.blurIteration!; i++) {
+         for (
+            let i = 0;
+            i < (config.current.blurIteration || blurIteration);
+            i++
+         ) {
             updateRenderTarget({ gl }, ({ read }) => {
                material.uniforms.src.value = read;
             });
@@ -79,7 +80,14 @@ export const useBoxBlur = ({
 
          return renderTarget.read.texture;
       },
-      [setValues, updateRenderTarget, material, renderTarget, config]
+      [
+         setValues,
+         updateRenderTarget,
+         material,
+         renderTarget,
+         config,
+         blurIteration,
+      ]
    );
 
    return {
