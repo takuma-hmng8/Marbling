@@ -1,16 +1,18 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { HooksProps, HooksReturn } from "../../types";
 import { getDpr } from "../../../utils/getDpr";
 import { RootState } from "../../types";
 import { BoxBlurMaterial, BoxBlurValues } from "../../../materials";
 import { useFxScene } from "../../../utils/useFxScene";
 import { useDoubleFBO } from "../../../utils/useDoubleFBO";
+import { useMutableConfig } from "../../../utils/useMutableConfig";
 
 type BoxBlurConfig = {
    blurIteration?: number;
 };
 
-export type BoxBlurProps = HooksProps & BoxBlurValues & BoxBlurConfig;
+type BoxBlurValuesAndConfig = BoxBlurValues & BoxBlurConfig;
+export type BoxBlurProps = HooksProps & BoxBlurValuesAndConfig;
 
 /**
  * @link https://github.com/FunTechInc/use-shader-fx?tab=readme-ov-file#usage
@@ -23,7 +25,7 @@ export const useBoxBlur = ({
    materialParameters,
    blurIteration = 5,
    ...uniformValues
-}: BoxBlurProps): HooksReturn<BoxBlurValues, BoxBlurMaterial> => {
+}: BoxBlurProps): HooksReturn<BoxBlurValuesAndConfig, BoxBlurMaterial> => {
    const _dpr = getDpr(dpr);
 
    const { scene, material, camera } = useFxScene({
@@ -43,15 +45,21 @@ export const useBoxBlur = ({
       ...renderTargetOptions,
    });
 
+   const [config, setConfig] = useMutableConfig<BoxBlurConfig>({
+      blurIteration,
+   });
+
    const setValues = useCallback(
-      (newValues: BoxBlurValues) => {
-         material.setUniformValues(newValues);
+      (newValues: BoxBlurValuesAndConfig) => {
+         const { blurIteration, ...rest } = newValues;
+         setConfig({ blurIteration });
+         material.setUniformValues(rest);
       },
-      [material]
+      [material, setConfig]
    );
 
    const render = useCallback(
-      (rootState: RootState, newValues?: BoxBlurValues) => {
+      (rootState: RootState, newValues?: BoxBlurValuesAndConfig) => {
          const { gl } = rootState;
          newValues && setValues(newValues);
 
@@ -61,7 +69,7 @@ export const useBoxBlur = ({
 
          updateRenderTarget({ gl });
 
-         for (let i = 0; i < blurIteration; i++) {
+         for (let i = 0; i < config.current.blurIteration!; i++) {
             updateRenderTarget({ gl }, ({ read }) => {
                material.uniforms.src.value = read;
             });
@@ -71,7 +79,7 @@ export const useBoxBlur = ({
 
          return renderTarget.read.texture;
       },
-      [setValues, updateRenderTarget, material, renderTarget, blurIteration]
+      [setValues, updateRenderTarget, material, renderTarget, config]
    );
 
    return {

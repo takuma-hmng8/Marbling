@@ -10,26 +10,27 @@ import { Size } from "../../../../hooks/types";
 type GaussianBlurUniforms = {
    /**  */
    src: { value: TexturePipelineSrc };
-   /**  */   
+   /**  */
    sigma: {
-    value: THREE.Vector2
-   },
+      value: THREE.Vector2;
+   };
    u_weights: {
-    value: number[]
-   },
+      value: number[];
+   };
    u_step: {
-    value: THREE.Vector2
-   },
+      value: THREE.Vector2;
+   };
    u_stepSize: {
-    value: THREE.Vector2
-   },   
+      value: THREE.Vector2;
+   };
 } & BasicFxUniforms;
 
-export type GaussianBlurValues = NestUniformValues<GaussianBlurUniforms> & BasicFxValues;
+export type GaussianBlurValues = NestUniformValues<GaussianBlurUniforms> &
+   BasicFxValues;
 
 export class GaussianBlurMaterial extends BasicFxMaterial {
    static get type() {
-      return "GaussianBlurMaterial";      
+      return "GaussianBlurMaterial";
    }
 
    uniforms!: GaussianBlurUniforms;
@@ -42,60 +43,70 @@ export class GaussianBlurMaterial extends BasicFxMaterial {
          vertexShader: vertex,
          fragmentShader: fragment,
          uniformValues,
-         materialParameters: {
-            defines: {
-                "KERNEL_SIZE": 1,                
-            },
-            ...materialParameters,            
-         },
+         materialParameters,
          uniforms: {
             src: {
-                value: null
+               value: null,
             },
             sigma: {
-                value: new THREE.Vector2(1,1)
+               value: new THREE.Vector2(1, 1),
             },
             u_weights: {
-                value: [0]
+               value: [0],
             },
             u_step: {
-                value: new THREE.Vector2(0,0)
+               value: new THREE.Vector2(0, 0),
             },
             u_stepSize: {
-                value: new THREE.Vector2(0)
-            },            
+               value: new THREE.Vector2(0),
+            },
          } as GaussianBlurUniforms,
       });
+
+      // 初期化時に更新
+      this.setBlurRadius(materialParameters.defines.KERNEL_SIZE);
 
       this.type = GaussianBlurMaterial.type;
    }
 
    setBlurRadius(kernelSize: number) {
-        const weights = []
-        let t = 0.0; 
+      const weights = [];
+      let t = 0.0;
 
-        for(let i = kernelSize - 1; i >= 0; i--){
-            let r = 1.0 + 2.0 * i;
-            let w = Math.exp(-0.5 * (r * r) / (kernelSize * kernelSize));
-            weights.push(w);
-            if(i > 0){w *= 2.0;}
-            t += w;
-        }        
+      console.log("setBlurRadius", kernelSize);
 
-        for(let i = 0; i < weights.length; i++){
-            weights[i] /= t;
-        } 
+      for (let i = kernelSize - 1; i >= 0; i--) {
+         let r = 1.0 + 2.0 * i;
+         let w = Math.exp((-0.5 * (r * r)) / (kernelSize * kernelSize));
+         weights.push(w);
+         if (i > 0) {
+            w *= 2.0;
+         }
+         t += w;
+      }
+
+      for (let i = 0; i < weights.length; i++) {
+         weights[i] /= t;
+      }
 
       // materiaに反映して更新を通知
-      this.defines.KERNEL_SIZE = weights.length;      
-      this.uniforms.u_weights.value = weights;      
+      this.defines.KERNEL_SIZE = weights.length; // TODO * ここkerbelSizeをそのまま渡す方が直感的かな？
+      this.uniforms.u_weights.value = weights;
       this.needsUpdate = true;
    }
 
-   setStep({size}:{size?: Size}) {
-        this.uniforms.u_step.value.set(
-            1 / (size?.width || this.uniforms.resolution.value.x || window.innerWidth),
-            1 / (size?.height || this.uniforms.resolution.value.y || window.innerHeight)            
-        );                
+   // TODO * これは必要？ resolutionをshaderで使っちゃえばいいのでは？
+   // TODO * ちなみに、FxMaterialには、texelSizeというuniformがあるので、それをそのまま使えば処理も不要になるかも updateResolutionのupdateResolutionメソッドを確認。これらのDefaultUniformsは、全てのshaderで自動でprefixとして挿入される。
+   setStep(size: Size) {
+      this.uniforms.u_step.value.set(
+         1 /
+            (size?.width ||
+               this.uniforms.resolution.value.x ||
+               window.innerWidth),
+         1 /
+            (size?.height ||
+               this.uniforms.resolution.value.y ||
+               window.innerHeight)
+      );
    }
 }

@@ -1,9 +1,13 @@
 "use client";
 
 import * as THREE from "three";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFrame, useThree, extend, createPortal } from "@react-three/fiber";
-import { useNoise, useBoxBlur, useSingleFBO } from "@/packages/use-shader-fx/src";
+import {
+   useNoise,
+   useBoxBlur,
+   useSingleFBO,
+} from "@/packages/use-shader-fx/src";
 import { FxMaterial } from "./FxMaterial";
 import { Float, OrbitControls } from "@react-three/drei";
 

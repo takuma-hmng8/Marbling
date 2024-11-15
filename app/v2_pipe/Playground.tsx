@@ -11,6 +11,7 @@ import {
    usePipeline,
 } from "@/packages/use-shader-fx/src";
 import { useTexture } from "@react-three/drei";
+import * as THREE from "three";
 
 const FxMaterialImpl = createFxMaterialImpl();
 const BasicFxMaterialImpl = createBasicFxMaterialImpl();
@@ -102,6 +103,10 @@ export const Playground = () => {
    setPipeline({}, { mixSrc: 0 });
 
    useFrame((state) => render(state));
+
+   const color1 = new THREE.Color(0x000000);
+   const color2 = new THREE.Color(0x000000);
+   console.log(color1 === color2);
 
    return (
       <mesh>

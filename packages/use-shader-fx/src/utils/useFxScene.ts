@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useObject3D } from "./useObject3D";
 import { Size } from "../hooks/types";
 import { useResolution } from "./useResolution";
@@ -30,7 +30,8 @@ export const useFxScene = <M extends FxMaterial>({
       height: number;
    };
 } & FxMaterialProps) => {
-   // non-reactive
+   // Mutable THREE objects should retain their values in useState
+   // https://github.com/FunTechInc/use-shader-fx/issues/145
    const [scene] = useState(() => new THREE.Scene());
    const [_geometry] = useState(
       () => new geometry(geometrySize?.width || 2, geometrySize?.height || 2)
