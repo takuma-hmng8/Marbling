@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 
-export const useMutableRefState = <S>(state: S) => {
+export const useMutableState = <S>(state: S) => {
    const ref = useRef(state);
    const setRef = useCallback((value: S | ((prevState: S) => S)) => {
       ref.current =

@@ -4,7 +4,7 @@ import {
    getDpr,
    useFxScene,
    useDoubleFBO,
-   useMutableRefState,
+   useMutableState,
 } from "../../../utils";
 import { RootState } from "../../types";
 import { BoxBlurMaterial, BoxBlurValues } from "../../../materials";
@@ -47,7 +47,7 @@ export const useBoxBlur = ({
       ...renderTargetOptions,
    });
 
-   const [config, setConfig] = useMutableRefState<BoxBlurConfig>({
+   const [config, setConfig] = useMutableState<BoxBlurConfig>({
       blurIteration,
    });
 

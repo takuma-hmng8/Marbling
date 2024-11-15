@@ -5,7 +5,7 @@ import {
    getDpr,
    useFxScene,
    useDoubleFBO,
-   useMutableRefState,
+   useMutableState,
 } from "../../../utils";
 import { RootState } from "../../types";
 import { GaussianBlurMaterial, GaussianBlurValues } from "../../../materials";
@@ -58,7 +58,7 @@ export const useGaussianBlur = ({
       ...renderTargetOptions,
    });
 
-   const [config, setConfig] = useMutableRefState<GaussianBlurConfig>({
+   const [config, setConfig] = useMutableState<GaussianBlurConfig>({
       radius,
    });
 
