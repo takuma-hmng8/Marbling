@@ -1,6 +1,11 @@
 import { useCallback } from "react";
 import { HooksProps, HooksReturn } from "../../types";
-import { getDpr, useFxScene, useDoubleFBO, useRefState } from "../../../utils";
+import {
+   getDpr,
+   useFxScene,
+   useDoubleFBO,
+   useMutableRefState,
+} from "../../../utils";
 import { RootState } from "../../types";
 import { BoxBlurMaterial, BoxBlurValues } from "../../../materials";
 
@@ -42,7 +47,7 @@ export const useBoxBlur = ({
       ...renderTargetOptions,
    });
 
-   const [config, setConfig] = useRefState<BoxBlurConfig>({
+   const [config, setConfig] = useMutableRefState<BoxBlurConfig>({
       blurIteration,
    });
 

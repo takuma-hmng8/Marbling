@@ -1,7 +1,12 @@
 import * as THREE from "three";
 import { useCallback } from "react";
 import { HooksProps, HooksReturn } from "../../types";
-import { getDpr, useFxScene, useDoubleFBO, useRefState } from "../../../utils";
+import {
+   getDpr,
+   useFxScene,
+   useDoubleFBO,
+   useMutableRefState,
+} from "../../../utils";
 import { RootState } from "../../types";
 import { GaussianBlurMaterial, GaussianBlurValues } from "../../../materials";
 
@@ -53,7 +58,7 @@ export const useGaussianBlur = ({
       ...renderTargetOptions,
    });
 
-   const [config, setConfig] = useRefState<GaussianBlurConfig>({
+   const [config, setConfig] = useMutableRefState<GaussianBlurConfig>({
       radius,
    });
 

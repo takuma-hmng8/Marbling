@@ -2,7 +2,7 @@ export * from "./getDpr";
 export * from "./useCamera";
 export * from "./useDoubleFBO";
 export * from "./useFxScene";
-export * from "./useRefState";
+export * from "./useMutableRefState";
 export * from "./useObject3D";
 export * from "./useResolution";
 export * from "./useSingleFBO";
