@@ -4,7 +4,7 @@ import { getDpr } from "../../utils/getDpr";
 import { RootState } from "../types";
 import { RGBShiftMaterial, RGBShiftValues } from "../../materials";
 import { useFxScene } from "../../utils/useFxScene";
-import { useMutableConfig } from "../../utils/useMutableConfig";
+import { useMutableState } from "../../utils/useMutableState";
 import { useSingleFBO } from "../../utils/useSingleFBO";
 
 type RGBShiftConfig = {
@@ -45,7 +45,7 @@ export const useRGBShift = ({
       ...renderTargetOptions,
    });
 
-   const [config, setConfig] = useMutableConfig<RGBShiftConfig>({
+   const [config, setConfig] = useMutableState<RGBShiftConfig>({
     //   blurIteration,
    });
 
