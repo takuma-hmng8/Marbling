@@ -104,10 +104,6 @@ export const Playground = () => {
 
    useFrame((state) => render(state));
 
-   const color1 = new THREE.Color(0x000000);
-   const color2 = new THREE.Color(0x000000);
-   console.log(color1 === color2);
-
    return (
       <mesh>
          <planeGeometry args={[2, 2]} />

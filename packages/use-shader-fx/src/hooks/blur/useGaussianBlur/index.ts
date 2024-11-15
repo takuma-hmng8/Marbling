@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { HooksProps, HooksReturn } from "../../types";
 import { getDpr } from "../../../utils/getDpr";
 import { RootState } from "../../types";
