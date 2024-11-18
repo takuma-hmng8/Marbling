@@ -25,7 +25,7 @@ export const useGaussianBlur = ({
    renderTargetOptions,
    materialParameters,
    radius = 1,
-   src, // TODO * ここでsrcを定義すると、uniformValuesにsrcがふくまれなくなっちゃう
+   // src, // TODO * ここでsrcを定義すると、uniformValuesにsrcがふくまれなくなっちゃう
    ...uniformValues
 }: GaussianBlurProps): HooksReturn<
    GaussianBlurValuesAndConfig,
@@ -45,9 +45,6 @@ export const useGaussianBlur = ({
          },
       },
    });
-
-   //THINKS * レンダー中に処理しちゃっていいかも. そもそも不要かも. materialのコメントを確認.
-   material.setStep(size);
 
    const [renderTarget, updateRenderTarget] = useDoubleFBO({
       scene,
@@ -83,7 +80,7 @@ export const useGaussianBlur = ({
 
          // draw vertical blur
          updateRenderTarget({ gl }, () => {
-            material.uniforms.src.value = src || new THREE.Texture();
+            material.uniforms.src.value = uniformValues.src || new THREE.Texture();
             material.uniforms.u_stepSize.value.set(0, 1);
             material.updateBasicFx();
          });
@@ -97,7 +94,7 @@ export const useGaussianBlur = ({
 
          return renderTarget.read.texture;
       },
-      [setValues, updateRenderTarget, material, renderTarget, src]
+      [setValues, updateRenderTarget, material, renderTarget, uniformValues.src]
    );
 
    return {

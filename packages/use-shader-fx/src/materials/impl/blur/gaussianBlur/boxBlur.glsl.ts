@@ -6,9 +6,8 @@ export const vertex = `
 	}
 `;
 
-export const fragment = `	
-	uniform sampler2D src;		
-	uniform vec2 u_step;	
+export const fragment = `		
+	uniform sampler2D src;			
 	uniform vec2 u_stepSize;	
 	uniform vec2 sigma;	
 	uniform float u_weights[KERNEL_SIZE];	
@@ -23,17 +22,17 @@ export const fragment = `
 		float sumW = 0.0;
 		float actualWeight;
 		vec2 stepSize = u_stepSize * sigma;
-
+		
 		for(int i = 0; i <  KERNEL_SIZE - 1; i++){
 
 			w = u_weights[i];
-			color = texture2D( src, vUv - count * u_step * stepSize );
+			color = texture2D( src, vUv - count * texelSize * stepSize );
 			actualWeight = w * color.a;
 			sum.rgb += color.rgb * actualWeight;
 			sum.a += color.a * w;
 			sumW += actualWeight;
 
-			color = texture2D( src, vUv + count * u_step * stepSize );
+			color = texture2D( src, vUv + count * texelSize * stepSize );
 			actualWeight = w * color.a;
 			sum.rgb += color.rgb * actualWeight;
 			sum.a += color.a * w;

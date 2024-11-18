@@ -17,9 +17,6 @@ type GaussianBlurUniforms = {
    u_weights: {
       value: number[];
    };
-   u_step: {
-      value: THREE.Vector2;
-   };
    u_stepSize: {
       value: THREE.Vector2;
    };
@@ -54,9 +51,6 @@ export class GaussianBlurMaterial extends BasicFxMaterial {
             u_weights: {
                value: [0],
             },
-            u_step: {
-               value: new THREE.Vector2(0, 0),
-            },
             u_stepSize: {
                value: new THREE.Vector2(0),
             },
@@ -71,9 +65,7 @@ export class GaussianBlurMaterial extends BasicFxMaterial {
 
    setBlurRadius(kernelSize: number) {
       const weights = [];
-      let t = 0.0;
-
-      console.log("setBlurRadius", kernelSize);
+      let t = 0.0; 
 
       for (let i = kernelSize - 1; i >= 0; i--) {
          let r = 1.0 + 2.0 * i;
@@ -90,23 +82,8 @@ export class GaussianBlurMaterial extends BasicFxMaterial {
       }
 
       // materiaに反映して更新を通知
-      this.defines.KERNEL_SIZE = weights.length; // TODO * ここkerbelSizeをそのまま渡す方が直感的かな？
+      this.defines.KERNEL_SIZE = kernelSize;
       this.uniforms.u_weights.value = weights;
       this.needsUpdate = true;
-   }
-
-   // TODO * これは必要？ resolutionをshaderで使っちゃえばいいのでは？
-   // TODO * ちなみに、FxMaterialには、texelSizeというuniformがあるので、それをそのまま使えば処理も不要になるかも updateResolutionのupdateResolutionメソッドを確認。これらのDefaultUniformsは、全てのshaderで自動でprefixとして挿入される。
-   setStep(size: Size) {
-      this.uniforms.u_step.value.set(
-         1 /
-            (size?.width ||
-               this.uniforms.resolution.value.x ||
-               window.innerWidth),
-         1 /
-            (size?.height ||
-               this.uniforms.resolution.value.y ||
-               window.innerHeight)
-      );
    }
 }
