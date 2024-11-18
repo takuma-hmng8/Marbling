@@ -5,7 +5,6 @@ import { FxMaterialProps } from "../../../core/FxMaterial";
 import { BasicFxUniforms, BasicFxValues } from "../../../core/BasicFxLib";
 import { NestUniformValues } from "../../../../shaders/uniformsUtils";
 import { TexturePipelineSrc } from "../../../../misc";
-import { Size } from "../../../../hooks/types";
 
 type GaussianBlurUniforms = {
    /**  */
