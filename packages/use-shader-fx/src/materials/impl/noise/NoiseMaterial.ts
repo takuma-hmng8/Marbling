@@ -25,6 +25,8 @@ type NoiseUniforms = {
    warpDirection: { value: THREE.Vector2 };
    /** strength of domain warping , default : `8.0` */
    warpStrength: { value: number };
+   /** offset of the time */
+   timeOffset: { value: number };
 } & BasicFxUniforms;
 
 export type NoiseValues = NestUniformValues<NoiseUniforms> & BasicFxValues;
@@ -58,6 +60,7 @@ export class NoiseMaterial extends BasicFxMaterial {
             warpOctaves: { value: 2 },
             warpDirection: { value: new THREE.Vector2(2.0, 2.0) },
             warpStrength: { value: 8 },
+            timeOffset: { value: 0 },
          } as NoiseUniforms,
       });
       this.type = NoiseMaterial.type;
