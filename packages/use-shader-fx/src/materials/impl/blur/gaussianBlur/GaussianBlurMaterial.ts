@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { fragment, vertex } from "./boxBlur.glsl";
+import { fragment, vertex } from "./gaussianBlur.glsl";
 import { BasicFxMaterial } from "../../../core/BasicFxMaterial";
 import { FxMaterialProps } from "../../../core/FxMaterial";
 import { BasicFxUniforms, BasicFxValues } from "../../../core/BasicFxLib";
