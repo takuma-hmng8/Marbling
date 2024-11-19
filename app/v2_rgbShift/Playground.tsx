@@ -9,12 +9,12 @@ import {
    FxMaterialImplValues,
    BasicFxMaterialImplValues,
    useRGBShift,
+   useGaussianBlur
 } from "@/packages/use-shader-fx/src";
 import { Float, OrbitControls, useTexture } from "@react-three/drei";
-import { useGaussianBlur } from "@/packages/use-shader-fx/src/hooks/blur/useGaussianBlur";
 import { useCoverTexture } from "@/packages/use-shader-fx/src/hooks/useCoverTexture";
 import { useNoise } from "@/packages/use-shader-fx/src";
-import gsap from "gsap";
+import { useMotionBlur } from "@/packages/use-shader-fx/src/hooks/blur/useMotionBlur";
 
 const FxMaterialImpl = createFxMaterialImpl({
    fragmentShader: `
@@ -44,28 +44,28 @@ export const Playground = () => {
    const noise = useNoise({
       size,
       dpr: 1,
-      scale: 0.001,
+      scale: 0.005,
       timeOffset: 0,
    })
 
    const noise2 = useNoise({
       size,
       dpr: 1,
-      scale: 0.001,
-      timeOffset: .04,
+      scale: 0.005,      
+      timeOffset: .03,
    })
 
    const noise3 = useNoise({
       size,
       dpr: 1,
-      scale: 0.001,
-      timeOffset: .08,
+      scale: 0.005,            
+      timeOffset: .06,
    })
 
    const rgbShift = useRGBShift({
       size,
       dpr: 2,
-      shiftScale: .18,
+      shiftScale: .1,
       src: coverTexture.texture,
       shiftPower: new THREE.Vector2(2, 2),
       shiftPowerSrcR: noise.texture,      
@@ -76,28 +76,34 @@ export const Playground = () => {
       isUseShiftPowerSrcB: true,
    })
 
-   const gBlur = useGaussianBlur({
+   const gbBur = useGaussianBlur({
       size,
       dpr: 1,
-      radius: 3,
+      radius: 2,      
+      sigma: new THREE.Vector2(0, 0),
       src: rgbShift.texture,
-      sigma: new THREE.Vector2(1, 1),
-   })
-   
+   });
+
+   const motionBlur = useMotionBlur({
+      size,
+      dpr: 1,
+      src: gbBur.texture,            
+   });
 
    useFrame((state) => {
       coverTexture.render(state);
       noise.render(state);
       noise2.render(state);
       noise3.render(state);
-      rgbShift.render(state);   
-      gBlur.render(state);
+      rgbShift.render(state);         
+      gbBur.render(state);
+      motionBlur.render(state);
    });
 
    return (
       <mesh>
          <planeGeometry args={[2, 2]} />
-         <fxMaterialImpl key={FxMaterialImpl.key} src={gBlur.texture} />
+         <fxMaterialImpl key={FxMaterialImpl.key} src={motionBlur.texture} />
       </mesh>
    );
 };

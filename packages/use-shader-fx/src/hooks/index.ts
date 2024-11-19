@@ -1,4 +1,6 @@
 import { useBoxBlur, BoxBlurProps } from "./blur/useBoxBlur";
+import { useGaussianBlur, GaussianBlurProps } from "./blur/useGaussianBlur";
+import { useMotionBlur, MotionBlurProps } from "./blur/useMotionBlur";
 import { useCoverTexture, CoverTextureProps } from "./useCoverTexture";
 import { useFluid, FluidProps } from "./useFluid";
 import { useNoise, NoiseProps } from "./useNoise";
@@ -11,7 +13,9 @@ export type FxTypes =
    | typeof useFluid
    | typeof useNoise
    | typeof useRawBlank
-   | typeof useRGBShift;
+   | typeof useRGBShift
+   | typeof useMotionBlur
+   | typeof useGaussianBlur;
 
 export type FxProps<T> = 
    T extends typeof useBoxBlur
@@ -26,6 +30,10 @@ export type FxProps<T> =
    ? RGBShiftProps
    : T extends typeof useRGBShift   
    ? RawBlankProps
+   : T extends typeof useMotionBlur
+   ? MotionBlurProps
+   : T extends typeof useGaussianBlur
+   ? MotionBlurProps
    : never;
 
 export * from "./blur/useBoxBlur";
@@ -34,3 +42,5 @@ export * from "./useFluid";
 export * from "./useNoise";
 export * from "./useRawBlank";
 export * from "./useRGBShift";
+export * from "./blur/useMotionBlur";
+export * from "./blur/useGaussianBlur";
