@@ -24,8 +24,7 @@ export const useGaussianBlur = ({
    fboAutoSetSize,
    renderTargetOptions,
    materialParameters,
-   radius = 1,
-   // src, // TODO * ここでsrcを定義すると、uniformValuesにsrcがふくまれなくなっちゃう
+   radius = 1,   
    ...uniformValues
 }: GaussianBlurProps): HooksReturn<
    GaussianBlurValuesAndConfig,
