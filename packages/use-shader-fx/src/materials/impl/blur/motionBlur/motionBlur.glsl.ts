@@ -12,9 +12,9 @@ export const fragment = `
 	uniform float mixRatio;
 
 	void main() {				
-		vec4 color = texture2D(src, vUv);
+		vec4 currentColor = texture2D(src, vUv);
 		vec4 prevColor = texture2D(backBuffer, vUv);
 
-		gl_FragColor = mix(prevColor, color, mixRatio);
+		gl_FragColor = mix(prevColor, currentColor, mixRatio);
 	}
 `;
