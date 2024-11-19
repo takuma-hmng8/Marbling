@@ -4,14 +4,9 @@ import { getDpr } from "../../utils/getDpr";
 import { RootState } from "../types";
 import { RGBShiftMaterial, RGBShiftValues } from "../../materials";
 import { useFxScene } from "../../utils/useFxScene";
-import { useMutableState } from "../../utils/useMutableState";
 import { useSingleFBO } from "../../utils/useSingleFBO";
 
-type RGBShiftConfig = {
-//    blurIteration?: number;
-};
-
-type RGBShiftValuesAndConfig = RGBShiftValues & RGBShiftConfig;
+type RGBShiftValuesAndConfig = RGBShiftValues;
 export type RGBShiftProps = HooksProps & RGBShiftValuesAndConfig;
 
 /**
@@ -23,7 +18,6 @@ export const useRGBShift = ({
    fboAutoSetSize,
    renderTargetOptions,
    materialParameters,
-//    blurIteration = 5,
    ...uniformValues
 }: RGBShiftProps): HooksReturn<RGBShiftValuesAndConfig, RGBShiftMaterial> => {
    const _dpr = getDpr(dpr);
@@ -45,17 +39,12 @@ export const useRGBShift = ({
       ...renderTargetOptions,
    });
 
-   const [config, setConfig] = useMutableState<RGBShiftConfig>({
-    //   blurIteration,
-   });
-
    const setValues = useCallback(
       (newValues: RGBShiftValuesAndConfig) => {
-         const { ...rest } = newValues;
-        //  setConfig({ blurIteration });
+         const { ...rest } = newValues;        
          material.setUniformValues(rest);
       },
-      [material, setConfig]
+      [material]
    );
 
    const render = useCallback(
@@ -66,7 +55,7 @@ export const useRGBShift = ({
          updateRenderTarget({ gl });
          return renderTarget.texture;
       },
-      [setValues, updateRenderTarget, material, renderTarget, config]
+      [setValues, updateRenderTarget, material, renderTarget]
    );
 
    return {
