@@ -42,3 +42,4 @@ CreateShaderFx/
 
 # exclude private demo
 app/private/
+public/private/

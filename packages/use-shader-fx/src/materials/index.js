@@ -9,3 +9,4 @@ export * from "./impl/blur/gaussianBlur/GaussianBlurMaterial";
 export * from "./impl/blur/motionBlur/MotionBlurMaterial";
 export * from "./impl/cover/CoverTextureMaterial";
 export * from "./impl/rgbShift/RGBShiftMaterial";
+export * from "./impl/distortion/DistortionMaterial";
