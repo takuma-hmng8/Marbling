@@ -17,6 +17,12 @@ export const fragment = `
 	uniform float timeOffset;
 	uniform vec2 powNum;
 
+	
+	uniform float glitchSpeed;
+	uniform float glitchPower;
+	uniform vec2 glitchFreq;	
+	uniform float glitchThreshold;
+
 
 	// noise functions
 	//
@@ -122,36 +128,28 @@ export const fragment = `
 
 	void main() {
 
-		// TODO add uniform		
-		// vec2 srcScale = vec2(1.0,1.0);
-		// 
-
 		float _time = time + timeOffset;
 		vec2 _scale = scale * 0.01;
 				
-		// vec2 dUv = vUv;
-		// convert to -1 to 1 space		
-		// vec2 dUv = vUv * 2.0 - 1.0;
-
 		vec2 shiftUv = vUv;
 
 		shiftUv.x =
-			(snoise(
+			snoise(
 				vec3(
 					vUv.y * freq.y,
 					vUv.x + time * timeStrength.x,
 					_time * timeStrength.x + 20.
 				)
-			) * 2.0 - 1.0) * _scale.x;
+			) * _scale.x;
 
 		shiftUv.y =
-			(snoise(
+			snoise(
 				vec3(
 					vUv.x * freq.x,
 					vUv.y + time * timeStrength.y + 10.,		
 					_time * timeStrength.y
 				)
-			) * 2.0 - 1.0) * _scale.y;
+			) * _scale.y;
 
 		// 符号を保ったままpowを計算
 		shiftUv = sign(shiftUv) * pow(abs(shiftUv), powNum);
@@ -160,35 +158,40 @@ export const fragment = `
 		vec4 outColor = texture2D(src, dUv);
 
 
-		// ピクセルをずらす
-		float n = snoise(vec3(
-			vUv.x * 40. ,
-			vUv.y * .3,
-			ceil(time * 20.) * 0.1
-		));
-		float n2 = snoise(vec3(
-			time,
-			vUv.x * 40. ,
-			vUv.y * .3
-		)) * 0.3 + 0.7;
-		vec2 d2Uv = dUv;
-		if(n > n2) {
-			// ずらし先のピクセルを取得			
-			d2Uv.x += (snoise(vec3(
-				dUv.x * .1,
-				dUv.y,
-				ceil(time * 3.) * 0.1 + n
-			)) * 2.0 - 1.0) * 0.04;
-			d2Uv.y += (snoise(vec3(
-				dUv.x,
-				dUv.y * .2 + n * 10.,
-				ceil(time * 1.) * 0.1
-			)) * 2.0 - 1.0) * (0.04 * n + 0.01);
+		if(glitchPower > 0.0) {
+			
+			float cTime1 = ceil(time * 10. * glitchSpeed);
+			float cTime2 = ceil(time * 7. * glitchSpeed) + 13.;			
+			
+			float gnx = (snoise(vec3(
+				floor(vUv.x * glitchFreq.x) / glitchFreq.x,
+				cTime2,
+				vUv.x * glitchFreq.x
+			)) + 1.0) * 0.5;
+
+			float gny = (snoise(vec3(
+				floor(vUv.y * glitchFreq.y) / glitchFreq.y,
+				cTime2,
+				floor(vUv.y * glitchFreq.y)
+			)) + 1.0) * 0.5;
+			
+			float gn = (snoise(vec3(	
+				cTime1,				
+				floor(vUv.x * glitchFreq.x) / glitchFreq.x * gnx,
+				floor(vUv.y * glitchFreq.y) / glitchFreq.y * gny
+			)) + 1.0) * 0.5;
+
+			vec2 d2Uv = dUv;
+			if(gn < glitchThreshold) {				
+				d2Uv += vec2(
+					snoise(vec3(dUv.x + cTime2, vUv.y, cTime2 + gny)),
+					snoise(vec3(dUv.y + cTime1, vUv.x, cTime1 + gnx))
+				) * glitchPower * vec2(0.01);
+				outColor = texture2D(src, d2Uv);										
+			}
 		}
-		outColor = texture2D(src, d2Uv);	
 
 
-		gl_FragColor = outColor;
-		// gl_FragColor = vec4(vec3(vUv.x * 2.0 - 1.0),1.0);
+		gl_FragColor = outColor;		
 	}
 `;

@@ -25,7 +25,7 @@ export const fragment = `
 
 		float r = 0.0;
 		if(isUseShiftPowerSrcR){		
-			vec2 shiftR = (texture2D(shiftPowerSrcR, vUv).rg * 2.0 - 1.0) * shiftScale;
+			vec2 shiftR = (texture2D(shiftPowerSrcR, vUv).rg * 4.0 - 1.0) * shiftScale;
 			r = texture2D(src, vUv + shiftR).r;
 		} else {
 		 	r = texture2D(src, vUv + shift).r;
@@ -33,7 +33,7 @@ export const fragment = `
 
 		float g = 0.0;
 		if(isUseShiftPowerSrcG){
-			vec2 shiftG = (texture2D(shiftPowerSrcG, vUv).rg * 2.0 - 1.0) * shiftScale;
+			vec2 shiftG = (texture2D(shiftPowerSrcG, vUv).rg * 4.0 - 1.0) * shiftScale;
 			g = texture2D(src, vUv + shiftG).g;
 		} else {
 			g = texture2D(src, vUv + shift).g;
@@ -41,7 +41,7 @@ export const fragment = `
 
 		float b = 0.0;
 		if(isUseShiftPowerSrcB){
-			vec2 shiftB = (texture2D(shiftPowerSrcB, vUv).rg * 2.0 - 1.0) * shiftScale;
+			vec2 shiftB = (texture2D(shiftPowerSrcB, vUv).rg * 4.0 - 1.0) * shiftScale;
 			b = texture2D(src, vUv + shiftB).b;
 		} else {
 			b = texture2D(src, vUv + shift).b;
