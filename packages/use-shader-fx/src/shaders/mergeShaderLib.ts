@@ -4,7 +4,7 @@ import { ShaderLib } from "./ShaderLib";
  * 共通でパースするShaderの共有部分を解決する
  * basicFx_fragment_begin, basicFx_fragment_endは含まない。これらは各FXでカスタマイズする必要があるため。
  */
-function mergeShaderLib(
+export function mergeShaderLib(
    vertexShader: string | undefined,
    fragmentShader: string | undefined,
    type: "default" | "basicFx"
@@ -39,4 +39,14 @@ function mergeShaderLib(
    return [vertex, fragment];
 }
 
-export { mergeShaderLib };
+
+/**
+ * Shaderのprefixを結合する
+ */
+export function joinShaderPrefix(prefix: string[]):string {   
+   return prefix
+      .filter((string) => {
+         string !== "";
+      })
+      .join("\n");
+}

@@ -6,6 +6,10 @@ import {
    flattenUniformValues,
 } from "../../shaders/uniformsUtils";
 
+import {
+   joinShaderPrefix
+} from '../../shaders/mergeShaderLib';
+
 /*===============================================
 basic fxを追加するときはこことShaderChunk,Libを編集する
 ===============================================*/
@@ -101,10 +105,6 @@ function handleUpdateBasicFx(
    };
 }
 
-function filterEmptyLine(string: string) {
-   return string !== "";
-}
-
 const BASICFX_SHADER_PREFIX = {
    mixSrc: "#define USF_USE_MIXSRC",
    mixDst: "#define USF_USE_MIXDST",
@@ -115,20 +115,16 @@ function handleUpdateBasicFxPrefix(basicFxFlag: BasicFxFlag): {
    prefixFragment: string;
 } {
    const { mixSrc, mixDst } = basicFxFlag;
-   const prefixVertex = [
+   const prefixVertex = joinShaderPrefix([
       mixSrc ? BASICFX_SHADER_PREFIX.mixSrc : "",
       mixDst ? BASICFX_SHADER_PREFIX.mixDst : "",
       "\n",
-   ]
-      .filter(filterEmptyLine)
-      .join("\n");
-   const prefixFragment = [
+   ]);
+   const prefixFragment = joinShaderPrefix([
       mixSrc ? BASICFX_SHADER_PREFIX.mixSrc : "",
       mixDst ? BASICFX_SHADER_PREFIX.mixDst : "",
       "\n",
-   ]
-      .filter(filterEmptyLine)
-      .join("\n");
+   ]);
 
    return {
       prefixVertex,
