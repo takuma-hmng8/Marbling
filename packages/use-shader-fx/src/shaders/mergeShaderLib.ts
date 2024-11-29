@@ -12,17 +12,22 @@ export function mergeShaderLib(
    let vertex,
       fragment = undefined;
 
-   const isDefault = type === "default";
+   const ShaderLibs = {
+      default: {         
+         vertexPars: ShaderLib.default_pars_vertex,
+         vertexMain: ShaderLib.default_vertex,
+         fragmentPars: ShaderLib.default_pars_fragment,
+      },
+      basicFx: {
+         vertexPars: ShaderLib.basicFx_pars_vertex,
+         vertexMain: ShaderLib.basicFx_vertex,
+         fragmentPars: ShaderLib.basicFx_pars_fragment,
+      }
+   };
 
-   const vertexPars = isDefault
-      ? ShaderLib.default_pars_vertex
-      : ShaderLib.basicFx_pars_vertex;
-   const vertexMain = isDefault
-      ? ShaderLib.default_vertex
-      : ShaderLib.basicFx_vertex;
-   const fragmentPars = isDefault
-      ? ShaderLib.default_pars_fragment
-      : ShaderLib.basicFx_pars_fragment;
+   const vertexPars = ShaderLibs[type].vertexPars;
+   const vertexMain = ShaderLibs[type].vertexMain;
+   const fragmentPars = ShaderLibs[type].fragmentPars;
 
    if (vertexShader) {
       vertex = vertexPars + `\n` + vertexShader;
