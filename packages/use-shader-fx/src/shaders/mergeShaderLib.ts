@@ -7,7 +7,7 @@ import { ShaderLib } from "./ShaderLib";
 export function mergeShaderLib(
    vertexShader: string | undefined,
    fragmentShader: string | undefined,
-   type: "default" | "basicFx"
+   type: "default" | "basicFx" | 'samplingFx'
 ): [string | undefined, string | undefined] {
    let vertex,
       fragment = undefined;
@@ -22,6 +22,11 @@ export function mergeShaderLib(
          vertexPars: ShaderLib.basicFx_pars_vertex,
          vertexMain: ShaderLib.basicFx_vertex,
          fragmentPars: ShaderLib.basicFx_pars_fragment,
+      },
+      samplingFx: {
+         vertexPars: ShaderLib.samplingFx_pars_vertex,
+         vertexMain: ShaderLib.samplingFx_vertex,
+         fragmentPars: ShaderLib.samplingFx_pars_fragment,
       }
    };
 

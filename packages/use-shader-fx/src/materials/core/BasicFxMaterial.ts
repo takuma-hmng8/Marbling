@@ -72,6 +72,7 @@ export class BasicFxMaterial extends FxMaterial {
    updateBasicFxPrefix() {
       const { prefixVertex, prefixFragment } =
          BasicFxLib.handleUpdateBasicFxPrefix(this.basicFxFlag);
+      
       this.vertexPrefixCache = prefixVertex;
       this.fragmentPrefixCache = prefixFragment;
    }
@@ -90,7 +91,7 @@ export class BasicFxMaterial extends FxMaterial {
          vertexShader,
          fragmentShader,
          "basicFx"
-      );
+      );      
 
       super.setupDefaultShaders(vertex, fragment);
 

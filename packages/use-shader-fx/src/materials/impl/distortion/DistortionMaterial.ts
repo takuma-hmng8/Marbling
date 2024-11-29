@@ -5,6 +5,8 @@ import { BasicFxUniforms, BasicFxValues } from "../../core/BasicFxLib";
 import { NestUniformValues } from "../../../shaders/uniformsUtils";
 import { TexturePipelineSrc } from "../../../misc";
 import * as THREE from 'three';
+import { SamplingFxMaterial } from "../../core/SamplingFxMaterial";
+import { SamplingFxUniforms } from "../../core/SamplingFxLib";
 
 type DistortionUniforms = {
    /**  */
@@ -20,11 +22,11 @@ type DistortionUniforms = {
    glitchPower: { value: number };
    glitchThreshold: { value: number };
    glitchFreq: { value: THREE.Vector2 };   
-} & BasicFxUniforms;
+} & SamplingFxUniforms
 
 export type DistortionValues = NestUniformValues<DistortionUniforms> & BasicFxValues;
 
-export class DistortionMaterial extends BasicFxMaterial {
+export class DistortionMaterial extends SamplingFxMaterial {
    static get type() {
       return "DistortionMaterial";      
    }

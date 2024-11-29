@@ -52,7 +52,7 @@ export const useDistortion = ({
          const { gl } = rootState;
          newValues && setValues(newValues);                  
          material.uniforms.time.value = rootState.clock.getElapsedTime();
-         material.updateBasicFx();         
+         material.updateSamplingFx();         
          updateRenderTarget({ gl });         
          return renderTarget.texture;
       },
