@@ -13,7 +13,7 @@ import {
 /*===============================================
 basic fxを追加するときはこことShaderChunk,Libを編集する
 ===============================================*/
-type BasicFxUniformsUnique = {
+export type BasicFxUniformsUnique = {
    // mixSrc
    mixSrc_src: { value: TexturePipelineSrc };
    mixSrc_resolution: { value: THREE.Vector2 };

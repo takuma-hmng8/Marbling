@@ -7,12 +7,16 @@ export const vertex = `
 `;
 
 export const fragment = `		
+	precision highp int;
+
 	uniform sampler2D src;			
 	uniform vec2 u_stepSize;	
 	uniform vec2 sigma;	
 	uniform float u_weights[KERNEL_SIZE];	
 
 	void main() {
+
+		${ShaderLib.basicFx_fragment_begin}
 
 		float count =  float(KERNEL_SIZE) - 1.0;		
 
@@ -49,6 +53,10 @@ export const fragment = `
 		sum.a += color.a * w;
 		sumW += actualWeight;
 
-		gl_FragColor = vec4(sum.rgb / sumW, sum.a);
+		vec4 usf_FragColor = vec4(sum.rgb / sumW, sum.a);
+
+		${ShaderLib.basicFx_fragment_end}
+		
+		gl_FragColor = usf_FragColor;
 	}
 `;

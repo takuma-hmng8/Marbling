@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { FxMaterial, FxMaterialProps } from './FxMaterial';
-
+import { FxMaterialProps } from './FxMaterial';
+import { BasicFxMaterial } from './BasicFxMaterial';
 import {
     SamplingFxUniforms,
     SamplingFxValues,
@@ -14,7 +14,7 @@ import { mergeShaderLib } from '../../shaders/mergeShaderLib';
 // mixSrc, mixDst, textureはsrcとなるtexutreを受け取る
 
 
-export class SamplingFxMaterial extends FxMaterial {
+export class SamplingFxMaterial extends BasicFxMaterial {
     public static readonly key: string = THREE.MathUtils.generateUUID();
 
     samplingFxFlag: SamplingFxFlag;
@@ -80,7 +80,7 @@ export class SamplingFxMaterial extends FxMaterial {
         const { prefixVertex, prefixFragment} =
             SamplingFxLib.handleUpdateSamplingFxPrefix(this.samplingFxFlag);            
         this.vertexPrefixCache = prefixVertex;
-        this.fragmentPrefixCache = prefixFragment;
+        this.fragmentPrefixCache = prefixFragment;        
     }
 
     updateSamplingFxShader() {

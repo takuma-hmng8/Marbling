@@ -5,6 +5,8 @@ import { FxMaterialProps } from "../../../core/FxMaterial";
 import { BasicFxUniforms, BasicFxValues } from "../../../core/BasicFxLib";
 import { NestUniformValues } from "../../../../shaders/uniformsUtils";
 import { TexturePipelineSrc } from "../../../../misc";
+import { SamplingFxMaterial } from "../../../core/SamplingFxMaterial";
+import { SamplingFxUniforms, SamplingFxValues } from "../../../core/SamplingFxLib";
 
 type GaussianBlurUniforms = {
    /**  */
@@ -19,12 +21,12 @@ type GaussianBlurUniforms = {
    u_stepSize: {
       value: THREE.Vector2;
    };
-} & BasicFxUniforms;
+} & SamplingFxUniforms;
 
 export type GaussianBlurValues = NestUniformValues<GaussianBlurUniforms> &
-   BasicFxValues;
+   SamplingFxValues;
 
-export class GaussianBlurMaterial extends BasicFxMaterial {
+export class GaussianBlurMaterial extends SamplingFxMaterial {
    static get type() {
       return "GaussianBlurMaterial";
    }
