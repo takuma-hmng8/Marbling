@@ -4,5 +4,5 @@
 		min(aspectRatio / textureSrcAspect, 1.0),
 		min(textureSrcAspect / aspectRatio, 1.0)
 	);
-	vMixSrcCoverUv = vUv * textureSrcAspectAspectRatio + (1.0 - textureSrcAspectAspectRatio) * .5;
+	vTextureCoverUv = vUv * textureSrcAspectAspectRatio + (1.0 - textureSrcAspectAspectRatio) * .5;
 #endif
