@@ -1,20 +1,17 @@
 "use client";
 
 import * as THREE from "three";
-import { useEffect, useRef, useState } from "react";
-import { useFrame, useThree, extend, createPortal } from "@react-three/fiber";
+import { useFrame, useThree, extend } from "@react-three/fiber";
 import {
    createFxMaterialImpl,
    createBasicFxMaterialImpl,
    FxMaterialImplValues,
    BasicFxMaterialImplValues,
-   useRGBShift,
-   useGaussianBlur
+   useGaussianBlur,
+   useCoverTexture,
+   useNoise
 } from "@/packages/use-shader-fx/src";
-import { Float, OrbitControls, useTexture } from "@react-three/drei";
-import { useCoverTexture } from "@/packages/use-shader-fx/src/hooks/useCoverTexture";
-import { useNoise } from "@/packages/use-shader-fx/src";
-import { useMotionBlur } from "@/packages/use-shader-fx/src/hooks/blur/useMotionBlur";
+import { useTexture } from "@react-three/drei";
 
 const FxMaterialImpl = createFxMaterialImpl({
    fragmentShader: `
@@ -30,9 +27,9 @@ const BasicFxMaterialImpl = createBasicFxMaterialImpl();
 extend({ FxMaterialImpl, BasicFxMaterialImpl });
 
 export const Playground = () => {
-   const { size, viewport, camera } = useThree();
+   const { size } = useThree();
 
-   const [app] = useTexture(["/dummy2.png"]);
+   const [app] = useTexture(["/funkun.jpg"]);
 
    const coverTexture = useCoverTexture({
       size,
@@ -41,20 +38,32 @@ export const Playground = () => {
       textureResolution: new THREE.Vector2(app.image.width, app.image.height),
    })   
 
+   const noise = useNoise({
+      size,
+      dpr: 0.1,
+      scale: 0.002,
+      timeStrength: 1,
+      mixDst: {         
+         src: coverTexture.texture,
+         uvFactor: 0.5,
+      },
+   })
 
    const gbBur = useGaussianBlur({
       size,
       dpr: 1,
-      radius: 2,      
-      sigma: new THREE.Vector2(0, 0),
-      src: coverTexture.texture,
+      radius: 20,
+      sigma: new THREE.Vector2(2, 2), 
+      texture: {
+         src: coverTexture.texture,
+         resolution: new THREE.Vector2(app.image.width, app.image.height),
+      }
    });
 
    useFrame((state) => {
       coverTexture.render(state);      
       gbBur.render(state);      
-
-      // console.log(gbBur.material.vertexShader)
+      noise.render(state);
    });
 
    return (

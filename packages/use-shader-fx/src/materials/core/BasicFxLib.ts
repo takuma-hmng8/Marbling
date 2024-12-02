@@ -47,6 +47,7 @@ export type BasicFxUniforms = BasicFxUniformsUnique & DefaultUniforms;
 export type BasicFxValues = NestUniformValues<BasicFxUniformsUnique>;
 
 export type BasicFxFlag = {
+   srcSystem: boolean; // is active srcSystem
    mixSrc: boolean;
    mixDst: boolean;
 };
@@ -62,12 +63,16 @@ function containsBasicFxValues(values?: { [key: string]: any }): boolean {
    );
 }
 
-function setupDefaultFlag(uniformValues?: BasicFxValues): BasicFxFlag {
+function setupDefaultFlag(uniformValues?: BasicFxValues): BasicFxFlag {   
+   const isMixSrc = uniformValues?.mixSrc ? true : false;
+   const isMixDst = uniformValues?.mixDst ? true : false;   
+   const isSrcSystem = isMixSrc || isMixDst;   
    return {
       // THINK : `handleUpdateBasicFx`での判定は、uniformの値で行っている.例えばsaturation・brightnessとかはどう判定する？
-      // THINK : `isMixSrc` みたいなuniform値をつくる？ uniformValues?.mixSrcを判定するイメージ
-      mixSrc: uniformValues?.mixSrc ? true : false,
-      mixDst: uniformValues?.mixDst ? true : false,
+      // THINK : `isMixSrc` みたいなuniform値をつくる？ uniformValues?.mixSrcを判定するイメージ      
+      mixSrc: isMixSrc,
+      mixDst: isMixDst,
+      srcSystem: isSrcSystem,
    };
 }
 
@@ -82,8 +87,9 @@ function handleUpdateBasicFx(
    // THINK : `isMixSrc` みたいなuniform値をつくる？ uniformValues?.mixSrcを判定するイメージ
    const isMixSrc = uniforms.mixSrc_src.value ? true : false;
    const isMixDst = uniforms.mixDst_src.value ? true : false;
+   const isSrcSystem = (isMixSrc || isMixDst);
 
-   const { mixSrc, mixDst } = basicFxFlag;
+   const { mixSrc, mixDst, srcSystem } = basicFxFlag;
 
    const updatedFlag = basicFxFlag;
 
@@ -99,28 +105,36 @@ function handleUpdateBasicFx(
       validCount++;
    }
 
+   if(srcSystem !== isSrcSystem){
+      updatedFlag.srcSystem = isSrcSystem;      
+      validCount++;
+   }
+
    return {
       validCount,
       updatedFlag,
    };
 }
 
-const BASICFX_SHADER_PREFIX = {
+export const BASICFX_SHADER_PREFIX = {
+   srcSystem: "#define USF_USE_SRC_SYSTEM",
    mixSrc: "#define USF_USE_MIXSRC",
-   mixDst: "#define USF_USE_MIXDST",
+   mixDst: "#define USF_USE_MIXDST",   
 };
 
 function handleUpdateBasicFxPrefix(basicFxFlag: BasicFxFlag): {
    prefixVertex: string;
    prefixFragment: string;
 } {
-   const { mixSrc, mixDst } = basicFxFlag;
+   const { mixSrc, mixDst, srcSystem} = basicFxFlag;
    const prefixVertex = joinShaderPrefix([
+      srcSystem ? BASICFX_SHADER_PREFIX.srcSystem : "",      
       mixSrc ? BASICFX_SHADER_PREFIX.mixSrc : "",
       mixDst ? BASICFX_SHADER_PREFIX.mixDst : "",
       "\n",
    ]);
    const prefixFragment = joinShaderPrefix([
+      srcSystem ? BASICFX_SHADER_PREFIX.srcSystem : "",
       mixSrc ? BASICFX_SHADER_PREFIX.mixSrc : "",
       mixDst ? BASICFX_SHADER_PREFIX.mixDst : "",
       "\n",

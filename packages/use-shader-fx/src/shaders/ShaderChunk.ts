@@ -14,6 +14,7 @@ import mixDst_vertex from "./ShaderChunk/mixDst_vertex.glsl";
 import texture_pars_fragment from "./ShaderChunk/texture_pars_fragment.glsl";
 import texture_pars_vertex from "./ShaderChunk/texture_pars_vertex.glsl";
 import texture_vertex from "./ShaderChunk/texture_vertex.glsl";
+import src_libs_vertex from './ShaderChunk/src_libs_vertex.glsl';
 
 export type ShaderChunkTypes =
    | "default_pars_fragment"
@@ -31,7 +32,8 @@ export type ShaderChunkTypes =
    | "mixDst_vertex"
    | "texture_pars_fragment"
    | "texture_pars_vertex"
-   | "texture_vertex";
+   | "texture_vertex"
+   | "src_libs_vertex";
 
 export const ShaderChunk: { [K in ShaderChunkTypes]: string } = Object.freeze({
    default_pars_fragment,
@@ -50,5 +52,5 @@ export const ShaderChunk: { [K in ShaderChunkTypes]: string } = Object.freeze({
    texture_pars_fragment,
    texture_pars_vertex,
    texture_vertex,
-   
+   src_libs_vertex   
 });

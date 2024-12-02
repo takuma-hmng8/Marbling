@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import { DefaultUniforms } from "./FxMaterial";
 import { TexturePipelineSrc } from "../../misc";
 
 import {
@@ -12,7 +11,8 @@ import {
     BasicFxUniforms,
     BasicFxUniformsUnique,
     BasicFxValues,
-    BasicFxLib
+    BasicFxLib,
+    BASICFX_SHADER_PREFIX
 } from "./BasicFxLib";
 
 
@@ -52,10 +52,15 @@ function containsSamplingFxValues(values?: { [key: string]: any }): boolean {
 
 
 function setupDefaultFlag(uniformValues?: SamplingFxValues): SamplingFxFlag {
-    return {
-        texture: uniformValues?.texture ? true : false,
-        mixSrc: uniformValues?.mixSrc ? true : false,
-        mixDst: uniformValues?.mixDst ? true : false,
+    const isMixSrc = uniformValues?.mixSrc ? true : false;
+    const isMixDst = uniformValues?.mixDst ? true : false;
+    const isTexture = uniformValues?.texture ? true : false;
+    const isSrcSystem = isMixSrc || isMixDst || isTexture
+    return {        
+        mixSrc: isMixSrc,
+        mixDst: isMixDst,
+        texture: isTexture,
+        srcSystem: isSrcSystem,
     }
 }
 
@@ -69,9 +74,10 @@ function handleUpdateSamplingFx(
 
     const isTexture = uniforms.texture_src.value ? true : false;
     const isMixSrc = uniforms.mixSrc_src.value ? true : false;
-    const isMixDst = uniforms.mixDst_src.value ? true : false;    
+    const isMixDst = uniforms.mixDst_src.value ? true : false; 
+    const isSrcSystem = isMixSrc || isMixDst || isTexture;   
 
-    const { texture, mixSrc, mixDst } = samplingFxFlag;
+    const { texture, mixSrc, mixDst, srcSystem} = samplingFxFlag;
 
     const updatedFlag = samplingFxFlag;
 
@@ -92,15 +98,19 @@ function handleUpdateSamplingFx(
         validCount++;
     }
 
+    if(srcSystem !== isSrcSystem){
+        updatedFlag.srcSystem = isSrcSystem;      
+        validCount++;
+    }
+
     return {
         validCount,
         updatedFlag
     }
 }
 
-const SAMPLINGFX_SHADER_PREFIX = {
-    mixSrc: "#define USF_USE_MIXSRC",
-    mixDst: "#define USF_USE_MIXDST",    
+const SAMPLINGFX_SHADER_PREFIX = {    
+    ...BASICFX_SHADER_PREFIX,
     texture: '#define USF_USE_TEXTURE',
 }
 
@@ -109,9 +119,10 @@ function handleUpdateSamplingFxPrefix(samplingFxFlag: SamplingFxFlag): {
     prefixVertex: string;
     prefixFragment: string;
 } {
-    const { mixSrc, mixDst, texture } = samplingFxFlag;
+    const { mixSrc, mixDst, texture, srcSystem} = samplingFxFlag;
 
     const prefixVertex = joinShaderPrefix([
+        srcSystem ? BASICFX_SHADER_PREFIX.srcSystem : "",
         mixSrc ? SAMPLINGFX_SHADER_PREFIX.mixSrc : "",
         mixDst ? SAMPLINGFX_SHADER_PREFIX.mixDst : "",              
         texture ? SAMPLINGFX_SHADER_PREFIX.texture : "",          
@@ -119,6 +130,7 @@ function handleUpdateSamplingFxPrefix(samplingFxFlag: SamplingFxFlag): {
     ]);    
 
     const prefixFragment = joinShaderPrefix([
+        srcSystem ? BASICFX_SHADER_PREFIX.srcSystem : "",
         mixSrc ? SAMPLINGFX_SHADER_PREFIX.mixSrc : "",
         mixDst ? SAMPLINGFX_SHADER_PREFIX.mixDst : "",              
         texture ? SAMPLINGFX_SHADER_PREFIX.texture : "",  

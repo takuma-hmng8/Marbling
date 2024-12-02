@@ -93,8 +93,8 @@ export class BasicFxMaterial extends FxMaterial {
          "basicFx"
       );      
 
-      super.setupDefaultShaders(vertex, fragment);
-
+      super.setupDefaultShaders(vertex, fragment);      
+            
       this.vertexShaderCache = this.vertexShader;
       this.fragmentShaderCache = this.fragmentShader;
 

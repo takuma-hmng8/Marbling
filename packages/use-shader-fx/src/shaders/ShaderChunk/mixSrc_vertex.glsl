@@ -1,8 +1,5 @@
-#ifdef USF_USE_MIXSRC
+#ifdef USF_USE_MIXSRC	
 	float mixSrcAspect = mixSrc_resolution.x / mixSrc_resolution.y;
-	vec2 mixSrcAspectAspectRatio = vec2(
-		min(aspectRatio / mixSrcAspect, 1.0),
-		min(mixSrcAspect / aspectRatio, 1.0)
-	);
-	vMixSrcCoverUv = vUv * mixSrcAspectAspectRatio + (1.0 - mixSrcAspectAspectRatio) * .5;
+	vec2 mixSrcAspectAspectRatio = calcSrcAspectRatio(aspectRatio, mixSrcAspect);		
+	vMixSrcCoverUv = calcCoverUv(vUv, mixSrcAspectAspectRatio);	
 #endif
