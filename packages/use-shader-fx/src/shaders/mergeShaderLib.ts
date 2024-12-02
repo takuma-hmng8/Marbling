@@ -56,7 +56,7 @@ export function mergeShaderLib(
 export function joinShaderPrefix(prefix: string[]):string {   
    return prefix
       .filter((string) => {
-         string !== "";
+         return string !== "";
       })
       .join("\n");
 }
