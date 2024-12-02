@@ -41,7 +41,8 @@ export const ShaderFx = ({
             eventPrefix={eventSource ? "client" : "offset"}
             dpr={dpr}
             gl={{ preserveDrawingBuffer: preserveDrawingBuffer }}
-            shadows={shadows}>
+            shadows={shadows}
+            linear>
             <PerformanceMonitor
                onChange={({ factor }) => {
                   if (preserveDrawingBuffer) {
