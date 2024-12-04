@@ -54,13 +54,14 @@ export const Playground = () => {
       dpr: 1,
       radius: 20,
       sigma: new THREE.Vector2(2, 2), 
-      texture: {
+      texture: {         
          src: coverTexture.texture,
          resolution: new THREE.Vector2(app.image.width, app.image.height),
       }
    });
 
    useFrame((state) => {
+      // console.log(gbBur.material.uniforms)
       coverTexture.render(state);      
       gbBur.render(state);      
       noise.render(state);

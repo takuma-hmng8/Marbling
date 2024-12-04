@@ -1,15 +1,64 @@
 import * as THREE from "three";
-import { FxMaterial, FxMaterialProps } from "./FxMaterial";
+import { FxMaterial, FxMaterialProps, DefaultUniforms } from "./FxMaterial";
+import { TexturePipelineSrc } from "../../misc";
 import {
-   BasicFxUniforms,
-   BasicFxValues,
-   BasicFxFlag,
-   BasicFxLib,
-} from "./BasicFxLib";
+   NestUniformValues,
+   flattenUniformValues,
+} from "../../shaders/uniformsUtils";
+import {
+   joinShaderPrefix
+} from '../../shaders/mergeShaderLib';
 import { mergeShaderLib } from "../../shaders/mergeShaderLib";
+
+
+export type BasicFxUniformsUnique = {   
+   // mixSrc
+   mixSrc_src: { value: TexturePipelineSrc };
+   mixSrc_resolution: { value: THREE.Vector2 };
+   mixSrc_uvFactor: { value: number };
+   mixSrc_alphaFactor: { value: number };
+   mixSrc_colorFactor: { value: number };
+   // mixDst
+   mixDst_src: { value: TexturePipelineSrc };
+   mixDst_resolution: { value: THREE.Vector2 };
+   mixDst_uvFactor: { value: number };
+   mixDst_alphaFactor: { value: number };
+   mixDst_colorFactor: { value: number };
+};
+
+export type BasicFxUniforms = BasicFxUniformsUnique & DefaultUniforms;
+
+export type BasicFxValues = NestUniformValues<BasicFxUniformsUnique>;
+
+export type BasicFxFlag = {
+   srcSystem: boolean; // is active srcSystem
+   mixSrc: boolean;
+   mixDst: boolean;
+};
 
 export class BasicFxMaterial extends FxMaterial {
    public static readonly key: string = THREE.MathUtils.generateUUID();
+
+   static readonly DEFAULT_BASICFX_VALUES = {
+      // mixSrc
+      mixSrc_src: { value: null },
+      mixSrc_resolution: { value: new THREE.Vector2() },
+      mixSrc_uvFactor: { value: 0 },
+      mixSrc_alphaFactor: { value: 0 },
+      mixSrc_colorFactor: { value: 0 },
+      // mixDst
+      mixDst_src: { value: null },
+      mixDst_resolution: { value: new THREE.Vector2() },
+      mixDst_uvFactor: { value: 0 },
+      mixDst_alphaFactor: { value: 0 },
+      mixDst_colorFactor: { value: 0 },
+   }   
+
+   static readonly BASICFX_SHADER_PREFIX = {
+      srcSystem: "#define USF_USE_SRC_SYSTEM",
+      mixSrc: "#define USF_USE_MIXSRC",
+      mixDst: "#define USF_USE_MIXDST",
+   }
 
    basicFxFlag: BasicFxFlag;
 
@@ -32,7 +81,7 @@ export class BasicFxMaterial extends FxMaterial {
          uniformValues,
          materialParameters,
          uniforms: THREE.UniformsUtils.merge([
-            BasicFxLib.DEFAULT_BASICFX_VALUES,
+            BasicFxMaterial.DEFAULT_BASICFX_VALUES,            
             uniforms || {},
          ]),
       });
@@ -43,7 +92,7 @@ export class BasicFxMaterial extends FxMaterial {
       this.fragmentPrefixCache = "";
       this.programCache = 0;
 
-      this.basicFxFlag = BasicFxLib.setupDefaultFlag(uniformValues);
+      this.basicFxFlag = this.setupDefaultFlag(uniformValues);
 
       this.setupBasicFxShaders(vertexShader, fragmentShader);
    }
@@ -54,7 +103,7 @@ export class BasicFxMaterial extends FxMaterial {
 
       const _cache = this.programCache;
 
-      const { validCount, updatedFlag } = BasicFxLib.handleUpdateBasicFx(
+      const { validCount, updatedFlag } = this.handleUpdateBasicFx(
          this.uniforms,
          this.basicFxFlag
       );
@@ -71,7 +120,7 @@ export class BasicFxMaterial extends FxMaterial {
 
    updateBasicFxPrefix() {
       const { prefixVertex, prefixFragment } =
-         BasicFxLib.handleUpdateBasicFxPrefix(this.basicFxFlag);
+         this.handleUpdateBasicFxPrefix(this.basicFxFlag);
       
       this.vertexPrefixCache = prefixVertex;
       this.fragmentPrefixCache = prefixFragment;
@@ -108,14 +157,106 @@ export class BasicFxMaterial extends FxMaterial {
       // THINK : `flattenUniformValues`するのはこのレイヤーの方がいいかも
       super.setUniformValues(values);
       // THINK : flattenUniformValuesしたあとで、containsBasicFxValuesに渡せばいい。containsBasicFxValuesでflattenUniformValuesを実行してるので、二度手間になっている
-      if (BasicFxLib.containsBasicFxValues(values)) {
+      if (this.containsBasicFxValues(values)) {
          this.updateBasicFx();
       }
    }
+
    defineUniformAccessors(onSet?: () => void) {
       super.defineUniformAccessors(() => {
          this.updateBasicFx();
          onSet?.();
       });
    }
+
+   // 
+   /** valuesのkeyにbasicFxが含まれているかどうかの判定 */
+   // TODO : rename to isContainsBasicFxValues
+   containsBasicFxValues(values?: { [key: string]: any }): boolean {
+      if (!values) return false;
+      // THINK : ここでflattenUniformValuesを呼び出すべき？
+      const _values = flattenUniformValues(values);
+      return Object.keys(_values).some((key) =>
+         Object.keys(BasicFxMaterial.DEFAULT_BASICFX_VALUES).includes(key as keyof BasicFxValues)      
+      );
+   }   
+
+   setupDefaultFlag(uniformValues?: BasicFxValues): BasicFxFlag {   
+      const isMixSrc = uniformValues?.mixSrc ? true : false;
+      const isMixDst = uniformValues?.mixDst ? true : false;   
+      const isSrcSystem = isMixSrc || isMixDst;   
+      return {
+         // THINK : `handleUpdateBasicFx`での判定は、uniformの値で行っている.例えばsaturation・brightnessとかはどう判定する？
+         // THINK : `isMixSrc` みたいなuniform値をつくる？ uniformValues?.mixSrcを判定するイメージ      
+         mixSrc: isMixSrc,
+         mixDst: isMixDst,
+         srcSystem: isSrcSystem,
+      };
+   }    
+
+   handleUpdateBasicFx(
+      uniforms: BasicFxUniforms,
+      basicFxFlag: BasicFxFlag
+   ): {
+      validCount: number;
+      updatedFlag: BasicFxFlag;
+   } {
+      // THINK : `handleUpdateBasicFx`での判定は、uniformの値で行っている.例えばsaturation・brightnessとかはどう判定する？
+      // THINK : `isMixSrc` みたいなuniform値をつくる？ uniformValues?.mixSrcを判定するイメージ
+      const isMixSrc = uniforms.mixSrc_src.value ? true : false;
+      const isMixDst = uniforms.mixDst_src.value ? true : false;
+      const isSrcSystem = (isMixSrc || isMixDst);
+   
+      const { mixSrc, mixDst, srcSystem } = basicFxFlag;
+   
+      const updatedFlag = basicFxFlag;
+   
+      let validCount = 0;
+   
+      if (mixSrc !== isMixSrc) {
+         updatedFlag.mixSrc = isMixSrc;
+         validCount++;
+      }
+   
+      if (mixDst !== isMixDst) {
+         updatedFlag.mixDst = isMixDst;
+         validCount++;
+      }
+   
+      if(srcSystem !== isSrcSystem){
+         updatedFlag.srcSystem = isSrcSystem;      
+         validCount++;
+      }
+   
+      return {
+         validCount,
+         updatedFlag,
+      };
+   }    
+   
+   
+   handleUpdateBasicFxPrefix(basicFxFlag: BasicFxFlag): {
+      prefixVertex: string;
+      prefixFragment: string;
+   } {
+      const { mixSrc, mixDst, srcSystem} = basicFxFlag;
+      const BASICFX_SHADER_PREFIX = BasicFxMaterial.BASICFX_SHADER_PREFIX;
+      const prefixVertex = joinShaderPrefix([
+         srcSystem ? BASICFX_SHADER_PREFIX.srcSystem : "",      
+         mixSrc ? BASICFX_SHADER_PREFIX.mixSrc : "",
+         mixDst ? BASICFX_SHADER_PREFIX.mixDst : "",
+         "\n",
+      ]);
+      const prefixFragment = joinShaderPrefix([
+         srcSystem ? BASICFX_SHADER_PREFIX.srcSystem : "",
+         mixSrc ? BASICFX_SHADER_PREFIX.mixSrc : "",
+         mixDst ? BASICFX_SHADER_PREFIX.mixDst : "",
+         "\n",
+      ]);
+   
+      return {
+         prefixVertex,
+         prefixFragment,
+      };
+   }   
 }

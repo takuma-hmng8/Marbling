@@ -41,7 +41,10 @@ export const Playground = () => {
       dpr: 1,
       radius: 21,
       // blurIteration: 1,
-      src: app,
+      // src: app,
+      texture: {
+         src: app,
+      }
    });
 
    blur.setValues({
