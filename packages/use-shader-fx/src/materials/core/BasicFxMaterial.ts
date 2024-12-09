@@ -11,7 +11,7 @@ import {
 import { mergeShaderLib } from "../../shaders/mergeShaderLib";
 
 
-export type BasicFxUniformsUnique = {   
+type BasicFxUniformsUnique = {   
    // mixSrc
    mixSrc_src: { value: TexturePipelineSrc };
    mixSrc_resolution: { value: THREE.Vector2 };
@@ -30,16 +30,15 @@ export type BasicFxUniforms = BasicFxUniformsUnique & DefaultUniforms;
 
 export type BasicFxValues = NestUniformValues<BasicFxUniformsUnique>;
 
-export type BasicFxFlag = {
+export type FxFlag = {   
    srcSystem: boolean; // is active srcSystem
    mixSrc: boolean;
    mixDst: boolean;
 };
 
-export class BasicFxMaterial extends FxMaterial {
-   public static readonly key: string = THREE.MathUtils.generateUUID();
+export class BasicFxMaterial extends FxMaterial {   
 
-   static readonly DEFAULT_BASICFX_VALUES = {
+   static readonly DEFAULT_VALUES = {
       // mixSrc
       mixSrc_src: { value: null },
       mixSrc_resolution: { value: new THREE.Vector2() },
@@ -54,13 +53,13 @@ export class BasicFxMaterial extends FxMaterial {
       mixDst_colorFactor: { value: 0 },
    }   
 
-   static readonly BASICFX_SHADER_PREFIX = {
+   static readonly SHADER_PREFIX = {
       srcSystem: "#define USF_USE_SRC_SYSTEM",
       mixSrc: "#define USF_USE_MIXSRC",
       mixDst: "#define USF_USE_MIXDST",
    }
 
-   basicFxFlag: BasicFxFlag;
+   fxFlag: FxFlag;
 
    uniforms!: BasicFxUniforms;
 
@@ -81,7 +80,7 @@ export class BasicFxMaterial extends FxMaterial {
          uniformValues,
          materialParameters,
          uniforms: THREE.UniformsUtils.merge([
-            BasicFxMaterial.DEFAULT_BASICFX_VALUES,            
+            BasicFxMaterial.DEFAULT_VALUES,            
             uniforms || {},
          ]),
       });
@@ -92,24 +91,24 @@ export class BasicFxMaterial extends FxMaterial {
       this.fragmentPrefixCache = "";
       this.programCache = 0;
 
-      this.basicFxFlag = this.setupDefaultFlag(uniformValues);
+      this.fxFlag = this.setupDefaultFlag(uniformValues);
 
       this.setupBasicFxShaders(vertexShader, fragmentShader);
    }
 
    updateBasicFx() {
       // shaderのsetup前は実行しない
-      if (!this.basicFxFlag) return;
+      if (!this.fxFlag) return;
 
       const _cache = this.programCache;
 
       const { validCount, updatedFlag } = this.handleUpdateBasicFx(
          this.uniforms,
-         this.basicFxFlag
+         this.fxFlag
       );
 
       this.programCache += validCount;
-      this.basicFxFlag = updatedFlag;
+      this.fxFlag = updatedFlag;
 
       if (_cache !== this.programCache) {
          this.updateBasicFxPrefix();
@@ -120,7 +119,7 @@ export class BasicFxMaterial extends FxMaterial {
 
    updateBasicFxPrefix() {
       const { prefixVertex, prefixFragment } =
-         this.handleUpdateBasicFxPrefix(this.basicFxFlag);
+         this.handleUpdateBasicFxPrefix(this.fxFlag);
       
       this.vertexPrefixCache = prefixVertex;
       this.fragmentPrefixCache = prefixFragment;
@@ -177,11 +176,11 @@ export class BasicFxMaterial extends FxMaterial {
       // THINK : ここでflattenUniformValuesを呼び出すべき？
       const _values = flattenUniformValues(values);
       return Object.keys(_values).some((key) =>
-         Object.keys(BasicFxMaterial.DEFAULT_BASICFX_VALUES).includes(key as keyof BasicFxValues)      
+         Object.keys(BasicFxMaterial.DEFAULT_VALUES).includes(key as keyof BasicFxValues)      
       );
    }   
 
-   setupDefaultFlag(uniformValues?: BasicFxValues): BasicFxFlag {   
+   setupDefaultFlag(uniformValues?: BasicFxValues): FxFlag {   
       const isMixSrc = uniformValues?.mixSrc ? true : false;
       const isMixDst = uniformValues?.mixDst ? true : false;   
       const isSrcSystem = isMixSrc || isMixDst;   
@@ -196,10 +195,10 @@ export class BasicFxMaterial extends FxMaterial {
 
    handleUpdateBasicFx(
       uniforms: BasicFxUniforms,
-      basicFxFlag: BasicFxFlag
+      fxFlag: FxFlag
    ): {
       validCount: number;
-      updatedFlag: BasicFxFlag;
+      updatedFlag: FxFlag;
    } {
       // THINK : `handleUpdateBasicFx`での判定は、uniformの値で行っている.例えばsaturation・brightnessとかはどう判定する？
       // THINK : `isMixSrc` みたいなuniform値をつくる？ uniformValues?.mixSrcを判定するイメージ
@@ -207,9 +206,9 @@ export class BasicFxMaterial extends FxMaterial {
       const isMixDst = uniforms.mixDst_src.value ? true : false;
       const isSrcSystem = (isMixSrc || isMixDst);
    
-      const { mixSrc, mixDst, srcSystem } = basicFxFlag;
+      const { mixSrc, mixDst, srcSystem } = fxFlag;
    
-      const updatedFlag = basicFxFlag;
+      const updatedFlag = fxFlag;
    
       let validCount = 0;
    
@@ -235,22 +234,22 @@ export class BasicFxMaterial extends FxMaterial {
    }    
    
    
-   handleUpdateBasicFxPrefix(basicFxFlag: BasicFxFlag): {
+   handleUpdateBasicFxPrefix(fxFlag: FxFlag): {
       prefixVertex: string;
       prefixFragment: string;
    } {
-      const { mixSrc, mixDst, srcSystem} = basicFxFlag;
-      const BASICFX_SHADER_PREFIX = BasicFxMaterial.BASICFX_SHADER_PREFIX;
+      const { mixSrc, mixDst, srcSystem} = fxFlag;
+      const SHADER_PREFIX = BasicFxMaterial.SHADER_PREFIX;
       const prefixVertex = joinShaderPrefix([
-         srcSystem ? BASICFX_SHADER_PREFIX.srcSystem : "",      
-         mixSrc ? BASICFX_SHADER_PREFIX.mixSrc : "",
-         mixDst ? BASICFX_SHADER_PREFIX.mixDst : "",
+         srcSystem ? SHADER_PREFIX.srcSystem : "",      
+         mixSrc ? SHADER_PREFIX.mixSrc : "",
+         mixDst ? SHADER_PREFIX.mixDst : "",
          "\n",
       ]);
       const prefixFragment = joinShaderPrefix([
-         srcSystem ? BASICFX_SHADER_PREFIX.srcSystem : "",
-         mixSrc ? BASICFX_SHADER_PREFIX.mixSrc : "",
-         mixDst ? BASICFX_SHADER_PREFIX.mixDst : "",
+         srcSystem ? SHADER_PREFIX.srcSystem : "",
+         mixSrc ? SHADER_PREFIX.mixSrc : "",
+         mixDst ? SHADER_PREFIX.mixDst : "",
          "\n",
       ]);
    

@@ -12,6 +12,7 @@ import {
    useNoise
 } from "@/packages/use-shader-fx/src";
 import { useTexture } from "@react-three/drei";
+import { SamplingFxMaterial } from "@/packages/use-shader-fx/src/materials/core/SamplingFxMaterial";
 
 const FxMaterialImpl = createFxMaterialImpl({
    fragmentShader: `
@@ -59,6 +60,8 @@ export const Playground = () => {
          resolution: new THREE.Vector2(app.image.width, app.image.height),
       }
    });
+
+   console.log(SamplingFxMaterial.key)
 
    useFrame((state) => {
       // console.log(gbBur.material.uniforms)

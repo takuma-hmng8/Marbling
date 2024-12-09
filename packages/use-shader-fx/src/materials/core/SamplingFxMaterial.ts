@@ -10,11 +10,10 @@ import {
     joinShaderPrefix
 } from '../../shaders/mergeShaderLib';
 import { 
-    BasicFxMaterial,
-    BasicFxUniformsUnique,
+    BasicFxMaterial,    
     BasicFxValues,
     BasicFxUniforms,
-    BasicFxFlag,
+    FxFlag as BasicFxFlag,
 } from './BasicFxMaterial';
 
 
@@ -22,33 +21,32 @@ type SamplingFxUniformsUnique = {
     // texture
     texture_src: { value: TexturePipelineSrc };
     texture_resolution: { value: THREE.Vector2 };
-} & BasicFxUniformsUnique;
+} & typeof BasicFxMaterial.DEFAULT_VALUES;
 
 export type SamplingFxUniforms = SamplingFxUniformsUnique & BasicFxUniforms;
 
 export type SamplingFxValues = NestUniformValues<SamplingFxUniformsUnique> & BasicFxValues;
 
-export type SamplingFxFlag = {
+export type FxFlag = {
     texture: boolean;
 } & BasicFxFlag;
 
 
-export class SamplingFxMaterial extends BasicFxMaterial {
-    public static readonly key: string = THREE.MathUtils.generateUUID();
+export class SamplingFxMaterial extends BasicFxMaterial {    
 
-    static readonly DEFAULT_SAMPLINGFX_VALUES:SamplingFxUniformsUnique = {
-        ...BasicFxMaterial.DEFAULT_BASICFX_VALUES,
+    static readonly DEFAULT_VALUES:SamplingFxUniformsUnique = {
+        ...BasicFxMaterial.DEFAULT_VALUES,
         // texture
         texture_src: { value: null },
         texture_resolution: { value: new THREE.Vector2() },        
     }
 
-    static readonly SAMPLINGFX_SHADER_PREFIX = {
-        ...BasicFxMaterial.BASICFX_SHADER_PREFIX,
+    static readonly SHADER_PREFIX = {
+        ...BasicFxMaterial.SHADER_PREFIX,
         texture: '#define USF_USE_TEXTURE',
     }
 
-    samplingFxFlag: SamplingFxFlag;
+    fxFlag: FxFlag;
 
     uniforms!: SamplingFxUniforms;
 
@@ -70,7 +68,7 @@ export class SamplingFxMaterial extends BasicFxMaterial {
             uniformValues,
             materialParameters,
             uniforms: THREE.UniformsUtils.merge([
-                SamplingFxMaterial.DEFAULT_SAMPLINGFX_VALUES,
+                SamplingFxMaterial.DEFAULT_VALUES,
                 uniforms || {}
             ])
         })
@@ -81,24 +79,24 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         this.fragmentPrefixCache = "";
         this.programCache = 0;
 
-        this.samplingFxFlag = this.setupDefaultFlag(uniformValues);
+        this.fxFlag = this.setupDefaultFlag(uniformValues);
 
         this.setupSamplingFxShaders(vertexShader, fragmentShader);    
     }
 
     updateSamplingFx() {
 
-        if(!this.samplingFxFlag) return;
+        if(!this.fxFlag) return;
 
         const __cache = this.programCache;
 
         const { validCount, updatedFlag} = this.handleUpdateSamplingFx(
             this.uniforms,
-            this.samplingFxFlag
+            this.fxFlag
         );
 
         this.programCache += validCount;
-        this.samplingFxFlag = updatedFlag;
+        this.fxFlag = updatedFlag;
 
         if(__cache !== this.programCache) {
             this.updateSamplingFxPrefix();
@@ -109,7 +107,7 @@ export class SamplingFxMaterial extends BasicFxMaterial {
 
     updateSamplingFxPrefix() {
         const { prefixVertex, prefixFragment} =
-            this.handleUpdateSamplingFxPrefix(this.samplingFxFlag);            
+            this.handleUpdateSamplingFxPrefix(this.fxFlag);            
         this.vertexPrefixCache = prefixVertex;
         this.fragmentPrefixCache = prefixFragment;        
     }
@@ -160,11 +158,11 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         // THINK : ここでflattenUniformValuesを呼び出すべき？
         const _values = flattenUniformValues(values);
         return Object.keys(_values).some((key) =>
-           Object.keys(SamplingFxMaterial.DEFAULT_SAMPLINGFX_VALUES).includes(key as keyof SamplingFxValues)
+           Object.keys(SamplingFxMaterial.DEFAULT_VALUES).includes(key as keyof SamplingFxValues)
         );
     }    
 
-    setupDefaultFlag(uniformValues?: SamplingFxValues): SamplingFxFlag {
+    setupDefaultFlag(uniformValues?: SamplingFxValues): FxFlag {
         const isMixSrc = uniformValues?.mixSrc ? true : false;
         const isMixDst = uniformValues?.mixDst ? true : false;
         const isTexture = uniformValues?.texture ? true : false;
@@ -179,10 +177,10 @@ export class SamplingFxMaterial extends BasicFxMaterial {
 
     handleUpdateSamplingFx(
         uniforms: SamplingFxUniforms,
-        samplingFxFlag: SamplingFxFlag
+        fxFlag: FxFlag
     ): {
         validCount: number;
-        updatedFlag: SamplingFxFlag;
+        updatedFlag: FxFlag;
     } {
     
         const isTexture = uniforms.texture_src.value ? true : false;
@@ -190,9 +188,9 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         const isMixDst = uniforms.mixDst_src.value ? true : false; 
         const isSrcSystem = isMixSrc || isMixDst || isTexture;   
     
-        const { texture, mixSrc, mixDst, srcSystem} = samplingFxFlag;
+        const { texture, mixSrc, mixDst, srcSystem} = fxFlag;
     
-        const updatedFlag = samplingFxFlag;
+        const updatedFlag = fxFlag;
     
         let validCount = 0;
     
@@ -222,27 +220,27 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         }
     }    
 
-    handleUpdateSamplingFxPrefix(samplingFxFlag: SamplingFxFlag): {
+    handleUpdateSamplingFxPrefix(fxFlag: FxFlag): {
         prefixVertex: string;
         prefixFragment: string;
     } {
-        const { mixSrc, mixDst, texture, srcSystem} = samplingFxFlag;
+        const { mixSrc, mixDst, texture, srcSystem} = fxFlag;
 
-        const SAMPLINGFX_SHADER_PREFIX = SamplingFxMaterial.SAMPLINGFX_SHADER_PREFIX;        
+        const SHADER_PREFIX = SamplingFxMaterial.SHADER_PREFIX;        
     
         const prefixVertex = joinShaderPrefix([
-            srcSystem ? SAMPLINGFX_SHADER_PREFIX.srcSystem : "",
-            mixSrc ? SAMPLINGFX_SHADER_PREFIX.mixSrc : "",            
-            mixDst ? SAMPLINGFX_SHADER_PREFIX.mixDst : "",              
-            texture ? SAMPLINGFX_SHADER_PREFIX.texture : "",          
+            srcSystem ? SHADER_PREFIX.srcSystem : "",
+            mixSrc ? SHADER_PREFIX.mixSrc : "",            
+            mixDst ? SHADER_PREFIX.mixDst : "",              
+            texture ? SHADER_PREFIX.texture : "",          
             "\n",
         ]);    
     
         const prefixFragment = joinShaderPrefix([
-            srcSystem ? SAMPLINGFX_SHADER_PREFIX.srcSystem : "",
-            mixSrc ? SAMPLINGFX_SHADER_PREFIX.mixSrc : "",
-            mixDst ? SAMPLINGFX_SHADER_PREFIX.mixDst : "",              
-            texture ? SAMPLINGFX_SHADER_PREFIX.texture : "",  
+            srcSystem ? SHADER_PREFIX.srcSystem : "",
+            mixSrc ? SHADER_PREFIX.mixSrc : "",
+            mixDst ? SHADER_PREFIX.mixDst : "",              
+            texture ? SHADER_PREFIX.texture : "",  
             "\n",
         ]);
     
