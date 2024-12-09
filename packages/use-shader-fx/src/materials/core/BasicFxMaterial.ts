@@ -85,6 +85,7 @@ export class BasicFxMaterial extends FxMaterial {
          ]),
       });
 
+
       this.vertexShaderCache = this.vertexShader;
       this.fragmentShaderCache = this.fragmentShader;
       this.vertexPrefixCache = "";
@@ -93,16 +94,16 @@ export class BasicFxMaterial extends FxMaterial {
 
       this.fxFlag = this.setupDefaultFlag(uniformValues);
 
-      this.setupBasicFxShaders(vertexShader, fragmentShader);
+      this.setupFxShaders(vertexShader, fragmentShader);
    }
 
-   updateBasicFx() {
+   updateFx() {
       // shaderのsetup前は実行しない
       if (!this.fxFlag) return;
 
       const _cache = this.programCache;
 
-      const { validCount, updatedFlag } = this.handleUpdateBasicFx(
+      const { validCount, updatedFlag } = this.handleUpdateFx(
          this.uniforms,
          this.fxFlag
       );
@@ -111,29 +112,28 @@ export class BasicFxMaterial extends FxMaterial {
       this.fxFlag = updatedFlag;
 
       if (_cache !== this.programCache) {
-         this.updateBasicFxPrefix();
-         this.updateBasicFxShader();
+         this.updateFxPrefix();
+         this.updateShader();
          this.version++; // same as this.needsUpdate = true;
       }
    }
 
-   updateBasicFxPrefix() {
+   updateFxPrefix() {
       const { prefixVertex, prefixFragment } =
-         this.handleUpdateBasicFxPrefix(this.fxFlag);
-      
+         this.handleUpdateFxPrefix(this.fxFlag);      
       this.vertexPrefixCache = prefixVertex;
       this.fragmentPrefixCache = prefixFragment;
    }
 
-   updateBasicFxShader() {
+   updateShader() {
       this.vertexShader = this.vertexPrefixCache + this.vertexShaderCache;
       this.fragmentShader = this.fragmentPrefixCache + this.fragmentShaderCache;
    }
 
-   setupBasicFxShaders(vertexShader?: string, fragmentShader?: string) {
+   setupFxShaders(vertexShader?: string, fragmentShader?: string) {
       if (!vertexShader && !fragmentShader) return;
 
-      this.updateBasicFxPrefix();
+      this.updateFxPrefix();
 
       const [vertex, fragment] = mergeShaderLib(
          vertexShader,
@@ -146,7 +146,7 @@ export class BasicFxMaterial extends FxMaterial {
       this.vertexShaderCache = this.vertexShader;
       this.fragmentShaderCache = this.fragmentShader;
 
-      this.updateBasicFxShader();
+      this.updateShader();
    }
 
    /*===============================================
@@ -155,15 +155,15 @@ export class BasicFxMaterial extends FxMaterial {
    setUniformValues(values?: { [key: string]: any }) {
       // THINK : `flattenUniformValues`するのはこのレイヤーの方がいいかも
       super.setUniformValues(values);
-      // THINK : flattenUniformValuesしたあとで、containsBasicFxValuesに渡せばいい。containsBasicFxValuesでflattenUniformValuesを実行してるので、二度手間になっている
-      if (this.containsBasicFxValues(values)) {
-         this.updateBasicFx();
+      // THINK : flattenUniformValuesしたあとで、containsFxValuesに渡せばいい。containsFxValuesでflattenUniformValuesを実行してるので、二度手間になっている
+      if (this.containsFxValues(values)) {
+         this.updateFx();
       }
    }
 
    defineUniformAccessors(onSet?: () => void) {
       super.defineUniformAccessors(() => {
-         this.updateBasicFx();
+         this.updateFx();
          onSet?.();
       });
    }
@@ -171,7 +171,7 @@ export class BasicFxMaterial extends FxMaterial {
    // 
    /** valuesのkeyにbasicFxが含まれているかどうかの判定 */
    // TODO : rename to isContainsBasicFxValues
-   containsBasicFxValues(values?: { [key: string]: any }): boolean {
+   containsFxValues(values?: { [key: string]: any }): boolean {
       if (!values) return false;
       // THINK : ここでflattenUniformValuesを呼び出すべき？
       const _values = flattenUniformValues(values);
@@ -185,7 +185,7 @@ export class BasicFxMaterial extends FxMaterial {
       const isMixDst = uniformValues?.mixDst ? true : false;   
       const isSrcSystem = isMixSrc || isMixDst;   
       return {
-         // THINK : `handleUpdateBasicFx`での判定は、uniformの値で行っている.例えばsaturation・brightnessとかはどう判定する？
+         // THINK : `handleUpdateFx`での判定は、uniformの値で行っている.例えばsaturation・brightnessとかはどう判定する？
          // THINK : `isMixSrc` みたいなuniform値をつくる？ uniformValues?.mixSrcを判定するイメージ      
          mixSrc: isMixSrc,
          mixDst: isMixDst,
@@ -193,14 +193,14 @@ export class BasicFxMaterial extends FxMaterial {
       };
    }    
 
-   handleUpdateBasicFx(
+   handleUpdateFx(
       uniforms: BasicFxUniforms,
       fxFlag: FxFlag
    ): {
       validCount: number;
       updatedFlag: FxFlag;
    } {
-      // THINK : `handleUpdateBasicFx`での判定は、uniformの値で行っている.例えばsaturation・brightnessとかはどう判定する？
+      // THINK : `handleUpdateFx`での判定は、uniformの値で行っている.例えばsaturation・brightnessとかはどう判定する？
       // THINK : `isMixSrc` みたいなuniform値をつくる？ uniformValues?.mixSrcを判定するイメージ
       const isMixSrc = uniforms.mixSrc_src.value ? true : false;
       const isMixDst = uniforms.mixDst_src.value ? true : false;
@@ -234,7 +234,7 @@ export class BasicFxMaterial extends FxMaterial {
    }    
    
    
-   handleUpdateBasicFxPrefix(fxFlag: FxFlag): {
+   handleUpdateFxPrefix(fxFlag: FxFlag): {
       prefixVertex: string;
       prefixFragment: string;
    } {

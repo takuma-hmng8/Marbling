@@ -67,7 +67,7 @@ export const useBoxBlur = ({
 
          const srcCache = material.uniforms.src?.value;
 
-         material.updateBasicFx();
+         material.updateFx();         
 
          updateRenderTarget({ gl });
 

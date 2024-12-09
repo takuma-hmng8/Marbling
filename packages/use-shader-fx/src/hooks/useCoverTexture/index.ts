@@ -50,7 +50,7 @@ export const useCoverTexture = ({
          const { gl } = rootState;
          newValues && setValues(newValues);
 
-         material.updateBasicFx();
+         material.updateFx();
 
          return updateRenderTarget({ gl });
       },

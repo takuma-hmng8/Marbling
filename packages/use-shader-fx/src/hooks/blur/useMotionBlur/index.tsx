@@ -62,7 +62,7 @@ export const useMotionBlur = ({
                   
          updateRenderTarget({gl}, ({read}) => {
             material.uniforms.backBuffer.value = read;                
-            material.updateBasicFx();
+            material.updateFx();
          });         
                   
          return renderTarget.read.texture;

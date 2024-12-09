@@ -51,7 +51,7 @@ export const useRGBShift = ({
       (rootState: RootState, newValues?: RGBShiftValuesAndConfig) => {
          const { gl } = rootState;
          newValues && setValues(newValues);         
-         material.updateBasicFx();
+         material.updateFx();
          updateRenderTarget({ gl });
          return renderTarget.texture;
       },

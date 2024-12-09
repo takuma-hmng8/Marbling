@@ -1,12 +1,10 @@
 import * as THREE from "three";
 import { fragment, vertex } from "./gaussianBlur.glsl";
-import { BasicFxMaterial } from "../../../core/BasicFxMaterial";
 import { FxMaterialProps } from "../../../core/FxMaterial";
-import { BasicFxUniforms, BasicFxValues } from "../../../core/BasicFxLib";
 import { NestUniformValues } from "../../../../shaders/uniformsUtils";
 import { TexturePipelineSrc } from "../../../../misc";
 import { SamplingFxMaterial } from "../../../core/SamplingFxMaterial";
-import { SamplingFxUniforms, SamplingFxValues } from "../../../core/SamplingFxLib";
+import { SamplingFxUniforms, SamplingFxValues } from "../../../core/SamplingFxMaterial";
 
 type GaussianBlurUniforms = {
    /**  */

@@ -50,13 +50,6 @@ export class SamplingFxMaterial extends BasicFxMaterial {
 
     uniforms!: SamplingFxUniforms;
 
-    vertexShaderCache: string;
-    vertexPrefixCache: string;
-    fragmentShaderCache: string;
-    fragmentPrefixCache: string;
-    programCache: number;
-
-
     constructor({
         uniformValues,
         materialParameters = {},
@@ -81,46 +74,13 @@ export class SamplingFxMaterial extends BasicFxMaterial {
 
         this.fxFlag = this.setupDefaultFlag(uniformValues);
 
-        this.setupSamplingFxShaders(vertexShader, fragmentShader);    
+        this.setupFxShaders(vertexShader, fragmentShader);    
     }
 
-    updateSamplingFx() {
-
-        if(!this.fxFlag) return;
-
-        const __cache = this.programCache;
-
-        const { validCount, updatedFlag} = this.handleUpdateSamplingFx(
-            this.uniforms,
-            this.fxFlag
-        );
-
-        this.programCache += validCount;
-        this.fxFlag = updatedFlag;
-
-        if(__cache !== this.programCache) {
-            this.updateSamplingFxPrefix();
-            this.updateSamplingFxShader();
-            this.version++;
-        }
-    }
-
-    updateSamplingFxPrefix() {
-        const { prefixVertex, prefixFragment} =
-            this.handleUpdateSamplingFxPrefix(this.fxFlag);            
-        this.vertexPrefixCache = prefixVertex;
-        this.fragmentPrefixCache = prefixFragment;        
-    }
-
-    updateSamplingFxShader() {
-        this.vertexShader = this.vertexPrefixCache + this.vertexShaderCache;
-        this.fragmentShader = this.fragmentPrefixCache + this.fragmentShaderCache;
-    }
-
-    setupSamplingFxShaders(vertexShader?: string, fragmentShader?: string) {
+    setupFxShaders(vertexShader?: string, fragmentShader?: string) {
         if (!vertexShader && !fragmentShader) return;
 
-        this.updateSamplingFxPrefix();
+        this.updateFxPrefix();
 
         const [vertex, fragment] = mergeShaderLib(
             vertexShader,
@@ -133,27 +93,11 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         this.vertexShaderCache = this.vertexShader;
         this.fragmentShaderCache = this.fragmentShader;
 
-        this.updateSamplingFxShader();                
-    }
-
-    setUniformValues(values?: { [key: string]: any }) {
-        
-        super.setUniformValues(values)
-
-        if(this.containsSamplingFxValues(values)) {
-            this.updateSamplingFx();
-        }
-    }
-
-    defineUniformAccessors(onSet?: () => void) {
-        super.defineUniformAccessors(() => {
-           this.updateSamplingFx();
-           onSet?.();
-        });
+        this.updateShader();                
     }
 
     // 
-    containsSamplingFxValues(values?: { [key: string]: any }): boolean {
+    containsFxValues(values?: { [key: string]: any }): boolean {
         if (!values) return false;
         // THINK : ここでflattenUniformValuesを呼び出すべき？
         const _values = flattenUniformValues(values);
@@ -175,7 +119,7 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         }
     }    
 
-    handleUpdateSamplingFx(
+    handleUpdateFx(
         uniforms: SamplingFxUniforms,
         fxFlag: FxFlag
     ): {
@@ -220,7 +164,7 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         }
     }    
 
-    handleUpdateSamplingFxPrefix(fxFlag: FxFlag): {
+    handleUpdateFxPrefix(fxFlag: FxFlag): {
         prefixVertex: string;
         prefixFragment: string;
     } {
