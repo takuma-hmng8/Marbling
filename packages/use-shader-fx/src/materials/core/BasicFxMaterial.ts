@@ -8,7 +8,7 @@ import {
 import {
    joinShaderPrefix
 } from '../../shaders/mergeShaderLib';
-import { mergeShaderLib } from "../../shaders/mergeShaderLib";
+import { mergeShaderLib, ShaderLibType } from "../../shaders/mergeShaderLib";
 
 
 type BasicFxUniformsUnique = {   
@@ -28,7 +28,8 @@ type BasicFxUniformsUnique = {
 
 export type BasicFxUniforms = BasicFxUniformsUnique & DefaultUniforms;
 
-export type BasicFxValues = NestUniformValues<BasicFxUniformsUnique>;
+type FxValues = NestUniformValues<BasicFxUniformsUnique>;
+export type BasicFxValues = FxValues;
 
 export type FxFlag = {   
    srcSystem: boolean; // is active srcSystem
@@ -130,7 +131,7 @@ export class BasicFxMaterial extends FxMaterial {
       this.fragmentShader = this.fragmentPrefixCache + this.fragmentShaderCache;
    }
 
-   setupFxShaders(vertexShader?: string, fragmentShader?: string) {
+   setupFxShaders(vertexShader?: string, fragmentShader?: string, shaderType: ShaderLibType = "basicFx") {
       if (!vertexShader && !fragmentShader) return;
 
       this.updateFxPrefix();
@@ -138,7 +139,7 @@ export class BasicFxMaterial extends FxMaterial {
       const [vertex, fragment] = mergeShaderLib(
          vertexShader,
          fragmentShader,
-         "basicFx"
+         shaderType
       );      
 
       super.setupDefaultShaders(vertex, fragment);      
@@ -155,8 +156,8 @@ export class BasicFxMaterial extends FxMaterial {
    setUniformValues(values?: { [key: string]: any }) {
       // THINK : `flattenUniformValues`するのはこのレイヤーの方がいいかも
       super.setUniformValues(values);
-      // THINK : flattenUniformValuesしたあとで、containsFxValuesに渡せばいい。containsFxValuesでflattenUniformValuesを実行してるので、二度手間になっている
-      if (this.containsFxValues(values)) {
+      // THINK : flattenUniformValuesしたあとで、isContainsFxValuesに渡せばいい。isContainsFxValuesでflattenUniformValuesを実行してるので、二度手間になっている
+      if (this.isContainsFxValues(values)) {
          this.updateFx();
       }
    }
@@ -169,14 +170,13 @@ export class BasicFxMaterial extends FxMaterial {
    }
 
    // 
-   /** valuesのkeyにbasicFxが含まれているかどうかの判定 */
-   // TODO : rename to isContainsBasicFxValues
-   containsFxValues(values?: { [key: string]: any }): boolean {
+   /** valuesのkeyにbasicFxが含まれているかどうかの判定 */   
+   isContainsFxValues(values?: { [key: string]: any }): boolean {
       if (!values) return false;
       // THINK : ここでflattenUniformValuesを呼び出すべき？
       const _values = flattenUniformValues(values);
       return Object.keys(_values).some((key) =>
-         Object.keys(BasicFxMaterial.DEFAULT_VALUES).includes(key as keyof BasicFxValues)      
+         Object.keys(BasicFxMaterial.DEFAULT_VALUES).includes(key as keyof FxValues)      
       );
    }   
 

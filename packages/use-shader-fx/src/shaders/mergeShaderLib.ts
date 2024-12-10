@@ -4,10 +4,11 @@ import { ShaderLib } from "./ShaderLib";
  * 共通でパースするShaderの共有部分を解決する
  * basicFx_fragment_begin, basicFx_fragment_endは含まない。これらは各FXでカスタマイズする必要があるため。
  */
+export type ShaderLibType = "default" | "basicFx" | 'samplingFx';
 export function mergeShaderLib(
    vertexShader: string | undefined,
    fragmentShader: string | undefined,
-   type: "default" | "basicFx" | 'samplingFx'
+   type: ShaderLibType
 ): [string | undefined, string | undefined] {
    let vertex,
       fragment = undefined;

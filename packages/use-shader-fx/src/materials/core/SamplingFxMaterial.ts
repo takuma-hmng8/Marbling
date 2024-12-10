@@ -5,8 +5,7 @@ import {
     NestUniformValues,
     flattenUniformValues,
 } from "../../shaders/uniformsUtils";
-import { 
-    mergeShaderLib,
+import {     
     joinShaderPrefix
 } from '../../shaders/mergeShaderLib';
 import { 
@@ -25,7 +24,8 @@ type SamplingFxUniformsUnique = {
 
 export type SamplingFxUniforms = SamplingFxUniformsUnique & BasicFxUniforms;
 
-export type SamplingFxValues = NestUniformValues<SamplingFxUniformsUnique> & BasicFxValues;
+type FxValues = NestUniformValues<SamplingFxUniformsUnique> & BasicFxValues;
+export type SamplingFxValues = FxValues;
 
 export type FxFlag = {
     texture: boolean;
@@ -56,7 +56,7 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         uniforms,
         vertexShader,
         fragmentShader
-    }: FxMaterialProps<SamplingFxValues>) {
+    }: FxMaterialProps<FxValues>) {
         super({
             uniformValues,
             materialParameters,
@@ -68,45 +68,23 @@ export class SamplingFxMaterial extends BasicFxMaterial {
 
         this.vertexShaderCache = this.vertexShader;
         this.fragmentShaderCache = this.fragmentShader;
-        this.vertexPrefixCache = "";
-        this.fragmentPrefixCache = "";
-        this.programCache = 0;
 
         this.fxFlag = this.setupDefaultFlag(uniformValues);
 
-        this.setupFxShaders(vertexShader, fragmentShader);    
-    }
-
-    setupFxShaders(vertexShader?: string, fragmentShader?: string) {
-        if (!vertexShader && !fragmentShader) return;
-
-        this.updateFxPrefix();
-
-        const [vertex, fragment] = mergeShaderLib(
-            vertexShader,
-            fragmentShader,
-            'samplingFx'
-        );
-
-        super.setupDefaultShaders(vertex, fragment);
-
-        this.vertexShaderCache = this.vertexShader;
-        this.fragmentShaderCache = this.fragmentShader;
-
-        this.updateShader();                
+        this.setupFxShaders(vertexShader, fragmentShader, 'samplingFx');
     }
 
     // 
-    containsFxValues(values?: { [key: string]: any }): boolean {
+    isContainsFxValues(values?: { [key: string]: any }): boolean {
         if (!values) return false;
         // THINK : ここでflattenUniformValuesを呼び出すべき？
         const _values = flattenUniformValues(values);
         return Object.keys(_values).some((key) =>
-           Object.keys(SamplingFxMaterial.DEFAULT_VALUES).includes(key as keyof SamplingFxValues)
+           Object.keys(SamplingFxMaterial.DEFAULT_VALUES).includes(key as keyof FxValues)
         );
     }    
 
-    setupDefaultFlag(uniformValues?: SamplingFxValues): FxFlag {
+    setupDefaultFlag(uniformValues?: FxValues): FxFlag {
         const isMixSrc = uniformValues?.mixSrc ? true : false;
         const isMixDst = uniformValues?.mixDst ? true : false;
         const isTexture = uniformValues?.texture ? true : false;
