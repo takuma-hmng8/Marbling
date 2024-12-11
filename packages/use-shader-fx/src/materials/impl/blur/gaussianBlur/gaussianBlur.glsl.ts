@@ -30,13 +30,13 @@ export const fragment = `
 		for(int i = 0; i <  KERNEL_SIZE - 1; i++){
 
 			w = u_weights[i];
-			color = texture2D( texture_src, vUv - count * texelSize * stepSize );
+			color = texture2D( texture_src, vTextureCoverUv - count * texelSize * stepSize );
 			actualWeight = w * color.a;
 			sum.rgb += color.rgb * actualWeight;
 			sum.a += color.a * w;
 			sumW += actualWeight;
 
-			color = texture2D( texture_src, vUv + count * texelSize * stepSize );
+			color = texture2D( texture_src, vTextureCoverUv + count * texelSize * stepSize );
 			actualWeight = w * color.a;
 			sum.rgb += color.rgb * actualWeight;
 			sum.a += color.a * w;
@@ -47,7 +47,7 @@ export const fragment = `
 
 		w = u_weights[KERNEL_SIZE - 1];
 
-		color = texture2D( texture_src, vUv );
+		color = texture2D( texture_src, vTextureCoverUv );
 		actualWeight = w * color.a;
 		sum.rgb += color.rgb * actualWeight;
 		sum.a += color.a * w;

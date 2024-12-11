@@ -17,7 +17,8 @@ type BasicFxUniformsUnique = {
    mixSrc_resolution: { value: THREE.Vector2 };
    mixSrc_uvFactor: { value: number };
    mixSrc_alphaFactor: { value: number };
-   mixSrc_colorFactor: { value: number };
+   mixSrc_colorFactor: { value: number };      
+
    // mixDst
    mixDst_src: { value: TexturePipelineSrc };
    mixDst_resolution: { value: THREE.Vector2 };
@@ -26,7 +27,12 @@ type BasicFxUniformsUnique = {
    mixDst_colorFactor: { value: number };
 };
 
-export type BasicFxUniforms = BasicFxUniformsUnique & DefaultUniforms;
+export type BasicFxUniforms = {
+   mixSrc_aspectRatio: { value: number };   
+   mixSrc_fitScale: { value: THREE.Vector2 };
+   mixDst_aspectRatio: { value: number };   
+   mixDst_fitScale: { value: THREE.Vector2 };
+} & BasicFxUniformsUnique & DefaultUniforms;
 
 type FxValues = NestUniformValues<BasicFxUniformsUnique>;
 export type BasicFxValues = FxValues;
@@ -46,12 +52,17 @@ export class BasicFxMaterial extends FxMaterial {
       mixSrc_uvFactor: { value: 0 },
       mixSrc_alphaFactor: { value: 0 },
       mixSrc_colorFactor: { value: 0 },
+      mixSrc_aspectRatio: { value: 0 }, // private      
+      mixSrc_fitScale: { value: new THREE.Vector2(1, 1) }, // private
+
       // mixDst
       mixDst_src: { value: null },
       mixDst_resolution: { value: new THREE.Vector2() },
       mixDst_uvFactor: { value: 0 },
       mixDst_alphaFactor: { value: 0 },
       mixDst_colorFactor: { value: 0 },
+      mixDst_aspectRatio: { value: 0 }, // private      
+      mixDst_fitScale: { value: new THREE.Vector2(1, 1) }, // private
    }   
 
    static readonly SHADER_PREFIX = {
@@ -153,13 +164,75 @@ export class BasicFxMaterial extends FxMaterial {
    /*===============================================
 	override super class method
 	===============================================*/
-   setUniformValues(values?: { [key: string]: any }) {
+   setUniformValues(values?: { [key: string]: any }) {      
       // THINK : `flattenUniformValues`するのはこのレイヤーの方がいいかも
       super.setUniformValues(values);
       // THINK : flattenUniformValuesしたあとで、isContainsFxValuesに渡せばいい。isContainsFxValuesでflattenUniformValuesを実行してるので、二度手間になっている
-      if (this.isContainsFxValues(values)) {
+      if (this.isContainsFxValues(values)) {         
          this.updateFx();
       }
+   }
+
+   calcAspectRatio(src?: TexturePipelineSrc, srcResolution?: THREE.Vector2): {
+      srcAspectRatio: number;
+      fitScale: THREE.Vector2;
+   } {
+      const screenAspectRatio = this.uniforms.aspectRatio.value;      
+            
+      // srcがない場合はnullを返す      
+      if(!src) {
+         return {
+            srcAspectRatio: this.uniforms.aspectRatio.value,
+            fitScale: new THREE.Vector2(1, 1),
+         };
+      };
+
+      // srcがあり、 resolutionがないまたは、0,0の場合は、srcのサイズを返す
+      if(!srcResolution || !srcResolution.x || !srcResolution.y) {  
+         const _aspectRatio = src.image.width / src.image.height;             
+         return {
+            srcAspectRatio: _aspectRatio,
+            fitScale: new THREE.Vector2(
+               Math.min(screenAspectRatio / _aspectRatio, 1),
+               Math.min(_aspectRatio / screenAspectRatio, 1)
+            ),
+         };
+      }
+
+      // それ以外の場合は、resolutionのアスペクト比を返す
+      if(srcResolution) {
+         const _aspectRatio = srcResolution.x / srcResolution.y;         
+         return {
+            srcAspectRatio: srcResolution.x / srcResolution.y,
+            fitScale: new THREE.Vector2(
+               Math.min(screenAspectRatio / _aspectRatio, 1),
+               Math.min(_aspectRatio / screenAspectRatio, 1)               
+            ),
+         };
+      }
+
+      return {
+         srcAspectRatio: this.uniforms.aspectRatio.value,
+         fitScale: new THREE.Vector2(1, 1),
+      };
+   }
+
+   updateResolution(resolution: THREE.Vector2) {
+      super.updateResolution(resolution);      
+
+      const mixSrcAspect = this.calcAspectRatio(
+         this.uniforms.mixSrc_src?.value,
+         this.uniforms.mixSrc_resolution?.value
+      );
+      this.uniforms.mixSrc_aspectRatio.value = mixSrcAspect.srcAspectRatio;
+      this.uniforms.mixSrc_fitScale.value = mixSrcAspect.fitScale;
+
+      const mixDstAspect = this.calcAspectRatio(
+         this.uniforms.mixDst_src?.value,
+         this.uniforms.mixDst_resolution?.value
+      );
+      this.uniforms.mixDst_aspectRatio.value = mixDstAspect.srcAspectRatio;
+      this.uniforms.mixDst_fitScale.value = mixDstAspect.fitScale;
    }
 
    defineUniformAccessors(onSet?: () => void) {

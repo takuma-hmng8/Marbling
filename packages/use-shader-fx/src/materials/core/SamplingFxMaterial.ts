@@ -22,7 +22,10 @@ type SamplingFxUniformsUnique = {
     texture_resolution: { value: THREE.Vector2 };
 } & typeof BasicFxMaterial.DEFAULT_VALUES;
 
-export type SamplingFxUniforms = SamplingFxUniformsUnique & BasicFxUniforms;
+export type SamplingFxUniforms = {
+    texture_aspectRatio: { value: number };
+    texture_fitScale: { value: THREE.Vector2 };
+} & SamplingFxUniformsUnique & BasicFxUniforms;
 
 type FxValues = NestUniformValues<SamplingFxUniformsUnique> & BasicFxValues;
 export type SamplingFxValues = FxValues;
@@ -34,11 +37,13 @@ export type FxFlag = {
 
 export class SamplingFxMaterial extends BasicFxMaterial {    
 
-    static readonly DEFAULT_VALUES:SamplingFxUniformsUnique = {
+    static readonly DEFAULT_VALUES = {
         ...BasicFxMaterial.DEFAULT_VALUES,
         // texture
         texture_src: { value: null },
-        texture_resolution: { value: new THREE.Vector2() },        
+        texture_resolution: { value: new THREE.Vector2() },              
+        texture_aspectRatio: { value: 0 }, // private
+        texture_fitScale: { value: new THREE.Vector2() }, // private
     }
 
     static readonly SHADER_PREFIX = {
@@ -84,6 +89,18 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         );
     }    
 
+    updateResolution(resolution: THREE.Vector2) {
+        super.updateResolution(resolution);
+
+        const textureAspect = this.calcAspectRatio(
+           this.uniforms.texture_src?.value,
+           this.uniforms.texture_resolution?.value
+        );
+
+        this.uniforms.texture_aspectRatio.value = textureAspect.srcAspectRatio;
+        this.uniforms.texture_fitScale.value = textureAspect.fitScale;
+     }    
+
     setupDefaultFlag(uniformValues?: FxValues): FxFlag {
         const isMixSrc = uniformValues?.mixSrc ? true : false;
         const isMixDst = uniformValues?.mixDst ? true : false;
@@ -95,7 +112,7 @@ export class SamplingFxMaterial extends BasicFxMaterial {
             texture: isTexture,
             srcSystem: isSrcSystem,
         }
-    }    
+    }
 
     handleUpdateFx(
         uniforms: SamplingFxUniforms,

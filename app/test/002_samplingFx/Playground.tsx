@@ -31,33 +31,13 @@ export const Playground = () => {
    const { size } = useThree();
 
    const [app] = useTexture(["/funkun.jpg"]);
-
-   const coverTexture = useCoverTexture({
-      size,
-      dpr: 1,      
-      src: app,       
-      textureResolution: new THREE.Vector2(app.image.width, app.image.height),
-   })   
-
-   const noise = useNoise({
-      size,
-      dpr: 0.1,
-      scale: 0.002,
-      timeStrength: 1,
-      mixDst: {         
-         src: coverTexture.texture,
-         uvFactor: 0.5,
-      },
-   })
-
    const gbBur = useGaussianBlur({
       size,
       dpr: 1,
       radius: 20,
       sigma: new THREE.Vector2(2, 2), 
       texture: {         
-         src: coverTexture.texture,
-         resolution: new THREE.Vector2(app.image.width, app.image.height),
+         src: app,     
       }
    });
 
@@ -65,9 +45,9 @@ export const Playground = () => {
 
    useFrame((state) => {
       // console.log(gbBur.material.uniforms)
-      coverTexture.render(state);      
-      gbBur.render(state);      
-      noise.render(state);
+      // app.render(state);      
+      // gbBur.render(state);      
+      gbBur.render(state);
    });
 
    return (
