@@ -1,16 +1,10 @@
-import { fragment, vertex } from "./distortion.glsl";
-import { BasicFxMaterial } from "../../core/BasicFxMaterial";
-import { FxMaterialProps } from "../../core/FxMaterial";
-import { BasicFxUniforms, BasicFxValues } from "../../core/BasicFxMaterial";
-import { NestUniformValues } from "../../../shaders/uniformsUtils";
-import { TexturePipelineSrc } from "../../../misc";
 import * as THREE from 'three';
-import { SamplingFxMaterial } from "../../core/SamplingFxMaterial";
-import { SamplingFxUniforms } from "../../core/SamplingFxLib";
+import { fragment, vertex } from "./distortion.glsl";
+import { FxMaterialProps } from "../../core/FxMaterial";
+import { NestUniformValues } from "../../../shaders/uniformsUtils";
+import { SamplingFxMaterial, SamplingFxUniforms, SamplingFxValues } from "../../core/SamplingFxMaterial";
 
 type DistortionUniforms = {
-   /**  */
-   src: { value: TexturePipelineSrc };
    /**  */
    time: { value: number };
    scale: { value: THREE.Vector2 };   
@@ -24,7 +18,7 @@ type DistortionUniforms = {
    glitchFreq: { value: THREE.Vector2 };   
 } & SamplingFxUniforms
 
-export type DistortionValues = NestUniformValues<DistortionUniforms> & BasicFxValues;
+export type DistortionValues = NestUniformValues<DistortionUniforms> & SamplingFxValues;
 
 export class DistortionMaterial extends SamplingFxMaterial {
    static get type() {
@@ -42,8 +36,7 @@ export class DistortionMaterial extends SamplingFxMaterial {
          fragmentShader: fragment,
          uniformValues,
          materialParameters,
-         uniforms: {
-            src: { value: null },
+         uniforms: {            
             time: { value: 0 },
             scale: { value: new THREE.Vector2(1,1) },
             freq: { value: new THREE.Vector2(1,1) },

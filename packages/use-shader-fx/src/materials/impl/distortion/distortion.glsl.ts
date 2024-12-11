@@ -6,10 +6,7 @@ export const vertex = `
 	}
 `;
 
-export const fragment = `
-	
-	uniform sampler2D src;
-	
+export const fragment = `		
 	uniform float time;
 	uniform vec2 scale;
 	uniform vec2 freq;
@@ -155,7 +152,7 @@ export const fragment = `
 		shiftUv = sign(shiftUv) * pow(abs(shiftUv), powNum);
 
 		vec2 dUv = vUv + shiftUv;
-		vec4 outColor = texture2D(src, dUv);
+		vec4 outColor = texture2D(texture_src, dUv);
 
 
 		if(glitchPower > 0.0) {
@@ -187,7 +184,7 @@ export const fragment = `
 					snoise(vec3(dUv.x + cTime2, vUv.y, cTime2 + gny)),
 					snoise(vec3(dUv.y + cTime1, vUv.x, cTime1 + gnx))
 				) * glitchPower * vec2(0.01);
-				outColor = texture2D(src, d2Uv);										
+				outColor = texture2D(texture_src, d2Uv);										
 			}
 		}
 
