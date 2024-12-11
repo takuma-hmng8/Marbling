@@ -65,7 +65,7 @@ export const useBoxBlur = ({
          const { gl } = rootState;
          newValues && setValues(newValues);
 
-         const srcCache = material.uniforms.src?.value;
+         const srcCache = material.uniforms.texture_src?.value;         
 
          material.updateFx();         
 
@@ -77,11 +77,11 @@ export const useBoxBlur = ({
             i++
          ) {
             updateRenderTarget({ gl }, ({ read }) => {
-               material.uniforms.src.value = read;
+               material.uniforms.texture_src.value = read;
             });
          }
 
-         material.uniforms.src.value = srcCache;
+         material.uniforms.texture_src.value = srcCache;
 
          return renderTarget.read.texture;
       },

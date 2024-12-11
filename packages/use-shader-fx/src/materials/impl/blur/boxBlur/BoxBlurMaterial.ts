@@ -1,20 +1,16 @@
 import { fragment, vertex } from "./boxBlur.glsl";
-import { BasicFxMaterial } from "../../../core/BasicFxMaterial";
 import { FxMaterialProps } from "../../../core/FxMaterial";
-import { BasicFxUniforms, BasicFxValues } from "../../../core/BasicFxMaterial";
+import { SamplingFxMaterial, SamplingFxUniforms, SamplingFxValues } from '../../../core/SamplingFxMaterial';
 import { NestUniformValues } from "../../../../shaders/uniformsUtils";
-import { TexturePipelineSrc } from "../../../../misc";
 
 type BoxBlurUniforms = {
    /**  */
-   src: { value: TexturePipelineSrc };
-   /**  */
    blurSize: { value: number };
-} & BasicFxUniforms;
+} & SamplingFxUniforms;
 
-export type BoxBlurValues = NestUniformValues<BoxBlurUniforms> & BasicFxValues;
+export type BoxBlurValues = NestUniformValues<BoxBlurUniforms> & SamplingFxValues;
 
-export class BoxBlurMaterial extends BasicFxMaterial {
+export class BoxBlurMaterial extends SamplingFxMaterial {
    static get type() {
       return "BoxBlurMaterial";      
    }
@@ -31,7 +27,6 @@ export class BoxBlurMaterial extends BasicFxMaterial {
          uniformValues,
          materialParameters,
          uniforms: {
-            src: { value: null },
             blurSize: { value: 5 },
          } as BoxBlurUniforms,
       });
