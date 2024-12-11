@@ -1,14 +1,11 @@
 import * as THREE from "three";
 import { fragment, vertex } from "./motionBlur.glsl";
-import { BasicFxMaterial } from "../../../core/BasicFxMaterial";
 import { FxMaterialProps } from "../../../core/FxMaterial";
-import { BasicFxUniforms, BasicFxValues } from "../../../core/BasicFxMaterial";
 import { NestUniformValues } from "../../../../shaders/uniformsUtils";
 import { TexturePipelineSrc } from "../../../../misc";
+import { SamplingFxMaterial, SamplingFxUniforms, SamplingFxValues } from "../../../core/SamplingFxMaterial";
 
 type MotionBlurUniforms = {
-   /**  */
-   src: { value: TexturePipelineSrc };
    /**  */
    backBuffer: { 
       value: TexturePipelineSrc
@@ -16,12 +13,12 @@ type MotionBlurUniforms = {
     mixRatio: {
       value: number;
     };
-} & BasicFxUniforms;
+} & SamplingFxUniforms;
 
 export type MotionBlurValues = NestUniformValues<MotionBlurUniforms> &
-   BasicFxValues;
+   SamplingFxValues;
 
-export class MotionBlurMaterial extends BasicFxMaterial {   
+export class MotionBlurMaterial extends SamplingFxMaterial {   
    static get type() {
       return "MotionBlurMaterial";
    }
@@ -38,12 +35,9 @@ export class MotionBlurMaterial extends BasicFxMaterial {
          uniformValues,
          materialParameters,
          uniforms: {
-            src: {
-               value: null,
-            },
             backBuffer: {
                value: new THREE.Texture(),
-            },
+            },            
             mixRatio: {
                value: 0.06,
             },

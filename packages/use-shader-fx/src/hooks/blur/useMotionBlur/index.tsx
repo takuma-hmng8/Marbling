@@ -7,6 +7,7 @@ import {
 } from "../../../utils";
 import { RootState } from "../../types";
 import { MotionBlurMaterial, MotionBlurValues } from "../../../materials";
+import * as THREE from 'three';
 
 type MotionBlurConfig = {   
 };
@@ -61,13 +62,13 @@ export const useMotionBlur = ({
          newValues && setValues(newValues);
                   
          updateRenderTarget({gl}, ({read}) => {
-            material.uniforms.backBuffer.value = read;                
+            material.uniforms.backBuffer.value = read;
             material.updateFx();
          });         
                   
          return renderTarget.read.texture;
       },
-      [setValues, updateRenderTarget, material, renderTarget, uniformValues.src]
+      [setValues, updateRenderTarget, material, renderTarget, uniformValues.texture?.src]      
    );
 
    return {

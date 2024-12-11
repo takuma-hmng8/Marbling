@@ -6,13 +6,12 @@ export const vertex = `
 	}
 `;
 
-export const fragment = `		
-	uniform sampler2D src;			
+export const fragment = `			
 	uniform sampler2D backBuffer;
 	uniform float mixRatio;
 
 	void main() {				
-		vec4 currentColor = texture2D(src, vUv);
+		vec4 currentColor = texture2D(texture_src, vUv);
 		vec4 prevColor = texture2D(backBuffer, vUv);
 
 		gl_FragColor = mix(prevColor, currentColor, mixRatio);
