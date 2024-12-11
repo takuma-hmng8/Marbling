@@ -30,12 +30,13 @@ extend({ FxMaterialImpl, BasicFxMaterialImpl });
 export const Playground = () => {
    const { size } = useThree();
 
-   const [app] = useTexture(["/funkun.jpg"]);
+   // const [app] = useTexture(["/funkun.jpg"]);
+   const [app] = useTexture(["/dummy.png"]);
    const gbBur = useGaussianBlur({
       size,
       dpr: 1,
-      radius: 20,
-      sigma: new THREE.Vector2(2, 2), 
+      radius: 40,
+      sigma: new THREE.Vector2(2, 200), 
       texture: {         
          src: app,     
       }

@@ -1,18 +1,16 @@
 "use client";
 
 import * as THREE from "three";
-import { useEffect, useRef, useState } from "react";
-import { useFrame, useThree, extend, createPortal } from "@react-three/fiber";
+import { useFrame, useThree, extend } from "@react-three/fiber";
 import {
    createFxMaterialImpl,
    createBasicFxMaterialImpl,
    FxMaterialImplValues,
    BasicFxMaterialImplValues,
-   useRGBShift,
-   useGaussianBlur,
+   useRGBShift,   
    useDistortion
 } from "@/packages/use-shader-fx/src";
-import { Float, OrbitControls, useTexture } from "@react-three/drei";
+import { useTexture } from "@react-three/drei";
 import { useCoverTexture } from "@/packages/use-shader-fx/src/hooks/useCoverTexture";
 import { useNoise } from "@/packages/use-shader-fx/src";
 import { useMotionBlur } from "@/packages/use-shader-fx/src/hooks/blur/useMotionBlur";
@@ -57,7 +55,6 @@ export const Playground = () => {
       dpr: 1,
       scale: 0.002,      
       timeStrength: 0.01,
-
       timeOffset: .1,
    })
 
@@ -73,7 +70,6 @@ export const Playground = () => {
       size,
       dpr: 2,
       shiftScale: .04,
-      src: coverTexture.texture,
       shiftPower: new THREE.Vector2(2, 2),
       shiftPowerSrcR: noise.texture,      
       shiftPowerSrcG: noise2.texture,      
@@ -81,24 +77,30 @@ export const Playground = () => {
       isUseShiftPowerSrcR: true,
       isUseShiftPowerSrcG: true,
       isUseShiftPowerSrcB: true,
+      texture: {
+         src: coverTexture.texture
+      },      
    })
 
 
    const motionBlur = useMotionBlur({
       size,
       dpr: 1,      
-      src: rgbShift.texture,            
+      texture: {
+         src: rgbShift.texture
+      },            
    });
 
    const distortion = useDistortion({
       size,
-      dpr: 1,
-      src: motionBlur.texture,      
-      scale: new THREE.Vector2(0.,0.2),
-      // scale: new THREE.Vector2(1.,3.0),
+      dpr: 1,      
+      scale: new THREE.Vector2(0.,0.2),      
       freq: new THREE.Vector2(120.,1.),
       powNum: new THREE.Vector2(1.,1.),
       timeStrength: new THREE.Vector2(1.0,1.0),
+      texture: {
+        src: motionBlur.texture 
+      }
    }) 
 
    useFrame((state) => {

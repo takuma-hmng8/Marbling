@@ -9,7 +9,8 @@ import {
    FxMaterialImplValues,
    BasicFxMaterialImplValues,
    useRGBShift,
-   useGaussianBlur
+   useGaussianBlur,
+   useBoxBlur
 } from "@/packages/use-shader-fx/src";
 import { Float, OrbitControls, useTexture } from "@react-three/drei";
 import { useCoverTexture } from "@/packages/use-shader-fx/src/hooks/useCoverTexture";
@@ -34,12 +35,12 @@ export const Playground = () => {
 
    const [app] = useTexture(["/dummy2.png"]);
 
-   const coverTexture = useCoverTexture({
-      size,
-      dpr: 1,      
-      src: app,       
-      textureResolution: new THREE.Vector2(app.image.width, app.image.height),
-   })   
+   // const coverTexture = useCoverTexture({
+   //    size,
+   //    dpr: 1,      
+   //    src: app,       
+   //    textureResolution: new THREE.Vector2(app.image.width, app.image.height),
+   // })   
 
    const noise = useNoise({
       size,
@@ -65,8 +66,7 @@ export const Playground = () => {
    const rgbShift = useRGBShift({
       size,
       dpr: 2,
-      shiftScale: .1,
-      src: coverTexture.texture,
+      shiftScale: .1,      
       shiftPower: new THREE.Vector2(2, 2),
       shiftPowerSrcR: noise.texture,      
       shiftPowerSrcG: noise2.texture,      
@@ -74,6 +74,9 @@ export const Playground = () => {
       isUseShiftPowerSrcR: true,
       isUseShiftPowerSrcG: true,
       isUseShiftPowerSrcB: true,
+      texture: {
+         src: app,
+      }
    })
 
    const gbBur = useGaussianBlur({
@@ -81,23 +84,27 @@ export const Playground = () => {
       dpr: 1,
       radius: 2,      
       sigma: new THREE.Vector2(0, 0),
-      src: rgbShift.texture,
+      texture: {
+         src: rgbShift.texture,         
+      }
    });
 
    const motionBlur = useMotionBlur({
       size,
       dpr: 1,
-      src: gbBur.texture,            
+      texture: {
+         src: gbBur.texture,
+      }
    });
 
    useFrame((state) => {
-      coverTexture.render(state);
+      // coverTexture.render(state);
       noise.render(state);
       noise2.render(state);
       noise3.render(state);
       rgbShift.render(state);         
       gbBur.render(state);
-      motionBlur.render(state);
+      motionBlur.render(state);      
    });
 
    return (
