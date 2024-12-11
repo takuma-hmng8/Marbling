@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { FxMaterialProps } from "../core/FxMaterial";
 import { ShaderLib } from "../../shaders/ShaderLib";
 import { BasicFxMaterial } from "../core/BasicFxMaterial";
-import { BasicFxUniforms, BasicFxValues } from "../core/BasicFxLib";
+import { BasicFxUniforms, BasicFxValues } from "../core/BasicFxMaterial";
 import {
    NestUniformValues,
    ShaderWithUniforms,

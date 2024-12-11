@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { noiseFragment, noiseVertex } from "./noise.glsl";
 import { BasicFxMaterial } from "../../core/BasicFxMaterial";
 import { FxMaterialProps } from "../../core/FxMaterial";
-import { BasicFxUniforms, BasicFxValues } from "../../core/BasicFxLib";
+import { BasicFxUniforms, BasicFxValues } from "../../core/BasicFxMaterial";
 import {
    ExtractUniformValues,
    NestUniformValues,

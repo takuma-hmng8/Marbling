@@ -1,7 +1,7 @@
 import { fragment, vertex } from "./distortion.glsl";
 import { BasicFxMaterial } from "../../core/BasicFxMaterial";
 import { FxMaterialProps } from "../../core/FxMaterial";
-import { BasicFxUniforms, BasicFxValues } from "../../core/BasicFxLib";
+import { BasicFxUniforms, BasicFxValues } from "../../core/BasicFxMaterial";
 import { NestUniformValues } from "../../../shaders/uniformsUtils";
 import { TexturePipelineSrc } from "../../../misc";
 import * as THREE from 'three';
