@@ -1,15 +1,11 @@
+import * as THREE from 'three';
+import { SamplingFxUniforms, SamplingFxValues, SamplingFxMaterial } from "../../core/SamplingFxMaterial";
 import { fragment, vertex } from "./rgbShift.glsl";
-import { BasicFxMaterial } from "../../core/BasicFxMaterial";
 import { FxMaterialProps } from "../../core/FxMaterial";
-import { BasicFxUniforms, BasicFxValues } from "../../core/BasicFxLib";
 import { NestUniformValues } from "../../../shaders/uniformsUtils";
 import { TexturePipelineSrc } from "../../../misc";
-import * as THREE from 'three';
 
 type RGBShiftUniforms = {
-   /**  */
-   src: { value: TexturePipelineSrc };
-   /**  */
    shiftPower: { value: THREE.Vector2 };      
    shiftPowerSrcR: { value: TexturePipelineSrc };
    isUseShiftPowerSrcR: { value: boolean };
@@ -18,11 +14,11 @@ type RGBShiftUniforms = {
    shiftPowerSrcB: { value: TexturePipelineSrc };
    isUseShiftPowerSrcB: { value: boolean };
    shiftScale: { value: number };
-} & BasicFxUniforms;
+} & SamplingFxUniforms;
 
-export type RGBShiftValues = NestUniformValues<RGBShiftUniforms> & BasicFxValues;
+export type RGBShiftValues = NestUniformValues<RGBShiftUniforms> & SamplingFxValues;
 
-export class RGBShiftMaterial extends BasicFxMaterial {
+export class RGBShiftMaterial extends SamplingFxMaterial {
    static get type() {
       return "RGBShiftMaterial";      
    }
@@ -38,8 +34,7 @@ export class RGBShiftMaterial extends BasicFxMaterial {
          fragmentShader: fragment,
          uniformValues,
          materialParameters,
-         uniforms: {
-            src: { value: null },
+         uniforms: {            
             shiftPower: { value: new THREE.Vector2(1, 1) },            
             shiftPowerSrcR: { value: null },
             isUseShiftPowerSrcR: { value: false },
