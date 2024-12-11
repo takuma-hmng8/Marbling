@@ -2,13 +2,9 @@ import * as THREE from "three";
 import { fragment, vertex } from "./gaussianBlur.glsl";
 import { FxMaterialProps } from "../../../core/FxMaterial";
 import { NestUniformValues } from "../../../../shaders/uniformsUtils";
-import { TexturePipelineSrc } from "../../../../misc";
-import { SamplingFxMaterial } from "../../../core/SamplingFxMaterial";
-import { SamplingFxUniforms, SamplingFxValues } from "../../../core/SamplingFxMaterial";
+import { SamplingFxMaterial, SamplingFxUniforms, SamplingFxValues } from "../../../core/SamplingFxMaterial";
 
 type GaussianBlurUniforms = {
-   /**  */
-   src: { value: TexturePipelineSrc };
    /**  */
    sigma: {
       value: THREE.Vector2;
@@ -41,9 +37,6 @@ export class GaussianBlurMaterial extends SamplingFxMaterial {
          uniformValues,
          materialParameters,
          uniforms: {
-            src: {
-               value: null,
-            },
             sigma: {
                value: new THREE.Vector2(1, 1),
             },
