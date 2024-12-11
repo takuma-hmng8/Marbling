@@ -79,21 +79,21 @@ export const useGaussianBlur = ({
 
          // draw vertical blur
          updateRenderTarget({ gl }, () => {
-            material.uniforms.src.value = uniformValues.src || new THREE.Texture();
+            material.uniforms.texture_src.value = uniformValues.texture?.src || new THREE.Texture();
             material.uniforms.u_stepSize.value.set(0, 1);
             material.updateFx();
          });
 
          // draw horizontal blur
          updateRenderTarget({ gl }, ({ read }) => {
-            material.uniforms.src.value = read;
+            material.uniforms.texture_src.value = read;
             material.uniforms.u_stepSize.value.set(1, 0);
             material.updateFx();
          });
 
          return renderTarget.read.texture;
       },
-      [setValues, updateRenderTarget, material, renderTarget, uniformValues.src]
+      [setValues, updateRenderTarget, material, renderTarget, uniformValues.texture?.src]
    );
 
    return {
