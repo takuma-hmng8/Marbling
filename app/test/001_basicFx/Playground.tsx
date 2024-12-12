@@ -35,12 +35,13 @@ export const Playground = () => {
    const noise = useNoise({
       size,
       dpr: 1,
-      scale: 0.002,
+      scale: 0.0,
       timeStrength: 1,
-      mixSrc: {         
+      mixDst: {
          src: app,
-         uvFactor: 1.,
+         uvFactor: 0.,
          alphaFactor: .5,
+         fit: 'contain',
       },
    })
 

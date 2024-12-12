@@ -13,6 +13,7 @@ import {
     BasicFxValues,
     BasicFxUniforms,
     FxFlag as BasicFxFlag,
+    FitType,
 } from './BasicFxMaterial';
 
 
@@ -20,6 +21,7 @@ type SamplingFxUniformsUnique = {
     // texture
     texture_src: { value: TexturePipelineSrc };
     texture_resolution: { value: THREE.Vector2 };
+    texture_fit: { value: FitType };
 } & typeof BasicFxMaterial.DEFAULT_VALUES;
 
 export type SamplingFxUniforms = {
@@ -41,7 +43,8 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         ...BasicFxMaterial.DEFAULT_VALUES,
         // texture
         texture_src: { value: null },
-        texture_resolution: { value: new THREE.Vector2() },              
+        texture_resolution: { value: new THREE.Vector2() },    
+        texture_fit: { value: 'fill' },          
         texture_aspectRatio: { value: 0 }, // private
         texture_fitScale: { value: new THREE.Vector2() }, // private
     }
@@ -77,6 +80,11 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         this.fxFlag = this.setupDefaultFlag(uniformValues);
 
         this.setupFxShaders(vertexShader, fragmentShader, 'samplingFx');
+
+        // 初期化時に更新
+        setTimeout(() => {
+            this.updateResolution(this.uniforms.resolution.value);
+        },10);
     }
 
     // 
@@ -93,12 +101,15 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         super.updateResolution(resolution);
 
         const textureAspect = this.calcAspectRatio(
-           this.uniforms.texture_src?.value,
-           this.uniforms.texture_resolution?.value
+            this.uniforms.texture_fit?.value,
+            this.uniforms.texture_src?.value,
+            this.uniforms.texture_resolution?.value
         );
 
         this.uniforms.texture_aspectRatio.value = textureAspect.srcAspectRatio;
         this.uniforms.texture_fitScale.value = textureAspect.fitScale;
+
+        console.log('updateResolution',this.uniforms.aspectRatio.value, this.uniforms.texture_aspectRatio.value);
      }    
 
     setupDefaultFlag(uniformValues?: FxValues): FxFlag {

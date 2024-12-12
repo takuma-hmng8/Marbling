@@ -10,6 +10,7 @@ import {
 } from '../../shaders/mergeShaderLib';
 import { mergeShaderLib, ShaderLibType } from "../../shaders/mergeShaderLib";
 
+export type FitType = "fill" | "cover" | "contain";
 
 type BasicFxUniformsUnique = {   
    // mixSrc
@@ -18,6 +19,7 @@ type BasicFxUniformsUnique = {
    mixSrc_uvFactor: { value: number };
    mixSrc_alphaFactor: { value: number };
    mixSrc_colorFactor: { value: number };      
+   mixSrc_fit: { value: FitType };
 
    // mixDst
    mixDst_src: { value: TexturePipelineSrc };
@@ -25,6 +27,7 @@ type BasicFxUniformsUnique = {
    mixDst_uvFactor: { value: number };
    mixDst_alphaFactor: { value: number };
    mixDst_colorFactor: { value: number };
+   mixDst_fit: { value: FitType };
 };
 
 export type BasicFxUniforms = {
@@ -52,6 +55,7 @@ export class BasicFxMaterial extends FxMaterial {
       mixSrc_uvFactor: { value: 0 },
       mixSrc_alphaFactor: { value: 0 },
       mixSrc_colorFactor: { value: 0 },
+      mixSrc_fit: { value: "fill" },
       mixSrc_aspectRatio: { value: 0 }, // private      
       mixSrc_fitScale: { value: new THREE.Vector2(1, 1) }, // private
 
@@ -61,6 +65,7 @@ export class BasicFxMaterial extends FxMaterial {
       mixDst_uvFactor: { value: 0 },
       mixDst_alphaFactor: { value: 0 },
       mixDst_colorFactor: { value: 0 },
+      mixDst_fit: { value: "fill" },
       mixDst_aspectRatio: { value: 0 }, // private      
       mixDst_fitScale: { value: new THREE.Vector2(1, 1) }, // private
    }   
@@ -173,47 +178,49 @@ export class BasicFxMaterial extends FxMaterial {
       }
    }
 
-   calcAspectRatio(src?: TexturePipelineSrc, srcResolution?: THREE.Vector2): {
+   calcAspectRatio(type: FitType, src?: TexturePipelineSrc, srcResolution?: THREE.Vector2): {
       srcAspectRatio: number;
       fitScale: THREE.Vector2;
    } {
-      const screenAspectRatio = this.uniforms.aspectRatio.value;      
+      const baseAspectRatio = this.uniforms.aspectRatio.value;
+      let srcAspectRatio = 1;
+      let fitScale = new THREE.Vector2(1, 1);
             
-      // srcがない場合はnullを返す      
+      // srcがない場合はbaseのアスペクト比を返す
       if(!src) {
-         return {
-            srcAspectRatio: this.uniforms.aspectRatio.value,
-            fitScale: new THREE.Vector2(1, 1),
-         };
-      };
-
+         srcAspectRatio = baseAspectRatio;
+      }
+      // それ以外の場合は、resolutionのアスペクト比を返す
+      else if(srcResolution?.x && srcResolution?.y) {
+         srcAspectRatio = srcResolution.x / srcResolution.y;         
+      }      
       // srcがあり、 resolutionがないまたは、0,0の場合は、srcのサイズを返す
-      if(!srcResolution || !srcResolution.x || !srcResolution.y) {  
-         const _aspectRatio = src.image.width / src.image.height;             
-         return {
-            srcAspectRatio: _aspectRatio,
-            fitScale: new THREE.Vector2(
-               Math.min(screenAspectRatio / _aspectRatio, 1),
-               Math.min(_aspectRatio / screenAspectRatio, 1)
-            ),
-         };
+      else if(!srcResolution || !srcResolution.x || !srcResolution.y) {  
+         srcAspectRatio = src.image.width / src.image.height;
       }
 
-      // それ以外の場合は、resolutionのアスペクト比を返す
-      if(srcResolution) {
-         const _aspectRatio = srcResolution.x / srcResolution.y;         
-         return {
-            srcAspectRatio: srcResolution.x / srcResolution.y,
-            fitScale: new THREE.Vector2(
-               Math.min(screenAspectRatio / _aspectRatio, 1),
-               Math.min(_aspectRatio / screenAspectRatio, 1)               
-            ),
-         };
+      if(type === 'fill') {
+         fitScale = new THREE.Vector2(
+            1,
+            1
+         );
+      }
+      else if(type === 'cover') {
+         fitScale = new THREE.Vector2(
+            Math.min(baseAspectRatio / srcAspectRatio, 1),
+            Math.min(srcAspectRatio / baseAspectRatio, 1)               
+         );
+      }
+      else if(type === 'contain') {
+         fitScale = new THREE.Vector2(
+            Math.max(baseAspectRatio / srcAspectRatio, 1),
+            Math.max(srcAspectRatio / baseAspectRatio, 1)              
+         );
       }
 
       return {
-         srcAspectRatio: this.uniforms.aspectRatio.value,
-         fitScale: new THREE.Vector2(1, 1),
+         srcAspectRatio,
+         fitScale,
       };
    }
 
@@ -221,6 +228,7 @@ export class BasicFxMaterial extends FxMaterial {
       super.updateResolution(resolution);      
 
       const mixSrcAspect = this.calcAspectRatio(
+         this.uniforms.mixSrc_fit?.value,
          this.uniforms.mixSrc_src?.value,
          this.uniforms.mixSrc_resolution?.value
       );
@@ -228,6 +236,7 @@ export class BasicFxMaterial extends FxMaterial {
       this.uniforms.mixSrc_fitScale.value = mixSrcAspect.fitScale;
 
       const mixDstAspect = this.calcAspectRatio(
+         this.uniforms.mixDst_fit?.value,
          this.uniforms.mixDst_src?.value,
          this.uniforms.mixDst_resolution?.value
       );

@@ -66,7 +66,7 @@ export const Playground = () => {
    const rgbShift = useRGBShift({
       size,
       dpr: 2,
-      shiftScale: .1,      
+      shiftScale: 0,      
       shiftPower: new THREE.Vector2(2, 2),
       shiftPowerSrcR: noise.texture,      
       shiftPowerSrcG: noise2.texture,      
@@ -76,24 +76,25 @@ export const Playground = () => {
       isUseShiftPowerSrcB: true,
       texture: {
          src: app,
+         fit: 'contain',
       }
    })
 
-   const gbBur = useGaussianBlur({
-      size,
-      dpr: 1,
-      radius: 2,      
-      sigma: new THREE.Vector2(0, 0),
-      texture: {
-         src: rgbShift.texture,         
-      }
-   });
+   // const gbBur = useGaussianBlur({
+   //    size,
+   //    dpr: 1,
+   //    radius: 2,      
+   //    sigma: new THREE.Vector2(0, 0),
+   //    texture: {
+   //       src: rgbShift.texture,         
+   //    }
+   // });
 
    const motionBlur = useMotionBlur({
       size,
       dpr: 1,
       texture: {
-         src: gbBur.texture,
+         src: rgbShift.texture,
       }
    });
 
@@ -103,7 +104,7 @@ export const Playground = () => {
       noise2.render(state);
       noise3.render(state);
       rgbShift.render(state);         
-      gbBur.render(state);
+      // gbBur.render(state);
       motionBlur.render(state);      
    });
 
