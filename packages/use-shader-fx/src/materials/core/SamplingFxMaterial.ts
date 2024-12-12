@@ -81,7 +81,7 @@ export class SamplingFxMaterial extends BasicFxMaterial {
 
         this.setupFxShaders(vertexShader, fragmentShader, 'samplingFx');
 
-        // 初期化時に更新
+        // TODO: 初期化時にSamplingFxMaterialのupdateResolutionが呼ばれない 
         setTimeout(() => {
             this.updateResolution(this.uniforms.resolution.value);
         },10);
@@ -107,9 +107,7 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         );
 
         this.uniforms.texture_aspectRatio.value = textureAspect.srcAspectRatio;
-        this.uniforms.texture_fitScale.value = textureAspect.fitScale;
-
-        console.log('updateResolution',this.uniforms.aspectRatio.value, this.uniforms.texture_aspectRatio.value);
+        this.uniforms.texture_fitScale.value = textureAspect.fitScale;        
      }    
 
     setupDefaultFlag(uniformValues?: FxValues): FxFlag {

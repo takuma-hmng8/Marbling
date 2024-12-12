@@ -48,7 +48,7 @@ export const Playground = () => {
       dpr: 1,      
       texture: {         
          src: app,
-         fit: 'cover',                  
+         fit: 'fill',                  
       }
    })
 
