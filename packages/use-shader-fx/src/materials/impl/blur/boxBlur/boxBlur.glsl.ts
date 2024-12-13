@@ -11,8 +11,10 @@ export const fragment = `
 
 	void main() {
 
+		${ShaderLib.samplingFx_fragment_begin}
+
 		vec2 perDivSize = blurSize / resolution;
-		vec2 uv = vTextureCoverUv;
+		vec2 uv = (renderCount == 0) ? vTextureCoverUv : vUv;
 
 		
 		vec4 outColor = vec4(
@@ -27,8 +29,10 @@ export const fragment = `
 			texture2D(texture_src, uv + perDivSize * vec2(1.0,  1.0))
 			) / 9.0;
 
-		gl_FragColor = outColor;
-		// gl_FragColor = vec4(vec3(uv.y),1.0);
+		vec4 usf_FragColor = outColor;
 
+		${ShaderLib.samplingFx_fragment_end}
+
+		gl_FragColor = usf_FragColor;				
 	}
 `;

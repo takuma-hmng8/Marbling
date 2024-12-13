@@ -108,6 +108,11 @@ export class SamplingFxMaterial extends BasicFxMaterial {
 
         this.uniforms.texture_aspectRatio.value = textureAspect.srcAspectRatio;
         this.uniforms.texture_fitScale.value = textureAspect.fitScale;        
+
+        console.log(
+            'texture_aspectRatio', this.uniforms.texture_aspectRatio.value, 
+            'texture_fitScale', this.uniforms.texture_fitScale.value
+        );
      }    
 
     setupDefaultFlag(uniformValues?: FxValues): FxFlag {

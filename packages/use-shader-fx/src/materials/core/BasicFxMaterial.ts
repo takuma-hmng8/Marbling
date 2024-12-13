@@ -235,6 +235,8 @@ export class BasicFxMaterial extends FxMaterial {
       this.uniforms.mixSrc_aspectRatio.value = mixSrcAspect.srcAspectRatio;
       this.uniforms.mixSrc_fitScale.value = mixSrcAspect.fitScale;
 
+      console.log('updateResolution', this.uniforms.mixSrc_aspectRatio.value, this.uniforms.mixSrc_fitScale.value);
+
       const mixDstAspect = this.calcAspectRatio(
          this.uniforms.mixDst_fit?.value,
          this.uniforms.mixDst_src?.value,

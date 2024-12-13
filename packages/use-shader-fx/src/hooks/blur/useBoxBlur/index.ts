@@ -65,7 +65,8 @@ export const useBoxBlur = ({
          const { gl } = rootState;
          newValues && setValues(newValues);
 
-         const srcCache = material.uniforms.texture_src?.value;         
+         const srcCache = material.uniforms.texture_src?.value;                       
+         material.uniforms.renderCount.value = 0;
 
          material.updateFx();         
 
@@ -76,8 +77,9 @@ export const useBoxBlur = ({
             i < (config.current.blurIteration || blurIteration);
             i++
          ) {
-            updateRenderTarget({ gl }, ({ read }) => {
-               material.uniforms.texture_src.value = read;
+            updateRenderTarget({ gl }, ({ read }) => {               
+               material.uniforms.texture_src.value = read;               
+               material.uniforms.renderCount.value++;
             });
          }
 

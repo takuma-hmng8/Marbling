@@ -27,16 +27,18 @@ export const fragment = `
 		float actualWeight;
 		vec2 stepSize = u_stepSize * sigma;
 		
+		vec2 uv = (renderCount == 0) ? vTextureCoverUv : vUv;		
+		
 		for(int i = 0; i <  KERNEL_SIZE - 1; i++){
 
-			w = u_weights[i];
-			color = texture2D( texture_src, vTextureCoverUv - count * texelSize * stepSize );
+			w = u_weights[i];			
+			color = texture2D( texture_src, uv - count * texelSize * stepSize );
 			actualWeight = w * color.a;
 			sum.rgb += color.rgb * actualWeight;
 			sum.a += color.a * w;
 			sumW += actualWeight;
 
-			color = texture2D( texture_src, vTextureCoverUv + count * texelSize * stepSize );
+			color = texture2D( texture_src, uv + count * texelSize * stepSize );
 			actualWeight = w * color.a;
 			sum.rgb += color.rgb * actualWeight;
 			sum.a += color.a * w;
@@ -47,7 +49,7 @@ export const fragment = `
 
 		w = u_weights[KERNEL_SIZE - 1];
 
-		color = texture2D( texture_src, vTextureCoverUv );
+		color = texture2D( texture_src, uv );
 		actualWeight = w * color.a;
 		sum.rgb += color.rgb * actualWeight;
 		sum.a += color.a * w;

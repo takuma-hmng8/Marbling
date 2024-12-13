@@ -37,11 +37,11 @@ export const Playground = () => {
       dpr: 1,
       scale: 0.0,
       timeStrength: 1,
-      mixDst: {
+      mixSrc: {
          src: app,
-         uvFactor: 0.,
+         uvFactor: 1.,
          alphaFactor: .5,
-         fit: 'contain',
+         fit: 'fill',
       },
    })
 

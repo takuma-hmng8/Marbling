@@ -20,34 +20,44 @@ export const fragment = `
 	uniform float shiftScale;	
 
 	void main() {
-		vec2 shift = shiftPower * shiftScale;		
+		vec2 usf_Uv = gl_FragCoord.xy;
+
+		${ShaderLib.basicFx_fragment_begin}
+
+		vec2 shift = shiftPower * shiftScale;
+		vec2 uv = vTextureCoverUv;		
 
 		float r = 0.0;
 		if(isUseShiftPowerSrcR){		
-			vec2 shiftR = (texture2D(shiftPowerSrcR, vUv).rg * 4.0 - 1.0) * shiftScale;
-			r = texture2D(texture_src, vUv + shiftR).r;
+			vec2 shiftR = (texture2D(shiftPowerSrcR, uv).rg * 4.0 - 1.0) * shiftScale;
+			r = texture2D(texture_src, uv + shiftR).r;
 		} else {
-		 	r = texture2D(texture_src, vUv + shift).r;
+		 	r = texture2D(texture_src, uv + shift).r;
 		}
 
 		float g = 0.0;
 		if(isUseShiftPowerSrcG){
-			vec2 shiftG = (texture2D(shiftPowerSrcG, vUv).rg * 4.0 - 1.0) * shiftScale;
-			g = texture2D(texture_src, vUv + shiftG).g;
+			vec2 shiftG = (texture2D(shiftPowerSrcG, uv).rg * 4.0 - 1.0) * shiftScale;
+			g = texture2D(texture_src, uv + shiftG).g;
 		} else {
-			g = texture2D(texture_src, vUv + shift).g;
+			g = texture2D(texture_src, uv + shift).g;
 		}
 
 		float b = 0.0;
 		if(isUseShiftPowerSrcB){
-			vec2 shiftB = (texture2D(shiftPowerSrcB, vUv).rg * 4.0 - 1.0) * shiftScale;
-			b = texture2D(texture_src, vUv + shiftB).b;
+			vec2 shiftB = (texture2D(shiftPowerSrcB, uv).rg * 4.0 - 1.0) * shiftScale;
+			b = texture2D(texture_src, uv + shiftB).b;
 		} else {
-			b = texture2D(texture_src, vUv + shift).b;
+			b = texture2D(texture_src, uv + shift).b;
 		}
 
 
 		vec4 outColor = vec4(r, g, b, 1.0);
+
+		vec4 usf_FragColor = outColor;
+
+		${ShaderLib.basicFx_fragment_end}
+
 		gl_FragColor = outColor;
 
 	}

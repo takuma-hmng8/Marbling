@@ -5,7 +5,7 @@ import { NestUniformValues } from "../../../../shaders/uniformsUtils";
 
 type BoxBlurUniforms = {
    /**  */
-   blurSize: { value: number };
+   blurSize: { value: number };   
 } & SamplingFxUniforms;
 
 export type BoxBlurValues = NestUniformValues<BoxBlurUniforms> & SamplingFxValues;
@@ -27,7 +27,7 @@ export class BoxBlurMaterial extends SamplingFxMaterial {
          uniformValues,
          materialParameters,
          uniforms: {
-            blurSize: { value: 5 },
+            blurSize: { value: 5 },            
          } as BoxBlurUniforms,
       });
 

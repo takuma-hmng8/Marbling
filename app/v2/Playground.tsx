@@ -7,6 +7,7 @@ import {
    useNoise,
    useBoxBlur,
    useSingleFBO,
+   useGaussianBlur,
 } from "@/packages/use-shader-fx/src";
 import { FxMaterial } from "./FxMaterial";
 import { Float, OrbitControls } from "@react-three/drei";
@@ -26,20 +27,24 @@ export const Playground = () => {
       depthBuffer: true,
    });
 
-   const blur = useBoxBlur({
+   const blur = useGaussianBlur({
       size,
       dpr: 0.4,
-      blurSize: 4,
-      blurIteration: 20,
-      src: renderTarget.texture,
+      // blurSize: 4,
+      // blurIteration: 20,
+      texture: {
+         src: renderTarget.texture         
+      }
    });
 
-   const gooey = useBoxBlur({
+   const gooey = useGaussianBlur({
       size,
-      dpr: 2,
-      blurSize: 4,
-      blurIteration: 30,
-      src: renderTarget.texture,
+      dpr: 2,      
+      // blurIteration: 30,
+      // src: renderTarget.texture,
+      texture: {
+         src: renderTarget.texture         
+      } 
    });
 
    const noise = useNoise({

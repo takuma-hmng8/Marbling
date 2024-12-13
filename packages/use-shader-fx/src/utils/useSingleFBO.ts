@@ -53,7 +53,7 @@ export const renderFBO = ({
 export type SingleFBOUpdateFunction = (
    renderProps: RenderProps,
    /**  call before FBO is rendered */
-   onBeforeRender?: ({ read }: { read: THREE.Texture }) => void
+   onBeforeRender?: ({ read }: { read: THREE.Texture }) => void,
 ) => THREE.Texture;
 
 type UseSingleFBOReturn = [THREE.WebGLRenderTarget, SingleFBOUpdateFunction];

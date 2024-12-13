@@ -5,3 +5,4 @@ uniform vec2 resolution;
 uniform vec2 texelSize;
 uniform float aspectRatio;
 uniform vec2 maxAspect;
+uniform int renderCount;
