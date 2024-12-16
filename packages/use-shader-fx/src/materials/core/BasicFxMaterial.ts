@@ -184,20 +184,20 @@ export class BasicFxMaterial extends FxMaterial {
    } {
       const baseAspectRatio = this.uniforms.aspectRatio.value;
       let srcAspectRatio = 1;
-      let fitScale = new THREE.Vector2(1, 1);
+      let fitScale = new THREE.Vector2(1, 1);         
             
-      // srcがない場合はbaseのアスペクト比を返す
-      if(!src) {
+      // srcがない場合はbaseのアスペクト比を返す      
+      if(!src) {         
          srcAspectRatio = baseAspectRatio;
       }
       // それ以外の場合は、resolutionのアスペクト比を返す
-      else if(srcResolution?.x && srcResolution?.y) {
+      else if(srcResolution?.x && srcResolution?.y) {         
          srcAspectRatio = srcResolution.x / srcResolution.y;         
       }      
       // srcがあり、 resolutionがないまたは、0,0の場合は、srcのサイズを返す
-      else if(!srcResolution || !srcResolution.x || !srcResolution.y) {  
+      else if(!srcResolution || !srcResolution.x || !srcResolution.y) {           
          srcAspectRatio = src.image.width / src.image.height;
-      }
+      }      
 
       if(type === 'fill') {
          fitScale = new THREE.Vector2(

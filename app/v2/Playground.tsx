@@ -29,9 +29,9 @@ export const Playground = () => {
 
    const blur = useGaussianBlur({
       size,
-      dpr: 0.4,
-      // blurSize: 4,
-      // blurIteration: 20,
+      dpr: 1,
+      radius: 20,
+      sigma: new THREE.Vector2(2, 2),
       texture: {
          src: renderTarget.texture         
       }
@@ -40,8 +40,8 @@ export const Playground = () => {
    const gooey = useGaussianBlur({
       size,
       dpr: 2,      
-      // blurIteration: 30,
-      // src: renderTarget.texture,
+      radius: 15,
+      sigma: new THREE.Vector2(5,5), 
       texture: {
          src: renderTarget.texture         
       } 

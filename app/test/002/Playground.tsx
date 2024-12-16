@@ -9,7 +9,8 @@ import {
    BasicFxMaterialImplValues,
    useBoxBlur,
    useRGBShift,
-   useGaussianBlur
+   useGaussianBlur,
+   useCoverTexture
 } from "@/packages/use-shader-fx/src";
 import { useTexture } from "@react-three/drei";
 import { SamplingFxMaterial } from "@/packages/use-shader-fx/src/materials/core/SamplingFxMaterial";
@@ -31,8 +32,8 @@ export const Playground = () => {
    const { size } = useThree();
 
    const [app] = useTexture(["/funkun.jpg"]);
-
-   const bb = useGaussianBlur({
+   
+   const gb = useGaussianBlur({
       size,
       dpr: 1,      
       radius: 10,
@@ -40,19 +41,20 @@ export const Playground = () => {
       texture: {         
          src: app,
          fit: 'cover',
+         resolution: new THREE.Vector2(1080,1080),
       }
    })
 
-   console.log(SamplingFxMaterial.key)
+   
 
-   useFrame((state) => {
-      bb.render(state);
-   });
+   useFrame((state) => {      
+      gb.render(state);     
+   });    
 
    return (
       <mesh>
          <planeGeometry args={[2, 2]} />
-         <fxMaterialImpl key={FxMaterialImpl.key} src={bb.texture} />
+         <fxMaterialImpl key={FxMaterialImpl.key} src={gb.texture} />
       </mesh>
    );
 };
