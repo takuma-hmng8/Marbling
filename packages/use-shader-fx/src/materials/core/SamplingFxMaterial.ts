@@ -167,30 +167,28 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         prefixVertex: string;
         prefixFragment: string;
     } {
-        const { mixSrc, mixDst, texture, srcSystem} = fxFlag;
+        // 親の処理を実行
+        const { prefixVertex: parentPrefixVertex, prefixFragment: parentPrefixFragment } = super.handleUpdateFxPrefix(fxFlag);
 
-        const SHADER_PREFIX = SamplingFxMaterial.SHADER_PREFIX;        
-    
+        // texture用prefixの追加
+        const texturePrefix = fxFlag.texture ? SamplingFxMaterial.SHADER_PREFIX.texture : "";
+
         const prefixVertex = joinShaderPrefix([
-            srcSystem ? SHADER_PREFIX.srcSystem : "",
-            mixSrc ? SHADER_PREFIX.mixSrc : "",            
-            mixDst ? SHADER_PREFIX.mixDst : "",              
-            texture ? SHADER_PREFIX.texture : "",          
-            "\n",
-        ]);    
-    
-        const prefixFragment = joinShaderPrefix([
-            srcSystem ? SHADER_PREFIX.srcSystem : "",
-            mixSrc ? SHADER_PREFIX.mixSrc : "",
-            mixDst ? SHADER_PREFIX.mixDst : "",              
-            texture ? SHADER_PREFIX.texture : "",  
-            "\n",
+            parentPrefixVertex.trim(),
+            texturePrefix,
+            "\n"
         ]);
-    
+
+        const prefixFragment = joinShaderPrefix([
+            parentPrefixFragment.trim(),
+            texturePrefix,
+            "\n"
+        ]);
+
         return {
             prefixVertex,
             prefixFragment
-        }
+        };
     }
 
 };
