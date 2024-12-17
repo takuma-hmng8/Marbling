@@ -36,12 +36,12 @@ export const Playground = () => {
    const gb = useGaussianBlur({
       size,
       dpr: 1,      
-      radius: 10,
-      sigma: new THREE.Vector2(2, 3),
+      radius: 12,
+      sigma: new THREE.Vector2(2, 2),
       texture: {         
          src: app,
          fit: 'cover',
-         resolution: new THREE.Vector2(1080,1080),
+         resolution: new THREE.Vector2(1080,1080),         
       }
    })
 

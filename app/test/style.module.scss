@@ -1,0 +1,21 @@
+.page {
+    width: 100%;
+    padding: 6.4rem 2rem;    
+}
+
+
+.ctt {
+    width: 100%;
+    max-width: 78rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.item {
+    color: #fff;
+    font-size: 1rem;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}

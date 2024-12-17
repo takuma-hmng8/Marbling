@@ -7,12 +7,9 @@ import {
    createBasicFxMaterialImpl,
    FxMaterialImplValues,
    BasicFxMaterialImplValues,
-   useGaussianBlur,
-   useCoverTexture,
    useNoise
 } from "@/packages/use-shader-fx/src";
 import { useTexture } from "@react-three/drei";
-import { SamplingFxMaterial } from "@/packages/use-shader-fx/src/materials/core/SamplingFxMaterial";
 
 const FxMaterialImpl = createFxMaterialImpl({
    fragmentShader: `
@@ -35,19 +32,17 @@ export const Playground = () => {
    const noise = useNoise({
       size,
       dpr: 1,
-      scale: 0.0,
-      timeStrength: 1,
-      mixSrc: {
+      scale: 10.,
+      timeStrength: .4,
+      mixDst: {
          src: app,
-         uvFactor: 1.,
-         alphaFactor: .5,
-         fit: 'fill',
+         uvFactor: .1,
+         alphaFactor: 1.,         
+         fit: 'contain',         
       },
    })
 
-   useFrame((state) => {
-      // console.log(gbBur.material.uniforms)
-      // coverTexture.render(state);            
+   useFrame((state) => {         
       noise.render(state);
    });
 
