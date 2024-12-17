@@ -125,42 +125,36 @@ export class SamplingFxMaterial extends BasicFxMaterial {
         validCount: number;
         updatedFlag: FxFlag;
     } {
-    
+
+        const { validCount: parentValidCount, updatedFlag: parentUpdateFlag } = super.handleUpdateFx(uniforms as BasicFxUniforms, fxFlag as BasicFxFlag);
+
+        let localValidCount = 0; 
+        fxFlag = {
+            ...parentUpdateFlag,
+            ...fxFlag
+        }
+        
+        const { texture } = fxFlag;
+
+        // textureの判定
         const isTexture = uniforms.texture_src.value ? true : false;
-        const isMixSrc = uniforms.mixSrc_src.value ? true : false;
-        const isMixDst = uniforms.mixDst_src.value ? true : false; 
-        const isSrcSystem = isMixSrc || isMixDst || isTexture;   
-    
-        const { texture, mixSrc, mixDst, srcSystem} = fxFlag;
-    
-        const updatedFlag = fxFlag;
-    
-        let validCount = 0;
-    
-        if (mixSrc !== isMixSrc) {
-            updatedFlag.mixSrc = isMixSrc;
-            validCount++;
-         }
-      
-         if (mixDst !== isMixDst) {
-            updatedFlag.mixDst = isMixDst;
-            validCount++;
-         }    
-    
-        if (isTexture !== texture) {
-            updatedFlag.texture = isTexture;
-            validCount++;
+        if (texture !== isTexture) {
+            fxFlag.texture = isTexture;
+            localValidCount++;
         }
-    
-        if(srcSystem !== isSrcSystem){
-            updatedFlag.srcSystem = isSrcSystem;      
-            validCount++;
+
+        // srcSystemの再判定 (mixSrc, mixDst, textureがいずれかtrueならsrcSystem)
+        const { mixSrc, mixDst } = fxFlag;
+        const isSrcSystem = mixSrc || mixDst || isTexture;
+        if (fxFlag.srcSystem !== isSrcSystem) {
+            fxFlag.srcSystem = isSrcSystem;
+            localValidCount++;
         }
-    
+
         return {
-            validCount,
-            updatedFlag
-        }
+            validCount: parentValidCount + localValidCount,
+            updatedFlag: fxFlag
+        }; 
     }    
 
     handleUpdateFxPrefix(fxFlag: FxFlag): {
