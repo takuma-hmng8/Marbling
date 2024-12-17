@@ -10,7 +10,10 @@ export default function Page() {
                   <Link className={s.item} href="/test/001/">001: Noise</Link>            
                </li>
                <li>
-                  <Link className={s.item} href="/test/002/">002: Blur</Link>            
+                  <Link className={s.item} href="/test/002/">002: GaussianBlur</Link>            
+               </li>
+               <li>
+                  <Link className={s.item} href="/test/003/">003: BoxBlur</Link>            
                </li>
             </ul>                        
 
