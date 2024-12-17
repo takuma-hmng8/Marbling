@@ -7,13 +7,9 @@ import {
    createBasicFxMaterialImpl,
    FxMaterialImplValues,
    BasicFxMaterialImplValues,
-   useBoxBlur,
-   useRGBShift,
-   useGaussianBlur,
-   useCoverTexture
+   useGaussianBlur,   
 } from "@/packages/use-shader-fx/src";
 import { useTexture } from "@react-three/drei";
-import { SamplingFxMaterial } from "@/packages/use-shader-fx/src/materials/core/SamplingFxMaterial";
 
 const FxMaterialImpl = createFxMaterialImpl({
    fragmentShader: `
@@ -40,7 +36,7 @@ export const Playground = () => {
       sigma: new THREE.Vector2(2, 2),
       texture: {         
          src: app,
-         fit: 'cover',
+         fit: 'contain',
          resolution: new THREE.Vector2(1080,1080),         
       }
    })
