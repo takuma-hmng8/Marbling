@@ -1,19 +1,15 @@
 "use client";
 
 import * as THREE from "three";
-import { useEffect, useRef, useState } from "react";
-import { useFrame, useThree, extend, createPortal } from "@react-three/fiber";
+import { useFrame, useThree, extend } from "@react-three/fiber";
 import {
    createFxMaterialImpl,
    createBasicFxMaterialImpl,
    FxMaterialImplValues,
    BasicFxMaterialImplValues,
-   useRGBShift,
-   useGaussianBlur,
-   useBoxBlur
+   useRGBShift
 } from "@/packages/use-shader-fx/src";
-import { Float, OrbitControls, useTexture } from "@react-three/drei";
-import { useCoverTexture } from "@/packages/use-shader-fx/src/hooks/useCoverTexture";
+import { useTexture } from "@react-three/drei";
 import { useNoise } from "@/packages/use-shader-fx/src";
 import { useMotionBlur } from "@/packages/use-shader-fx/src/hooks/blur/useMotionBlur";
 
@@ -31,16 +27,9 @@ const BasicFxMaterialImpl = createBasicFxMaterialImpl();
 extend({ FxMaterialImpl, BasicFxMaterialImpl });
 
 export const Playground = () => {
-   const { size, viewport, camera } = useThree();
+   const { size } = useThree();
 
    const [app] = useTexture(["/dummy2.png"]);
-
-   // const coverTexture = useCoverTexture({
-   //    size,
-   //    dpr: 1,      
-   //    src: app,       
-   //    textureResolution: new THREE.Vector2(app.image.width, app.image.height),
-   // })   
 
    const noise = useNoise({
       size,
@@ -66,7 +55,7 @@ export const Playground = () => {
    const rgbShift = useRGBShift({
       size,
       dpr: 2,
-      shiftScale: .03,      
+      shiftScale: .13,      
       shiftPower: new THREE.Vector2(2, 2),
       shiftPowerSrcR: noise.texture,      
       shiftPowerSrcG: noise2.texture,      
@@ -76,19 +65,9 @@ export const Playground = () => {
       isUseShiftPowerSrcB: true,
       texture: {
          src: app,
-         fit: 'contain',
+         fit: 'cover',
       }
    })
-
-   // const gbBur = useGaussianBlur({
-   //    size,
-   //    dpr: 1,
-   //    radius: 2,      
-   //    sigma: new THREE.Vector2(0, 0),
-   //    texture: {
-   //       src: rgbShift.texture,         
-   //    }
-   // });
 
    const motionBlur = useMotionBlur({
       size,
@@ -98,13 +77,11 @@ export const Playground = () => {
       }
    });
 
-   useFrame((state) => {
-      // coverTexture.render(state);
+   useFrame((state) => {      
       noise.render(state);
       noise2.render(state);
       noise3.render(state);
-      rgbShift.render(state);         
-      // gbBur.render(state);
+      rgbShift.render(state);               
       motionBlur.render(state);      
    });
 

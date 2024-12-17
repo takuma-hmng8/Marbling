@@ -11,9 +11,15 @@ export const fragment = `
 	uniform float mixRatio;
 
 	void main() {				
-		vec4 currentColor = texture2D(texture_src, vUv);
-		vec4 prevColor = texture2D(backBuffer, vUv);
+		${ShaderLib.samplingFx_fragment_begin}
 
-		gl_FragColor = mix(prevColor, currentColor, mixRatio);
+		vec4 currentColor = texture2D(texture_src, vTextureCoverUv);
+		vec4 prevColor = texture2D(backBuffer, vTextureCoverUv);
+
+		vec4 usf_FragColor = mix(prevColor, currentColor, mixRatio);
+
+		${ShaderLib.samplingFx_fragment_end}
+
+		gl_FragColor = usf_FragColor;
 	}
 `;
