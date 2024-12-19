@@ -66,9 +66,7 @@ export const useBoxBlur = ({
          newValues && setValues(newValues);
 
          const srcCache = material.uniforms.texture_src?.value;                       
-         material.uniforms.renderCount.value = 0;
-
-         material.updateFx();         
+         material.uniforms.renderCount.value = 0;          
 
          updateRenderTarget({ gl });
 
