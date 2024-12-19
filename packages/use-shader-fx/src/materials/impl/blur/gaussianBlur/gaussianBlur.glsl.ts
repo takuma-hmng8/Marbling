@@ -9,7 +9,6 @@ export const vertex = `
 export const fragment = `		
 	precision highp int;
 
-	// uniform sampler2D src;			
 	uniform vec2 stepSize;	
 	uniform vec2 sigma;	
 	uniform float weights[KERNEL_SIZE];	
