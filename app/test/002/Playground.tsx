@@ -39,9 +39,7 @@ export const Playground = () => {
          fit: 'contain',
          resolution: new THREE.Vector2(1080,1080),         
       }
-   })
-
-   
+   })   
 
    useFrame((state) => {      
       gb.render(state);
