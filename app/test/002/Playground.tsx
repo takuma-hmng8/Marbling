@@ -33,7 +33,7 @@ export const Playground = () => {
       size,
       dpr: 1,      
       radius: 12,
-      sigma: new THREE.Vector2(2, 2),
+      sigma: new THREE.Vector2(2, 2), 
       texture: {         
          src: app,
          fit: 'contain',
@@ -44,7 +44,7 @@ export const Playground = () => {
    
 
    useFrame((state) => {      
-      gb.render(state);     
+      gb.render(state);
    });    
 
    return (

@@ -54,7 +54,7 @@ export const useGaussianBlur = ({
       ...renderTargetOptions,
    });
 
-   const [config, setConfig] = useMutableState<GaussianBlurConfig>({
+   const [_, setConfig] = useMutableState<GaussianBlurConfig>({
       radius,
    });
 
@@ -77,14 +77,15 @@ export const useGaussianBlur = ({
          const { gl } = rootState;
          newValues && setValues(newValues);           
          
-         material.uniforms.renderCount.value = 0;                   
-         material.uniforms.texture_src.value = uniformValues.texture?.src || new THREE.Texture();
-         material.uniforms.u_stepSize.value.set(0, 1);                  
-         updateRenderTarget({ gl });
+         updateRenderTarget({ gl }, () => {
+            material.uniforms.renderCount.value = 0;                   
+            material.uniforms.texture_src.value = uniformValues.texture?.src || new THREE.Texture();
+            material.uniforms.stepSize.value.set(0, 1);                  
+         });
          
          updateRenderTarget({ gl }, ({ read }) => {
             material.uniforms.texture_src.value = read;
-            material.uniforms.u_stepSize.value.set(1, 0);            
+            material.uniforms.stepSize.value.set(1, 0);            
             material.uniforms.renderCount.value = 1;                               
          });
 
