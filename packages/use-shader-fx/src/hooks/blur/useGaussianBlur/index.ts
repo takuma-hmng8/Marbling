@@ -24,7 +24,7 @@ export const useGaussianBlur = ({
    fboAutoSetSize,
    renderTargetOptions,
    materialParameters,
-   radius = 1,   
+   radius = 1,
    ...uniformValues
 }: GaussianBlurProps): HooksReturn<
    GaussianBlurValuesAndConfig,
@@ -75,7 +75,7 @@ export const useGaussianBlur = ({
    const render = useCallback(
       (rootState: RootState, newValues?: GaussianBlurValuesAndConfig) => {
          const { gl } = rootState;
-         newValues && setValues(newValues);           
+ newValues && setValues(newValues);           
          
          updateRenderTarget({ gl }, () => {
             material.uniforms.renderCount.value = 0;                   
@@ -86,12 +86,18 @@ export const useGaussianBlur = ({
          updateRenderTarget({ gl }, ({ read }) => {
             material.uniforms.texture_src.value = read;
             material.uniforms.stepSize.value.set(1, 0);            
-            material.uniforms.renderCount.value = 1;                               
+            material.uniforms.renderCount.value = 1; 
          });
 
          return renderTarget.read.texture;
       },
-      [setValues, updateRenderTarget, material, renderTarget, uniformValues.texture?.src]
+      [
+         setValues,
+         updateRenderTarget,
+         material,
+         renderTarget,
+         uniformValues.texture?.src,
+      ]
    );
 
    return {

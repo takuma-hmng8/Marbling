@@ -23,7 +23,6 @@ export type FxMaterialProps<T = {}> = {
 export class FxMaterial extends THREE.ShaderMaterial {
    public static readonly key: string = THREE.MathUtils.generateUUID();
 
-   
    constructor({
       uniformValues,
       materialParameters = {},
@@ -39,7 +38,7 @@ export class FxMaterial extends THREE.ShaderMaterial {
             texelSize: { value: new THREE.Vector2() },
             aspectRatio: { value: 0 },
             maxAspect: { value: new THREE.Vector2() },
-            renderCount: { value: 0 }
+            renderCount: { value: 0 },
          },
          uniforms || {},
       ]) as DefaultUniforms;
