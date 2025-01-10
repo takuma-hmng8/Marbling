@@ -24,7 +24,7 @@ export const useGaussianBlur = ({
    fboAutoSetSize,
    renderTargetOptions,
    materialParameters,
-   radius = 1,   
+   radius = 1,
    ...uniformValues
 }: GaussianBlurProps): HooksReturn<
    GaussianBlurValuesAndConfig,
@@ -54,7 +54,7 @@ export const useGaussianBlur = ({
       ...renderTargetOptions,
    });
 
-   const [config, setConfig] = useMutableState<GaussianBlurConfig>({
+   const [_, setConfig] = useMutableState<GaussianBlurConfig>({
       radius,
    });
 
@@ -75,25 +75,32 @@ export const useGaussianBlur = ({
    const render = useCallback(
       (rootState: RootState, newValues?: GaussianBlurValuesAndConfig) => {
          const { gl } = rootState;
-         newValues && setValues(newValues);           
-         
-         material.uniforms.renderCount.value = 0;                   
-         material.uniforms.texture_src.value = uniformValues.texture?.src || new THREE.Texture();
-         material.uniforms.u_stepSize.value.set(0, 1);         
+         newValues && setValues(newValues);
+
+         material.uniforms.renderCount.value = 0;
+         material.uniforms.texture_src.value =
+            uniformValues.texture?.src || new THREE.Texture();
+         material.uniforms.u_stepSize.value.set(0, 1);
          material.updateFx();
          updateRenderTarget({ gl });
 
          // draw horizontal blur
          updateRenderTarget({ gl }, ({ read }) => {
             material.uniforms.texture_src.value = read;
-            material.uniforms.u_stepSize.value.set(1, 0);            
-            material.uniforms.renderCount.value = 1;     
-            material.updateFx();              
+            material.uniforms.u_stepSize.value.set(1, 0);
+            material.uniforms.renderCount.value = 1;
+            material.updateFx();
          });
 
          return renderTarget.read.texture;
       },
-      [setValues, updateRenderTarget, material, renderTarget, uniformValues.texture?.src]
+      [
+         setValues,
+         updateRenderTarget,
+         material,
+         renderTarget,
+         uniformValues.texture?.src,
+      ]
    );
 
    return {

@@ -1,188 +1,193 @@
-import * as THREE from 'three';
-import { FxMaterialProps } from './FxMaterial';
+import * as THREE from "three";
+import { FxMaterialProps } from "./FxMaterial";
 import { TexturePipelineSrc } from "../../misc";
 import {
-    NestUniformValues,
-    flattenUniformValues,
+   NestUniformValues,
+   flattenUniformValues,
 } from "../../shaders/uniformsUtils";
-import {     
-    joinShaderPrefix
-} from '../../shaders/mergeShaderLib';
-import { 
-    BasicFxMaterial,    
-    BasicFxValues,
-    BasicFxUniforms,
-    FxFlag as BasicFxFlag,
-    FitType,
-} from './BasicFxMaterial';
-
+import { joinShaderPrefix } from "../../shaders/mergeShaderLib";
+import {
+   BasicFxMaterial,
+   BasicFxValues,
+   BasicFxUniforms,
+   FxFlag as BasicFxFlag,
+   FitType,
+} from "./BasicFxMaterial";
 
 type SamplingFxUniformsUnique = {
-    // texture
-    texture_src: { value: TexturePipelineSrc };
-    texture_resolution: { value: THREE.Vector2 };
-    texture_fit: { value: FitType };
+   // texture
+   texture_src: { value: TexturePipelineSrc };
+   texture_resolution: { value: THREE.Vector2 };
+   texture_fit: { value: FitType };
 } & typeof BasicFxMaterial.DEFAULT_VALUES;
 
 export type SamplingFxUniforms = {
-    texture_aspectRatio: { value: number };
-    texture_fitScale: { value: THREE.Vector2 };
-} & SamplingFxUniformsUnique & BasicFxUniforms;
+   texture_aspectRatio: { value: number };
+   texture_fitScale: { value: THREE.Vector2 };
+} & SamplingFxUniformsUnique &
+   BasicFxUniforms;
 
 type FxValues = NestUniformValues<SamplingFxUniformsUnique> & BasicFxValues;
 export type SamplingFxValues = FxValues;
 
 export type FxFlag = {
-    texture: boolean;
+   texture: boolean;
 } & BasicFxFlag;
 
+export class SamplingFxMaterial extends BasicFxMaterial {
+   static readonly DEFAULT_VALUES = {
+      ...BasicFxMaterial.DEFAULT_VALUES,
+      // texture
+      texture_src: { value: null },
+      texture_resolution: { value: new THREE.Vector2() },
+      texture_fit: { value: "fill" },
+      texture_aspectRatio: { value: 0 }, // private
+      texture_fitScale: { value: new THREE.Vector2() }, // private
+   };
 
-export class SamplingFxMaterial extends BasicFxMaterial {    
+   static readonly SHADER_PREFIX = {
+      ...BasicFxMaterial.SHADER_PREFIX,
+      texture: "#define USF_USE_TEXTURE",
+   };
 
-    static readonly DEFAULT_VALUES = {
-        ...BasicFxMaterial.DEFAULT_VALUES,
-        // texture
-        texture_src: { value: null },
-        texture_resolution: { value: new THREE.Vector2() },    
-        texture_fit: { value: 'fill' },          
-        texture_aspectRatio: { value: 0 }, // private
-        texture_fitScale: { value: new THREE.Vector2() }, // private
-    }
+   fxFlag: FxFlag;
 
-    static readonly SHADER_PREFIX = {
-        ...BasicFxMaterial.SHADER_PREFIX,
-        texture: '#define USF_USE_TEXTURE',
-    }
+   uniforms!: SamplingFxUniforms;
 
-    fxFlag: FxFlag;
+   constructor({
+      uniformValues,
+      materialParameters = {},
+      uniforms,
+      vertexShader,
+      fragmentShader,
+   }: FxMaterialProps<FxValues>) {
+      super({
+         uniformValues,
+         materialParameters,
+         uniforms: THREE.UniformsUtils.merge([
+            SamplingFxMaterial.DEFAULT_VALUES,
+            uniforms || {},
+         ]),
+      });
 
-    uniforms!: SamplingFxUniforms;
+      this.vertexShaderCache = this.vertexShader;
+      this.fragmentShaderCache = this.fragmentShader;
 
-    constructor({
-        uniformValues,
-        materialParameters = {},
-        uniforms,
-        vertexShader,
-        fragmentShader
-    }: FxMaterialProps<FxValues>) {
-        super({
-            uniformValues,
-            materialParameters,
-            uniforms: THREE.UniformsUtils.merge([
-                SamplingFxMaterial.DEFAULT_VALUES,
-                uniforms || {}
-            ])
-        })
+      this.fxFlag = this.setupDefaultFlag(uniformValues);
 
-        this.vertexShaderCache = this.vertexShader;
-        this.fragmentShaderCache = this.fragmentShader;
+      this.setupFxShaders(vertexShader, fragmentShader, "samplingFx");
+   }
 
-        this.fxFlag = this.setupDefaultFlag(uniformValues);
+   //
+   isContainsFxValues(values?: { [key: string]: any }): boolean {
+      if (!values) return false;
+      // THINK : ここでflattenUniformValuesを呼び出すべき？
+      const _values = flattenUniformValues(values);
+      return Object.keys(_values).some((key) =>
+         Object.keys(SamplingFxMaterial.DEFAULT_VALUES).includes(
+            key as keyof FxValues
+         )
+      );
+   }
 
-        this.setupFxShaders(vertexShader, fragmentShader, 'samplingFx');
-    }
+   updateResolution(resolution: THREE.Vector2) {
+      super.updateResolution(resolution);
 
-    // 
-    isContainsFxValues(values?: { [key: string]: any }): boolean {
-        if (!values) return false;
-        // THINK : ここでflattenUniformValuesを呼び出すべき？
-        const _values = flattenUniformValues(values);
-        return Object.keys(_values).some((key) =>
-           Object.keys(SamplingFxMaterial.DEFAULT_VALUES).includes(key as keyof FxValues)
-        );
-    }    
+      const textureAspect = this.calcAspectRatio(
+         this.uniforms.texture_fit?.value,
+         this.uniforms.texture_src?.value,
+         this.uniforms.texture_resolution?.value
+      );
 
-    updateResolution(resolution: THREE.Vector2) {
-        super.updateResolution(resolution);
+      this.uniforms.texture_aspectRatio.value = textureAspect.srcAspectRatio;
+      this.uniforms.texture_fitScale.value = textureAspect.fitScale;
+   }
 
-        const textureAspect = this.calcAspectRatio(
-            this.uniforms.texture_fit?.value,
-            this.uniforms.texture_src?.value,
-            this.uniforms.texture_resolution?.value
-        );
+   setupDefaultFlag(uniformValues?: FxValues): FxFlag {
+      const isMixSrc = uniformValues?.mixSrc ? true : false;
+      const isMixDst = uniformValues?.mixDst ? true : false;
+      const isTexture = uniformValues?.texture ? true : false;
+      const isSrcSystem = isMixSrc || isMixDst || isTexture;
+      return {
+         mixSrc: isMixSrc,
+         mixDst: isMixDst,
+         texture: isTexture,
+         srcSystem: isSrcSystem,
+      };
+   }
 
-        this.uniforms.texture_aspectRatio.value = textureAspect.srcAspectRatio;
-        this.uniforms.texture_fitScale.value = textureAspect.fitScale;        
-     }    
+   handleUpdateFx(
+      uniforms: SamplingFxUniforms,
+      fxFlag: FxFlag
+   ): {
+      validCount: number;
+      updatedFlag: FxFlag;
+   } {
+      const { validCount: parentValidCount, updatedFlag: parentUpdateFlag } =
+         super.handleUpdateFx(
+            uniforms as BasicFxUniforms,
+            fxFlag as BasicFxFlag
+         );
 
-    setupDefaultFlag(uniformValues?: FxValues): FxFlag {
-        const isMixSrc = uniformValues?.mixSrc ? true : false;
-        const isMixDst = uniformValues?.mixDst ? true : false;
-        const isTexture = uniformValues?.texture ? true : false;
-        const isSrcSystem = isMixSrc || isMixDst || isTexture        
-        return {        
-            mixSrc: isMixSrc,
-            mixDst: isMixDst,
-            texture: isTexture,
-            srcSystem: isSrcSystem,
-        }
-    }
+      let localValidCount = 0;
+      fxFlag = {
+         ...parentUpdateFlag,
+         ...fxFlag,
+      };
 
-    handleUpdateFx(
-        uniforms: SamplingFxUniforms,
-        fxFlag: FxFlag
-    ): {
-        validCount: number;
-        updatedFlag: FxFlag;
-    } {
+      const { texture } = fxFlag;
 
-        const { validCount: parentValidCount, updatedFlag: parentUpdateFlag } = super.handleUpdateFx(uniforms as BasicFxUniforms, fxFlag as BasicFxFlag);
+      // textureの判定
+      const isTexture = uniforms.texture_src.value ? true : false;
+      if (texture !== isTexture) {
+         fxFlag.texture = isTexture;
+         localValidCount++;
+      }
 
-        let localValidCount = 0; 
-        fxFlag = {
-            ...parentUpdateFlag,
-            ...fxFlag
-        }
-        
-        const { texture } = fxFlag;
+      // srcSystemの再判定 (mixSrc, mixDst, textureがいずれかtrueならsrcSystem)
+      const { mixSrc, mixDst } = fxFlag;
+      const isSrcSystem = mixSrc || mixDst || isTexture;
+      if (fxFlag.srcSystem !== isSrcSystem) {
+         fxFlag.srcSystem = isSrcSystem;
+         localValidCount++;
+      }
 
-        // textureの判定
-        const isTexture = uniforms.texture_src.value ? true : false;
-        if (texture !== isTexture) {
-            fxFlag.texture = isTexture;
-            localValidCount++;
-        }
+      return {
+         validCount: parentValidCount + localValidCount,
+         updatedFlag: fxFlag,
+      };
+   }
 
-        // srcSystemの再判定 (mixSrc, mixDst, textureがいずれかtrueならsrcSystem)
-        const { mixSrc, mixDst } = fxFlag;
-        const isSrcSystem = mixSrc || mixDst || isTexture;
-        if (fxFlag.srcSystem !== isSrcSystem) {
-            fxFlag.srcSystem = isSrcSystem;
-            localValidCount++;
-        }
+   handleUpdateFxPrefix(fxFlag: FxFlag): {
+      prefixVertex: string;
+      prefixFragment: string;
+   } {
+      // 親の処理を実行
+      const {
+         prefixVertex: parentPrefixVertex,
+         prefixFragment: parentPrefixFragment,
+      } = super.handleUpdateFxPrefix(fxFlag);
 
-        return {
-            validCount: parentValidCount + localValidCount,
-            updatedFlag: fxFlag
-        }; 
-    }    
+      // texture用prefixの追加
+      const texturePrefix = fxFlag.texture
+         ? SamplingFxMaterial.SHADER_PREFIX.texture
+         : "";
 
-    handleUpdateFxPrefix(fxFlag: FxFlag): {
-        prefixVertex: string;
-        prefixFragment: string;
-    } {
-        // 親の処理を実行
-        const { prefixVertex: parentPrefixVertex, prefixFragment: parentPrefixFragment } = super.handleUpdateFxPrefix(fxFlag);
+      const prefixVertex = joinShaderPrefix([
+         parentPrefixVertex.trim(),
+         texturePrefix,
+         "\n",
+      ]);
 
-        // texture用prefixの追加
-        const texturePrefix = fxFlag.texture ? SamplingFxMaterial.SHADER_PREFIX.texture : "";
+      const prefixFragment = joinShaderPrefix([
+         parentPrefixFragment.trim(),
+         texturePrefix,
+         "\n",
+      ]);
 
-        const prefixVertex = joinShaderPrefix([
-            parentPrefixVertex.trim(),
-            texturePrefix,
-            "\n"
-        ]);
-
-        const prefixFragment = joinShaderPrefix([
-            parentPrefixFragment.trim(),
-            texturePrefix,
-            "\n"
-        ]);
-
-        return {
-            prefixVertex,
-            prefixFragment
-        };
-    }
-
-};
+      return {
+         prefixVertex,
+         prefixFragment,
+      };
+   }
+}
