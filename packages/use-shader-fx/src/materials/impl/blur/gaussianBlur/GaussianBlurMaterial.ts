@@ -13,13 +13,17 @@ type GaussianBlurUniforms = {
    sigma: {
       value: THREE.Vector2;
    };
-   u_weights: {
+} & SamplingFxUniforms;
+
+// 内部的な型
+type GaussianBlurValuesAndConfig = {
+   weights: {
       value: number[];
    };
-   u_stepSize: {
+   stepSize: {
       value: THREE.Vector2;
    };
-} & SamplingFxUniforms;
+}
 
 export type GaussianBlurValues = NestUniformValues<GaussianBlurUniforms> &
    SamplingFxValues;
@@ -29,7 +33,7 @@ export class GaussianBlurMaterial extends SamplingFxMaterial {
       return "GaussianBlurMaterial";
    }
 
-   uniforms!: GaussianBlurUniforms;
+   uniforms!: GaussianBlurUniforms & GaussianBlurValuesAndConfig;
 
    constructor({
       uniformValues,
@@ -44,13 +48,13 @@ export class GaussianBlurMaterial extends SamplingFxMaterial {
             sigma: {
                value: new THREE.Vector2(1, 1),
             },
-            u_weights: {
+            weights: {
                value: [0],
             },
-            u_stepSize: {
+            stepSize: {
                value: new THREE.Vector2(0),
             },
-         } as GaussianBlurUniforms,
+         } as GaussianBlurUniforms & GaussianBlurValuesAndConfig,
       });
 
       // 初期化時に更新
@@ -79,7 +83,7 @@ export class GaussianBlurMaterial extends SamplingFxMaterial {
 
       // materiaに反映して更新を通知
       this.defines.KERNEL_SIZE = kernelSize;
-      this.uniforms.u_weights.value = weights;
+      this.uniforms.weights.value = weights;
       this.needsUpdate = true;
    }
 }

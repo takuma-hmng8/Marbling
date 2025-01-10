@@ -75,21 +75,18 @@ export const useGaussianBlur = ({
    const render = useCallback(
       (rootState: RootState, newValues?: GaussianBlurValuesAndConfig) => {
          const { gl } = rootState;
-         newValues && setValues(newValues);
-
-         material.uniforms.renderCount.value = 0;
-         material.uniforms.texture_src.value =
-            uniformValues.texture?.src || new THREE.Texture();
-         material.uniforms.u_stepSize.value.set(0, 1);
-         material.updateFx();
-         updateRenderTarget({ gl });
-
-         // draw horizontal blur
+ newValues && setValues(newValues);           
+         
+         updateRenderTarget({ gl }, () => {
+            material.uniforms.renderCount.value = 0;                   
+            material.uniforms.texture_src.value = uniformValues.texture?.src || new THREE.Texture();
+            material.uniforms.stepSize.value.set(0, 1);                  
+         });
+         
          updateRenderTarget({ gl }, ({ read }) => {
             material.uniforms.texture_src.value = read;
-            material.uniforms.u_stepSize.value.set(1, 0);
-            material.uniforms.renderCount.value = 1;
-            material.updateFx();
+            material.uniforms.stepSize.value.set(1, 0);            
+            material.uniforms.renderCount.value = 1; 
          });
 
          return renderTarget.read.texture;
