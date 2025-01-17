@@ -46,12 +46,12 @@ export const Playground = () => {
       },
    });
 
-   // rgbShift.setValues({
-   //    texture: {
-   //       src: app,
-   //       fit: "cover",
-   //    },
-   // });
+   rgbShift.setValues({
+      texture: {
+         src: app,
+         fit: "cover",
+      },
+   });
 
    useFrame((state) => {
       rgbShift.render(state);
