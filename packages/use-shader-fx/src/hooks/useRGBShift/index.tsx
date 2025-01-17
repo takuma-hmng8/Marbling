@@ -41,7 +41,7 @@ export const useRGBShift = ({
 
    const setValues = useCallback(
       (newValues: RGBShiftValuesAndConfig) => {
-         const { ...rest } = newValues;        
+         const { ...rest } = newValues;
          material.setUniformValues(rest);
       },
       [material]
@@ -50,12 +50,11 @@ export const useRGBShift = ({
    const render = useCallback(
       (rootState: RootState, newValues?: RGBShiftValuesAndConfig) => {
          const { gl } = rootState;
-         newValues && setValues(newValues);         
-         material.updateFx();
+         newValues && setValues(newValues);
          updateRenderTarget({ gl });
          return renderTarget.texture;
       },
-      [setValues, updateRenderTarget, material, renderTarget]
+      [setValues, updateRenderTarget, renderTarget]
    );
 
    return {

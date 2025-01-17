@@ -1,5 +1,5 @@
-import s from './style.module.scss';
-import Link from 'next/link';
+import s from "./style.module.scss";
+import Link from "next/link";
 
 export default function Page() {
    return (
@@ -7,16 +7,21 @@ export default function Page() {
          <div className={s.ctt}>
             <ul>
                <li>
-                  <Link className={s.item} href="/test/001/">001: Noise</Link>            
+                  <Link className={s.item} href="/test/001/">
+                     001: Noise
+                  </Link>
                </li>
                <li>
-                  <Link className={s.item} href="/test/002/">002: GaussianBlur</Link>            
+                  <Link className={s.item} href="/test/002/">
+                     002: GaussianBlur
+                  </Link>
                </li>
                <li>
-                  <Link className={s.item} href="/test/003/">003: BoxBlur</Link>            
+                  <Link className={s.item} href="/test/003/">
+                     003: BoxBlur
+                  </Link>
                </li>
-            </ul>                        
-
+            </ul>
          </div>
       </div>
    );

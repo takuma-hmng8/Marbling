@@ -38,6 +38,7 @@ export class FxMaterial extends THREE.ShaderMaterial {
             texelSize: { value: new THREE.Vector2() },
             aspectRatio: { value: 0 },
             maxAspect: { value: new THREE.Vector2() },
+            // 一部のFXでiterationをカウントする必要があるため
             renderCount: { value: 0 },
          },
          uniforms || {},
@@ -76,9 +77,9 @@ export class FxMaterial extends THREE.ShaderMaterial {
 
    setUniformValues(values?: { [key: string]: any }) {
       if (values === undefined) return;
-      const _values = flattenUniformValues(values);
+      const flattenedValues = flattenUniformValues(values);
 
-      for (const [key, value] of Object.entries(_values)) {
+      for (const [key, value] of Object.entries(flattenedValues)) {
          if (value === undefined) {
             warn(`parameter '${key}' has value of undefined.`);
             continue;
@@ -93,6 +94,8 @@ export class FxMaterial extends THREE.ShaderMaterial {
 
          curretUniform.value = value;
       }
+
+      return flattenedValues;
    }
 
    /** define getter/setters　*/

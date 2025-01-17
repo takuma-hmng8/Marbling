@@ -34,12 +34,12 @@ export const Playground = () => {
       dpr: 1,
       scale: 0.02,
       timeStrength: 0.4,
-      mixDst: {
-         src: app,
-         uvFactor: 0.1,
-         alphaFactor: 1,
-         fit: "contain",
-      },
+      // mixDst: {
+      //    src: app,
+      //    uvFactor: 0.1,
+      //    alphaFactor: 1,
+      //    fit: "contain",
+      // },
    });
 
    useFrame((state) => {

@@ -6,9 +6,14 @@ export const vertex = `
 	}
 `;
 
+/*===============================================
+TODO 
+- shiftがvec2なので、vec3にする。
+	- たぶんshiftPowerSrcをつくる過程でvec2にしたっぽい
+===============================================*/
+
 export const fragment = `
 	
-	// uniform sampler2D src;
 	uniform vec2 shiftPower;
 	
 	uniform sampler2D shiftPowerSrcR;
@@ -24,7 +29,8 @@ export const fragment = `
 
 		${ShaderLib.basicFx_fragment_begin}
 
-		vec2 shift = shiftPower * shiftScale;
+		// vec2 shift = shiftPower * shiftScale;
+		vec2 shift = vec2(.5, .1);
 		vec2 uv = vTextureCoverUv;		
 
 		float r = 0.0;
@@ -32,7 +38,7 @@ export const fragment = `
 			vec2 shiftR = (texture2D(shiftPowerSrcR, uv).rg * 4.0 - 1.0) * shiftScale;
 			r = texture2D(texture_src, uv + shiftR).r;
 		} else {
-		 	r = texture2D(texture_src, uv + shift).r;
+		 	r = texture2D(texture_src, uv + .03).r;
 		}
 
 		float g = 0.0;
@@ -40,7 +46,7 @@ export const fragment = `
 			vec2 shiftG = (texture2D(shiftPowerSrcG, uv).rg * 4.0 - 1.0) * shiftScale;
 			g = texture2D(texture_src, uv + shiftG).g;
 		} else {
-			g = texture2D(texture_src, uv + shift).g;
+			g = texture2D(texture_src, uv + .01).g;
 		}
 
 		float b = 0.0;
@@ -48,7 +54,7 @@ export const fragment = `
 			vec2 shiftB = (texture2D(shiftPowerSrcB, uv).rg * 4.0 - 1.0) * shiftScale;
 			b = texture2D(texture_src, uv + shiftB).b;
 		} else {
-			b = texture2D(texture_src, uv + shift).b;
+			b = texture2D(texture_src, uv + .02).b;
 		}
 
 
@@ -59,6 +65,7 @@ export const fragment = `
 		${ShaderLib.basicFx_fragment_end}
 
 		gl_FragColor = outColor;
+		// gl_FragColor = vec4(1.,0.,0.,1.);
 
 	}
 `;

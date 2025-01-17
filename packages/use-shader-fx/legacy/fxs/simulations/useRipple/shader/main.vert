@@ -1,1 +1,0 @@
-#usf <defaultVertex>

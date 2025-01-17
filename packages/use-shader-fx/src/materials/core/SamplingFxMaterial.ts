@@ -1,10 +1,7 @@
 import * as THREE from "three";
 import { FxMaterialProps } from "./FxMaterial";
 import { TexturePipelineSrc } from "../../misc";
-import {
-   NestUniformValues,
-   flattenUniformValues,
-} from "../../shaders/uniformsUtils";
+import { NestUniformValues } from "../../shaders/uniformsUtils";
 import { joinShaderPrefix } from "../../shaders/mergeShaderLib";
 import {
    BasicFxMaterial,
@@ -13,13 +10,14 @@ import {
    FxFlag as BasicFxFlag,
    FitType,
 } from "./BasicFxMaterial";
+import { DEFAULT_TEXTURE } from "../../libs/constants";
 
 type SamplingFxUniformsUnique = {
    // texture
    texture_src: { value: TexturePipelineSrc };
    texture_resolution: { value: THREE.Vector2 };
    texture_fit: { value: FitType };
-} & typeof BasicFxMaterial.DEFAULT_VALUES;
+} & typeof BasicFxMaterial.BASIC_VALUES;
 
 export type SamplingFxUniforms = {
    texture_aspectRatio: { value: number };
@@ -27,22 +25,26 @@ export type SamplingFxUniforms = {
 } & SamplingFxUniformsUnique &
    BasicFxUniforms;
 
-type FxValues = NestUniformValues<SamplingFxUniformsUnique> & BasicFxValues;
-export type SamplingFxValues = FxValues;
+export type SamplingFxValues = NestUniformValues<SamplingFxUniformsUnique> &
+   BasicFxValues;
 
-export type FxFlag = {
+export type SamplingFxFlag = {
    texture: boolean;
 } & BasicFxFlag;
 
+/*===============================================
+TODO 
+- てか、SamplingFxMaterialのtextureって常にtrueでいいんじゃね
+===============================================*/
+
 export class SamplingFxMaterial extends BasicFxMaterial {
-   static readonly DEFAULT_VALUES = {
-      ...BasicFxMaterial.DEFAULT_VALUES,
-      // texture
-      texture_src: { value: null },
-      texture_resolution: { value: new THREE.Vector2() },
+   static readonly BASIC_VALUES = {
+      ...BasicFxMaterial.BASIC_VALUES,
+      texture_src: { value: DEFAULT_TEXTURE },
+      texture_resolution: { value: new THREE.Vector2(0) },
       texture_fit: { value: "fill" },
-      texture_aspectRatio: { value: 0 }, // private
-      texture_fitScale: { value: new THREE.Vector2() }, // private
+      texture_aspectRatio: { value: 0 },
+      texture_fitScale: { value: new THREE.Vector2(1, 1) },
    };
 
    static readonly SHADER_PREFIX = {
@@ -50,7 +52,7 @@ export class SamplingFxMaterial extends BasicFxMaterial {
       texture: "#define USF_USE_TEXTURE",
    };
 
-   fxFlag: FxFlag;
+   fxFlag: SamplingFxFlag;
 
    uniforms!: SamplingFxUniforms;
 
@@ -60,12 +62,12 @@ export class SamplingFxMaterial extends BasicFxMaterial {
       uniforms,
       vertexShader,
       fragmentShader,
-   }: FxMaterialProps<FxValues>) {
+   }: FxMaterialProps<SamplingFxValues>) {
       super({
          uniformValues,
          materialParameters,
          uniforms: THREE.UniformsUtils.merge([
-            SamplingFxMaterial.DEFAULT_VALUES,
+            SamplingFxMaterial.BASIC_VALUES,
             uniforms || {},
          ]),
       });
@@ -77,18 +79,15 @@ export class SamplingFxMaterial extends BasicFxMaterial {
 
       this.setupFxShaders(vertexShader, fragmentShader, "samplingFx");
    }
-
-   //
-   isContainsFxValues(values?: { [key: string]: any }): boolean {
-      if (!values) return false;
-      // THINK : ここでflattenUniformValuesを呼び出すべき？
-      const _values = flattenUniformValues(values);
-      return Object.keys(_values).some((key) =>
-         Object.keys(SamplingFxMaterial.DEFAULT_VALUES).includes(
-            key as keyof FxValues
-         )
-      );
-   }
+   /*===============================================
+	↓↓ BasicFxMaterialの拡張 ↓↓
+	===============================================*/
+   // isContainsBasicValues(values?: { [key: string]: any }): boolean {
+   //    return this.filterBasicValues(
+   //       values ?? null,
+   //       SamplingFxMaterial.BASIC_VALUES
+   //    );
+   // }
 
    updateResolution(resolution: THREE.Vector2) {
       super.updateResolution(resolution);
@@ -103,7 +102,8 @@ export class SamplingFxMaterial extends BasicFxMaterial {
       this.uniforms.texture_fitScale.value = textureAspect.fitScale;
    }
 
-   setupDefaultFlag(uniformValues?: FxValues): FxFlag {
+   // TODO ここの継承ももっとスマートに工夫する
+   setupDefaultFlag(uniformValues?: SamplingFxValues): SamplingFxFlag {
       const isMixSrc = uniformValues?.mixSrc ? true : false;
       const isMixDst = uniformValues?.mixDst ? true : false;
       const isTexture = uniformValues?.texture ? true : false;
@@ -116,15 +116,15 @@ export class SamplingFxMaterial extends BasicFxMaterial {
       };
    }
 
-   handleUpdateFx(
+   handleUpdateFxShaders(
       uniforms: SamplingFxUniforms,
-      fxFlag: FxFlag
+      fxFlag: SamplingFxFlag
    ): {
       validCount: number;
-      updatedFlag: FxFlag;
+      updatedFlag: SamplingFxFlag;
    } {
       const { validCount: parentValidCount, updatedFlag: parentUpdateFlag } =
-         super.handleUpdateFx(
+         super.handleUpdateFxShaders(
             uniforms as BasicFxUniforms,
             fxFlag as BasicFxFlag
          );
@@ -158,7 +158,7 @@ export class SamplingFxMaterial extends BasicFxMaterial {
       };
    }
 
-   handleUpdateFxPrefix(fxFlag: FxFlag): {
+   handleUpdateFxShaderPrefixes(fxFlag: SamplingFxFlag): {
       prefixVertex: string;
       prefixFragment: string;
    } {
@@ -166,7 +166,7 @@ export class SamplingFxMaterial extends BasicFxMaterial {
       const {
          prefixVertex: parentPrefixVertex,
          prefixFragment: parentPrefixFragment,
-      } = super.handleUpdateFxPrefix(fxFlag);
+      } = super.handleUpdateFxShaderPrefixes(fxFlag);
 
       // texture用prefixの追加
       const texturePrefix = fxFlag.texture
