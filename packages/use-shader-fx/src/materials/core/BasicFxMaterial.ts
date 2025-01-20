@@ -7,10 +7,12 @@ import { mergeShaderLib, ShaderLibType } from "../../shaders/mergeShaderLib";
 
 export type FitType = "fill" | "cover" | "contain";
 
+export type TextureResolution = THREE.Vector2 | null;
+
 export type BasicFxUniformsUnique = {
    // mixSrc
    mixSrc_src: { value: TexturePipelineSrc };
-   mixSrc_resolution: { value: THREE.Vector2 }; // TODO ここnullを許容に入れて、calcAspectRatioの処理を明確にする
+   mixSrc_resolution: { value: TextureResolution };
    mixSrc_uvFactor: { value: number };
    mixSrc_alphaFactor: { value: number };
    mixSrc_colorFactor: { value: number };
@@ -19,7 +21,7 @@ export type BasicFxUniformsUnique = {
    mixSrc_fitScale: { value: THREE.Vector2 };
    // mixDst
    mixDst_src: { value: TexturePipelineSrc };
-   mixDst_resolution: { value: THREE.Vector2 };
+   mixDst_resolution: { value: TextureResolution };
    mixDst_uvFactor: { value: number };
    mixDst_alphaFactor: { value: number };
    mixDst_colorFactor: { value: number };
@@ -50,7 +52,7 @@ export class BasicFxMaterial extends FxMaterial {
    static readonly BASIC_VALUES: BasicFxUniformsUnique = {
       // mixSrc
       mixSrc_src: { value: null },
-      mixSrc_resolution: { value: new THREE.Vector2() },
+      mixSrc_resolution: { value: null },
       mixSrc_uvFactor: { value: 0 },
       mixSrc_alphaFactor: { value: 0 },
       mixSrc_colorFactor: { value: 0 },
@@ -59,7 +61,7 @@ export class BasicFxMaterial extends FxMaterial {
       mixSrc_fitScale: { value: new THREE.Vector2(1, 1) },
       // mixDst
       mixDst_src: { value: null },
-      mixDst_resolution: { value: new THREE.Vector2() },
+      mixDst_resolution: { value: null },
       mixDst_uvFactor: { value: 0 },
       mixDst_alphaFactor: { value: 0 },
       mixDst_colorFactor: { value: 0 },
@@ -111,9 +113,6 @@ export class BasicFxMaterial extends FxMaterial {
       this.setupFxShaders(vertexShader, fragmentShader, "basicFx");
    }
 
-   /*===============================================
-	FxShadersの更新
-	===============================================*/
    updateFxShaders() {
       // shaderのsetup前は実行しない
       if (!this.fxFlag) return;
@@ -259,6 +258,7 @@ export class BasicFxMaterial extends FxMaterial {
       const flattenedValues = super.setUniformValues(values);
       if (this.isContainsBasicValues(flattenedValues)) {
          this.updateFxShaders();
+         // aspectRationの更新を伴う可能性があるので、同時に実行する
          this.updateResolution(this.uniforms.resolution.value);
       }
       return flattenedValues;
@@ -287,7 +287,7 @@ export class BasicFxMaterial extends FxMaterial {
    calcAspectRatio(
       type: FitType,
       src: TexturePipelineSrc,
-      srcResolution: THREE.Vector2
+      srcResolution: TextureResolution
    ): {
       srcAspectRatio: number;
       fitScale: THREE.Vector2;
@@ -297,13 +297,13 @@ export class BasicFxMaterial extends FxMaterial {
       let fitScale = new THREE.Vector2(1, 1);
 
       if (src === null) {
-         // srcがない場合はbaseのアスペクト比を返す
+         // srcがnullの場合は、baseのアスペクト比を返す
          srcAspectRatio = baseAspectRatio;
-      } else if (srcResolution?.x && srcResolution?.y) {
-         // srcResolutionが0以上の場合は、resolutionのアスペクト比を返す
+      } else if (srcResolution != null) {
+         // src の resolution が 設定されている場合
          srcAspectRatio = srcResolution.x / srcResolution.y;
-      } else if (!srcResolution || !srcResolution.x || !srcResolution.y) {
-         // srcがあり、 resolutionがないまたは、0,0の場合は、srcのサイズを返す
+      } else if (src?.image) {
+         // TODO * VideoTextureも許容する
          srcAspectRatio = src.image.width / src.image.height;
       }
 
