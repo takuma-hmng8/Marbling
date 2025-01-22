@@ -32,8 +32,8 @@ export const Playground = () => {
    const rgbShift = useRGBShift({
       size,
       dpr: 1,
-      shiftScale: 0.03,
-      shiftPower: new THREE.Vector2(3, 2),
+      shiftScale: 0.3,
+      shiftPower: new THREE.Vector2(32, 2),
       // shiftPowerSrcR: noise.texture,
       // shiftPowerSrcG: noise2.texture,
       // shiftPowerSrcB: noise3.texture,
@@ -47,6 +47,8 @@ export const Playground = () => {
    });
 
    rgbShift.setValues({
+      shiftScale: 0.3,
+      shiftPower: new THREE.Vector2(3, 20),
       texture: {
          src: app,
          fit: "cover",

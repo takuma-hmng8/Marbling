@@ -1,5 +1,7 @@
 - color adjustments追加していく
 
+- mergeShaderLib無駄が多い。textureFragmentBeginは不要。つまりparsとvertexさえあればいいので、ShaderLibをシンプルにできる。
+
 MaterialImpl / basicFxのhook化
 - useBasicFx/BasicFxMaterialImplはSamplingFxMaterialを拡張してつくる
 - FxMaterialImpl

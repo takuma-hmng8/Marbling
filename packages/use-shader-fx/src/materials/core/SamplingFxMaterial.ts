@@ -3,48 +3,44 @@ import { FxMaterialProps } from "./FxMaterial";
 import { TexturePipelineSrc } from "../../misc";
 import { NestUniformValues } from "../../shaders/uniformsUtils";
 import { joinShaderPrefix } from "../../shaders/mergeShaderLib";
-import { BasicFxMaterial, hasMatchingKeys } from "./BasicFxMaterial";
+import { BasicFxMaterial } from "./BasicFxMaterial";
 import { DEFAULT_TEXTURE } from "../../libs/constants";
+import { mergeShaderLib } from "../../shaders/mergeShaderLib";
+import * as BasicFxLib from "./BasicFxLib";
 
-import type {
-   BasicFxValues,
-   BasicFxUniforms,
-   FxFlag,
-   FitType,
-   BasicFxUniformsUnique,
-   TextureResolution,
-} from "./BasicFxMaterial";
-
+/*===============================================
+types
+===============================================*/
 type SamplingFxUniformsUnique = {
    texture_src: { value: TexturePipelineSrc };
-   texture_resolution: { value: TextureResolution };
-   texture_fit: { value: FitType };
+   texture_resolution: { value: BasicFxLib.TextureResolution };
+   texture_fit: { value: BasicFxLib.FitType };
    texture_aspectRatio: { value: number };
    texture_fitScale: { value: THREE.Vector2 };
-} & BasicFxUniformsUnique;
-
-export type SamplingFxUniforms = SamplingFxUniformsUnique & BasicFxUniforms;
-
+};
+export type SamplingFxUniforms = SamplingFxUniformsUnique &
+   BasicFxLib.BasicFxUniforms;
 export type SamplingFxValues = NestUniformValues<SamplingFxUniforms>;
+
+/*===============================================
+constants
+===============================================*/
+const SAMPLINGFX_VALUES: SamplingFxUniformsUnique = {
+   texture_src: { value: DEFAULT_TEXTURE },
+   texture_resolution: { value: null },
+   texture_fit: { value: "fill" },
+   texture_aspectRatio: { value: 0 },
+   texture_fitScale: { value: new THREE.Vector2(1, 1) },
+};
+
+const SAMPLINGFX_SHADER_PREFIX = {
+   texture: "#define USF_USE_TEXTURE",
+};
 
 /**
  * SamplingFxMaterialでは常にtextureはtrueであるはずなので、BasicFxMaterialを継承して、srcSystemは常にtrueになるように、継承する
  */
 export class SamplingFxMaterial extends BasicFxMaterial {
-   static readonly BASIC_VALUES: SamplingFxUniformsUnique = {
-      ...BasicFxMaterial.BASIC_VALUES,
-      texture_src: { value: DEFAULT_TEXTURE },
-      texture_resolution: { value: null },
-      texture_fit: { value: "fill" },
-      texture_aspectRatio: { value: 0 },
-      texture_fitScale: { value: new THREE.Vector2(1, 1) },
-   };
-
-   static readonly SHADER_PREFIX = {
-      ...BasicFxMaterial.SHADER_PREFIX,
-      texture: "#define USF_USE_TEXTURE",
-   };
-
    uniforms!: SamplingFxUniforms;
 
    constructor({
@@ -55,51 +51,55 @@ export class SamplingFxMaterial extends BasicFxMaterial {
       fragmentShader,
    }: FxMaterialProps<SamplingFxValues>) {
       super({
+         vertexShader,
+         fragmentShader,
          uniformValues,
          materialParameters,
          uniforms: THREE.UniformsUtils.merge([
-            SamplingFxMaterial.BASIC_VALUES,
+            SAMPLINGFX_VALUES,
             uniforms || {},
          ]),
       });
-
-      this.setupFxShaders(vertexShader, fragmentShader, "samplingFx");
    }
 
-   isContainsBasicValues(values?: { [key: string]: any }): boolean {
-      return hasMatchingKeys(values ?? null, SamplingFxMaterial.BASIC_VALUES);
+   handleMergeShaderLib(vertexShader?: string, fragmentShader?: string) {
+      return mergeShaderLib(vertexShader, fragmentShader, "samplingFx");
+   }
+
+   isContainsBasicFxValues(values?: { [key: string]: any }): boolean {
+      return super.isContainsBasicFxValues(values, {
+         ...BasicFxLib.BASICFX_VALUES,
+         ...SAMPLINGFX_VALUES,
+      });
    }
 
    updateResolution(resolution: THREE.Vector2) {
       super.updateResolution(resolution);
 
-      const { srcAspectRatio, fitScale } = this.calcAspectRatio(
-         this.uniforms.texture_fit.value,
-         this.uniforms.texture_src.value,
-         this.uniforms.texture_resolution.value
-      );
+      const { srcAspectRatio, fitScale } = BasicFxLib.calcAspectRatio({
+         type: this.uniforms.texture_fit.value,
+         src: this.uniforms.texture_src.value,
+         srcResolution: this.uniforms.texture_resolution.value,
+         baseAspectRatio: this.uniforms.aspectRatio.value,
+      });
 
       this.uniforms.texture_aspectRatio.value = srcAspectRatio;
       this.uniforms.texture_fitScale.value = fitScale;
    }
 
-   setupDefaultFlag(uniformValues: BasicFxValues): FxFlag {
+   setupDefaultFlag(
+      uniformValues: BasicFxLib.BasicFxValues
+   ): BasicFxLib.FxFlag {
       const flag = super.setupDefaultFlag(uniformValues);
       flag.srcSystem = true;
       return flag;
    }
 
-   handleUpdateFxShaders(
-      uniforms: SamplingFxUniforms,
-      fxFlag: FxFlag
-   ): {
+   handleUpdateFxShaders(): {
       validCount: number;
-      updatedFlag: FxFlag;
+      updatedFlag: BasicFxLib.FxFlag;
    } {
-      const { validCount, updatedFlag } = super.handleUpdateFxShaders(
-         uniforms,
-         fxFlag
-      );
+      const { validCount, updatedFlag } = super.handleUpdateFxShaders();
       updatedFlag.srcSystem = true;
       return {
          validCount,
@@ -107,24 +107,20 @@ export class SamplingFxMaterial extends BasicFxMaterial {
       };
    }
 
-   handleUpdateFxShaderPrefixes(fxFlag: FxFlag): {
-      prefixVertex: string;
-      prefixFragment: string;
+   handleUpdateFxShaderPrefixes(): {
+      vertex: string;
+      fragment: string;
    } {
-      const { prefixVertex, prefixFragment } =
-         super.handleUpdateFxShaderPrefixes(fxFlag);
-
-      const texturePrefix = SamplingFxMaterial.SHADER_PREFIX.texture;
-
+      const prefix = super.handleUpdateFxShaderPrefixes();
       return {
-         prefixVertex: joinShaderPrefix([
-            prefixVertex.trim(),
-            texturePrefix,
+         vertex: joinShaderPrefix([
+            prefix.vertex.trim(),
+            SAMPLINGFX_SHADER_PREFIX.texture,
             "\n",
          ]),
-         prefixFragment: joinShaderPrefix([
-            prefixFragment.trim(),
-            texturePrefix,
+         fragment: joinShaderPrefix([
+            prefix.fragment.trim(),
+            SAMPLINGFX_SHADER_PREFIX.texture,
             "\n",
          ]),
       };
