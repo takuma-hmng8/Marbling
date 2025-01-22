@@ -5,5 +5,5 @@
 	usf_FragColor = mix(usf_FragColor, mixDstColor, mixDst_colorFactor);
 
 	usf_FragColor = mix(usf_FragColor, mixDstColor, mixDstColor.a * mixDst_alphaFactor);
-	
+
 #endif

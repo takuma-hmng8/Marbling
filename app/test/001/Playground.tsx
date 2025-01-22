@@ -4,25 +4,14 @@ import * as THREE from "three";
 import { useFrame, useThree, extend } from "@react-three/fiber";
 import {
    createFxMaterialImpl,
-   createBasicFxMaterialImpl,
    FxMaterialImplValues,
-   BasicFxMaterialImplValues,
    useNoise,
 } from "@/packages/use-shader-fx/src";
 import { useTexture } from "@react-three/drei";
 
-const FxMaterialImpl = createFxMaterialImpl({
-   fragmentShader: `
-	uniform sampler2D src;
-	void main() {      
-		vec4 oC = texture2D(src, vUv);            
-      gl_FragColor = oC;
-	}
-`,
-});
-const BasicFxMaterialImpl = createBasicFxMaterialImpl();
+const FxMaterialImpl = createFxMaterialImpl();
 
-extend({ FxMaterialImpl, BasicFxMaterialImpl });
+extend({ FxMaterialImpl });
 
 export const Playground = () => {
    const { size } = useThree();
@@ -34,13 +23,24 @@ export const Playground = () => {
       dpr: 1,
       scale: 0.02,
       timeStrength: 0.4,
-      // mixDst: {
-      //    src: app,
-      //    uvFactor: 0.1,
-      //    alphaFactor: 1,
-      //    fit: "contain",
-      // },
+      mixDst: {
+         src: app,
+         colorFactor: 0.5,
+         uvFactor: 0.5,
+         alphaFactor: 0.5,
+         fit: "cover",
+      },
    });
+
+   // noise.setValues({
+   //    mixDst: {
+   //       src: app,
+   //       colorFactor: 0.5,
+   //       uvFactor: 0.5,
+   //       alphaFactor: 0.5,
+   //       fit: "cover",
+   //    },
+   // });
 
    useFrame((state) => {
       noise.render(state);
@@ -58,8 +58,6 @@ declare global {
    namespace JSX {
       interface IntrinsicElements {
          fxMaterialImpl: FxMaterialImplValues &
-            JSX.IntrinsicElements["shaderMaterial"];
-         BasicFxMaterialImpl: BasicFxMaterialImplValues &
             JSX.IntrinsicElements["shaderMaterial"];
       }
    }

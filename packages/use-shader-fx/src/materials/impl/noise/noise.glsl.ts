@@ -93,5 +93,6 @@ export const noiseFragment = `
 		${ShaderLib.basicFx_fragment_end}
 		
 		gl_FragColor = usf_FragColor;
+
 	}
 `;

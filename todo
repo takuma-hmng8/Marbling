@@ -1,18 +1,5 @@
-- createMaterialImpl
-	- createMaterialImplにして、引数に関数で引数にチャンクとれるみたいな。第二引数でマテリアルの種類選べるみたいな。
-	- 実装クラスを生成する関数
+- color adjustments追加していく
 
-- fluid
-	- advectionのdisipationを追加する
-	- deltaTimeも操作できるように
-	- transparencyを選択できるように
-	- transparencyにして、0~1でmixする方式で
-	- 粘性の追加！
-
-- basic fx
-	- basicFxに色調補正系
-		- fluid contrastを参考に
-	- micSrc => 色調補正系 => micDstの順
-
-
-- NoiseMaterialPropsみたいにMaterialのprops型をつくって、HooksReturnのMaterialに&しちゃおう
+MaterialImpl / basicFxのhook化
+- useBasicFx/BasicFxMaterialImplはSamplingFxMaterialを拡張してつくる
+- FxMaterialImpl

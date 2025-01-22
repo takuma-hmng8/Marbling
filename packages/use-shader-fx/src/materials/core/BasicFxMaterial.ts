@@ -230,7 +230,7 @@ export class BasicFxMaterial extends FxMaterial {
       this.vertexShaderCache = this.vertexShader;
       this.fragmentShaderCache = this.fragmentShader;
 
-      this.updateFxShaders();
+      this.compileFxShaders();
    }
 
    /** valuesのkeyにbasicValuesが含まれているかどうかの判定 */
