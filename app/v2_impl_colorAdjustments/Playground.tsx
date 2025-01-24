@@ -12,7 +12,6 @@ import {
    FxMaterialImplValues,
    BasicFxMaterialImplValues,
    useFluid,
-   useCoverTexture,
 } from "@/packages/use-shader-fx/src";
 import { Float, OrbitControls, useTexture } from "@react-three/drei";
 
@@ -46,8 +45,8 @@ vec3 rgb2hsv(vec3 c)
 		vec4 fluidColor = vec4(len);
 
 		// color balance
-		fluidColor.r *= clamp(fluidColor.r * 1.1, 0., 1.);
-		fluidColor.g *= clamp(fluidColor.g * 0.2, 0., 1.);
+		fluidColor.r *= clamp(fluidColor.r * 1., 0., 1.);
+		fluidColor.g *= clamp(fluidColor.g * 0.6, 0., 1.);
 		fluidColor.b *= clamp(fluidColor.b * .6, 0., 1.);
 		// THINK ここまでがデフォルトのfluidのcolor
 		
@@ -55,15 +54,20 @@ vec3 rgb2hsv(vec3 c)
 		// THINK ガンマ補正とコントラストはvec4でやればいいのかも
 
 		vec4 outputColor = fluidColor;
+
+		/*===============================================
+		COLOR ADJUSTMENTS
+		===============================================*/
 		
 		/*===============================================
-		// レベル補正
+		// レベル補正 Levels		vec4 に意味がありそう
 		===============================================*/
-		float u_shadows = 1.2;         // シャドウ値 
-		float u_midtones = 1.1;        // ミッドトーン値
-		float u_highlights = 1.4;      // ハイライト値 
-		float u_outputMin = 0.0;       // 出力の最小値 
-		float u_outputMax = 1.0;       // 出力の最大値
+ 		// vec4のテスト
+		vec4 u_shadows = vec4(0., 0., 0., 0.); // シャドウ値
+		vec4 u_midtones = vec4(1., 1., 1., .5); // ミッドトーン値
+		vec4 u_highlights = vec4(1., 1., 1., 1.); // ハイライト値
+		vec4 u_outputMin = vec4(0., 0., 0., 0.); // 出力の最小値
+		vec4 u_outputMax = vec4(1., 1., 1., 1.); // 出力の最大値
 
 		// 入力レベル補正
 		outputColor = (outputColor - vec4(u_shadows)) / (vec4(u_highlights) - vec4(u_shadows));
@@ -73,56 +77,79 @@ vec3 rgb2hsv(vec3 c)
 
 		// 出力レベル補正
 		outputColor = outputColor * (vec4(u_outputMax) - vec4(u_outputMin)) + vec4(u_outputMin);
+
 		/*===============================================
-		// コントラスト TODO これもvec4でuniformを渡す！ alphaだけコントラストかけたり！
+		// コントラスト Contrast TODO これもvec4でuniformを渡す！ alphaだけコントラストかけたり！
 		===============================================*/
 		// コントラスト
-		float contrastFactor = 20.;
+		vec4 contrastFactor = vec4(1.,1.,1.,1.);
 		outputColor = clamp(((outputColor-.5)*contrastFactor)+.5, 0., 1.);
 
 		/*===============================================
-		// color balance
+		// ColorBalance
 		===============================================*/
-		outputColor.r *= clamp(outputColor.r * 1., 0., 1.);
-		outputColor.g *= clamp(outputColor.g * 1., 0., 1.);
-		outputColor.b *= clamp(outputColor.b * 1., 0., 1.);
+		vec3 colorBalance = vec3(2., .2, 12.2);
+		// outputColor.rgb = clamp(outputColor.rgb * colorBalance, 0., 1.);
 
 		/*===============================================
-		// saturation・brightness
+		// hsv
 		===============================================*/
+		float hueShift   = 0.10; // 色相を +X 度分回転 (0.0~1.0 で0~360度)
+		float saturation = 2.0; // 彩度乗算 (1.0で変化なし)
+		float brightness = 2.0; // 明度乗算 (1.0で変化なし)
+
 		vec3 hsv = rgb2hsv(outputColor.rgb);
-		hsv.y *= 1.; // 彩度
-		hsv.z *= 2.; // 明度
+
+		hsv.x = fract(hsv.x + hueShift); // Hue (色相) - 加算で回転、fract で 0~1 に収める
+		hsv.y = clamp(hsv.y * saturation, 0.0, 1.0); // Saturation (彩度) - 乗算して 0~1 に clamp
+		hsv.z = clamp(hsv.z * brightness, 0.0, 1.0); // brightness (明度) - 乗算して 0~1 に clamp
+
 		outputColor.rgb = hsv2rgb(hsv);
 
 		/*===============================================
-		// ポスタライゼーション
+		// ポスタライゼーション Posterize
 		===============================================*/
-		float posterizationLevels = 6.;
-		outputColor.rgb = floor(outputColor.rgb * posterizationLevels) / posterizationLevels;
+		vec4 posterization = vec4(0.,1.,0.,1.); // 1以上
+		outputColor.r = posterization.r > 1. ? floor(outputColor.r * posterization.r) / posterization.r : outputColor.r;
+		outputColor.g = posterization.g > 1. ? floor(outputColor.g * posterization.g) / posterization.g : outputColor.g;
+		outputColor.b = posterization.b > 1. ? floor(outputColor.b * posterization.b) / posterization.b : outputColor.b;
+		outputColor.a = posterization.a > 1. ? floor(outputColor.a * posterization.a) / posterization.a : outputColor.a;
 
 		/*===============================================
-		// black&White
+		// BlackAndWhite TODO * 以下の型
+		grayscale = {
+			weight:vector3;
+			duotone:{
+				color0:vector3;
+				color1:vector3;
+			};
+			threashold:float; // 0~1 負の値は処理をスキップする
+		}
 		===============================================*/
-		float redWeight = 0.;
-		float greenWeight = 0.;
+		float redWeight = 0.4;
+		float greenWeight = 2.;
 		float blueWeight = 0.;
 		float grayscale = dot(outputColor.rgb, vec3(0.299 + redWeight, 0.587 + greenWeight, 0.114 + blueWeight));
 
-		outputColor.rgb = vec3(grayscale);
+		// outputColor.rgb = vec3(grayscale);
 
 		/*===============================================
-		// duo tone
+		// DuoTone TODO ここからgrayscaleとしてまとめる？
 		===============================================*/
 		vec3 color0 = vec3(0.45, .5, 0.534);
 		vec3 color1 = vec3(.3, 0.876, 0.579);
 		// outputColor.rgb = mix(color0, color1, grayscale);
 
 		/*===============================================
-		// threshold
+		// Threshold
 		===============================================*/
-		float threshold = 0.4;
+		float threshold = 0.2;
 		// outputColor.rgb = grayscale > threshold ? vec3(1.) : vec3(0.);
+
+		
+		/*===============================================
+		ここまでが色調補正
+		===============================================*/
 
 		// alpha TODO * transparentを選択できるようにする？
 		float alpha = outputColor.a;

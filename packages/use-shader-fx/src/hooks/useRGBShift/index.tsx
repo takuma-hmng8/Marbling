@@ -1,9 +1,8 @@
 import { useCallback } from "react";
 import { HooksProps, HooksReturn } from "../types";
-import { getDpr } from "../../utils/getDpr";
+import { getDpr, useSetup } from "../../utils";
 import { RootState } from "../types";
 import { RGBShiftMaterial, RGBShiftValues } from "../../materials";
-import { useFxScene } from "../../utils/useFxScene";
 import { useSingleFBO } from "../../utils/useSingleFBO";
 
 type RGBShiftValuesAndConfig = RGBShiftValues;
@@ -22,7 +21,7 @@ export const useRGBShift = ({
 }: RGBShiftProps): HooksReturn<RGBShiftValuesAndConfig, RGBShiftMaterial> => {
    const _dpr = getDpr(dpr);
 
-   const { scene, material, camera } = useFxScene({
+   const { scene, material, camera } = useSetup({
       size,
       dpr: _dpr.shader,
       material: RGBShiftMaterial,

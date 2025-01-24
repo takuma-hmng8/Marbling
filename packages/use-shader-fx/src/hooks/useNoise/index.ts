@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useSingleFBO, getDpr, useFxScene } from "../../utils";
+import { useSingleFBO, getDpr, useSetup } from "../../utils";
 import { HooksProps, HooksReturn, RootState } from "../types";
 import {
    NoiseMaterial,
@@ -25,7 +25,7 @@ export const useNoise = ({
 > => {
    const _dpr = getDpr(dpr);
 
-   const { scene, material, camera } = useFxScene({
+   const { scene, material, camera } = useSetup({
       size,
       dpr: _dpr.shader,
       material: NoiseMaterial,

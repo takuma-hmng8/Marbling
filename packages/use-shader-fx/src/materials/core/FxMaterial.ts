@@ -1,6 +1,5 @@
 import * as THREE from "three";
-import { resolveIncludes } from "../../shaders/resolveShaders";
-import { mergeShaderLib } from "../../shaders/mergeShaderLib";
+import { resolveIncludes, mergeShaderLib } from "../../shaders/shaderUtils";
 import {
    flattenUniformValues,
    ShaderWithUniforms,
@@ -44,7 +43,7 @@ export class FxMaterial extends THREE.ShaderMaterial {
          uniforms || {},
       ]) as DefaultUniforms;
 
-      this.setupDefaultShaders(vertexShader, fragmentShader);
+      this.setupShaders(vertexShader, fragmentShader);
 
       this.setUniformValues(uniformValues);
 
@@ -61,7 +60,7 @@ export class FxMaterial extends THREE.ShaderMaterial {
       this.uniforms.maxAspect.value.set(maxAspect / width, maxAspect / height);
    }
 
-   setupDefaultShaders(vertexShader?: string, fragmentShader?: string) {
+   setupShaders(vertexShader?: string, fragmentShader?: string) {
       if (!vertexShader && !fragmentShader) return;
 
       const [vertex, fragment] = mergeShaderLib(

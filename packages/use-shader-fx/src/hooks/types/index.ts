@@ -52,7 +52,7 @@ export interface HooksProps {
  * @returns {HooksReturn<T, O, C>}
  *  render - Functions to update parameters and render.
  *  setValues - Function to update parameters only.
- *  texture - テクスチャー
+ *  texture - texture
  *  material - material
  *  scene - scene
  *

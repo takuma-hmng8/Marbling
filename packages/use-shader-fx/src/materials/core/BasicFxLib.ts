@@ -1,8 +1,10 @@
 import * as THREE from "three";
-import { TexturePipelineSrc } from "../../misc";
-import { joinShaderPrefix } from "../../shaders/mergeShaderLib";
+import { mergeShaderCode } from "../../shaders/shaderUtils";
 import { DefaultUniforms } from "./FxMaterial";
-import { NestUniformValues } from "../../shaders/uniformsUtils";
+import {
+   NestUniformValues,
+   UniformParentKey,
+} from "../../shaders/uniformsUtils";
 
 /*===============================================
 types
@@ -12,7 +14,8 @@ export type TextureResolution = THREE.Vector2 | null;
 
 export type BasicFxUniformsUnique = {
    // mixSrc
-   mixSrc_src: { value: TexturePipelineSrc };
+   mixSrc: { value: UniformParentKey };
+   mixSrc_src: { value: THREE.Texture };
    mixSrc_resolution: { value: TextureResolution };
    mixSrc_uvFactor: { value: number };
    mixSrc_alphaFactor: { value: number };
@@ -21,7 +24,8 @@ export type BasicFxUniformsUnique = {
    mixSrc_aspectRatio: { value: number };
    mixSrc_fitScale: { value: THREE.Vector2 };
    // mixDst
-   mixDst_src: { value: TexturePipelineSrc };
+   mixDst: { value: UniformParentKey };
+   mixDst_src: { value: THREE.Texture };
    mixDst_resolution: { value: TextureResolution };
    mixDst_uvFactor: { value: number };
    mixDst_alphaFactor: { value: number };
@@ -29,16 +33,28 @@ export type BasicFxUniformsUnique = {
    mixDst_fit: { value: FitType };
    mixDst_aspectRatio: { value: number };
    mixDst_fitScale: { value: THREE.Vector2 };
+   // levels
+   levels: { value: UniformParentKey };
+   levels_shadows: { value: THREE.Vector4 };
+   levels_midtones: { value: number };
+   levels_highlights: { value: number };
+   levels_outputMin: { value: number };
+   levels_outputMax: { value: number };
+   // contrast
+   contrast: { value: UniformParentKey };
+   contrast_factor: { value: THREE.Vector4 };
 };
 
 export type BasicFxUniforms = BasicFxUniformsUnique & DefaultUniforms;
 
 export type BasicFxValues = NestUniformValues<BasicFxUniforms>;
 
-export type FxFlag = {
-   srcSystem: boolean; // src stystemが使われているかどうか
+export type FxKey = {
+   srcSystem: boolean;
    mixSrc: boolean;
    mixDst: boolean;
+   levels: boolean;
+   contrast: boolean;
 };
 
 /*===============================================
@@ -46,7 +62,8 @@ constants
 ===============================================*/
 export const BASICFX_VALUES: BasicFxUniformsUnique = {
    // mixSrc
-   mixSrc_src: { value: null },
+   mixSrc: { value: false },
+   mixSrc_src: { value: new THREE.Texture() },
    mixSrc_resolution: { value: null },
    mixSrc_uvFactor: { value: 0 },
    mixSrc_alphaFactor: { value: 0 },
@@ -55,7 +72,8 @@ export const BASICFX_VALUES: BasicFxUniformsUnique = {
    mixSrc_aspectRatio: { value: 0 },
    mixSrc_fitScale: { value: new THREE.Vector2(1, 1) },
    // mixDst
-   mixDst_src: { value: null },
+   mixDst: { value: false },
+   mixDst_src: { value: new THREE.Texture() },
    mixDst_resolution: { value: null },
    mixDst_uvFactor: { value: 0 },
    mixDst_alphaFactor: { value: 0 },
@@ -63,144 +81,62 @@ export const BASICFX_VALUES: BasicFxUniformsUnique = {
    mixDst_fit: { value: "fill" },
    mixDst_aspectRatio: { value: 0 },
    mixDst_fitScale: { value: new THREE.Vector2(1, 1) },
+   // levels
+   levels: { value: false },
+   levels_shadows: { value: new THREE.Vector4(0, 0, 0, 0) },
+   levels_midtones: { value: 1 },
+   levels_highlights: { value: 1 },
+   levels_outputMin: { value: 0 },
+   levels_outputMax: { value: 1 },
+   // contrast
+   contrast: { value: false },
+   contrast_factor: { value: new THREE.Vector4(1, 1, 1, 1) },
 };
 
 export const BASICFX_SHADER_PREFIX = {
    srcSystem: "#define USF_USE_SRC_SYSTEM",
    mixSrc: "#define USF_USE_MIXSRC",
    mixDst: "#define USF_USE_MIXDST",
+   levels: "#define USF_USE_LEVELS",
+   contrast: "#define USF_USE_CONTRAST",
 };
 
 /*===============================================
 functions
 ===============================================*/
-export function handleUpdateFxShaders(
-   uniforms: BasicFxUniformsUnique,
-   fxFlag: FxFlag
-): {
-   validCount: number;
-   updatedFlag: FxFlag;
-} {
-   // THINK : `handleUpdateFx`での判定は、uniformの値で行っている.例えばsaturation・brightnessとかはどう判定する？
-   // THINK : `isMixSrc` みたいなuniform値をつくる？ uniformValues?.mixSrcを判定するイメージ
-   const isMixSrc = uniforms.mixSrc_src.value ? true : false;
-   const isMixDst = uniforms.mixDst_src.value ? true : false;
-   const isSrcSystem = isMixSrc || isMixDst;
-
-   const { mixSrc, mixDst, srcSystem } = fxFlag;
-
-   const updatedFlag = fxFlag;
-
-   let validCount = 0;
-
-   if (mixSrc !== isMixSrc) {
-      updatedFlag.mixSrc = isMixSrc;
-      validCount++;
-   }
-
-   if (mixDst !== isMixDst) {
-      updatedFlag.mixDst = isMixDst;
-      validCount++;
-   }
-
-   if (srcSystem !== isSrcSystem) {
-      updatedFlag.srcSystem = isSrcSystem;
-      validCount++;
-   }
-
-   return {
-      validCount,
-      updatedFlag,
-   };
-}
-
-export function handleUpdateFxShaderPrefixes(fxFlag: FxFlag): {
+export function handleUpdateFxShaderPrefixes(fxKey: FxKey): {
    vertex: string;
    fragment: string;
 } {
-   const { mixSrc, mixDst, srcSystem } = fxFlag;
-
+   const { mixSrc, mixDst, srcSystem, levels, contrast } = fxKey;
    return {
-      vertex: joinShaderPrefix([
+      vertex: mergeShaderCode([
          srcSystem ? BASICFX_SHADER_PREFIX.srcSystem : "",
          mixSrc ? BASICFX_SHADER_PREFIX.mixSrc : "",
          mixDst ? BASICFX_SHADER_PREFIX.mixDst : "",
          "\n",
       ]),
-      fragment: joinShaderPrefix([
+      fragment: mergeShaderCode([
          srcSystem ? BASICFX_SHADER_PREFIX.srcSystem : "",
          mixSrc ? BASICFX_SHADER_PREFIX.mixSrc : "",
          mixDst ? BASICFX_SHADER_PREFIX.mixDst : "",
+         levels ? BASICFX_SHADER_PREFIX.levels : "",
+         contrast ? BASICFX_SHADER_PREFIX.contrast : "",
          "\n",
       ]),
    };
 }
 
-export function handleSetupDefaultFlag(uniformValues?: BasicFxValues): FxFlag {
-   const isMixSrc = uniformValues?.mixSrc ? true : false;
-   const isMixDst = uniformValues?.mixDst ? true : false;
+/** setterで定義される場合もあるため、valuesではなくuniformsから判定する */
+export function getFxKeyFromUniforms(uniforms: BasicFxUniformsUnique): FxKey {
+   const isMixSrc = uniforms.mixSrc.value ? true : false;
+   const isMixDst = uniforms.mixDst.value ? true : false;
    const isSrcSystem = isMixSrc || isMixDst;
    return {
-      // THINK : `handleUpdateFx`での判定は、uniformの値で行っている.例えばsaturation・brightnessとかはどう判定する？
-      // THINK : `isMixSrc` みたいなuniform値をつくる？ uniformValues?.mixSrcを判定するイメージ
       mixSrc: isMixSrc,
       mixDst: isMixDst,
       srcSystem: isSrcSystem,
+      levels: uniforms.levels.value ? true : false,
+      contrast: uniforms.contrast.value ? true : false,
    };
-}
-
-export function calcAspectRatio({
-   type,
-   src,
-   srcResolution,
-   baseAspectRatio,
-}: {
-   type: FitType;
-   src: TexturePipelineSrc;
-   srcResolution: TextureResolution;
-   baseAspectRatio: number;
-}): {
-   srcAspectRatio: number;
-   fitScale: THREE.Vector2;
-} {
-   let srcAspectRatio = 1;
-   let fitScale = new THREE.Vector2(1, 1);
-
-   if (src === null) {
-      // srcがnullの場合は、baseのアスペクト比を返す
-      srcAspectRatio = baseAspectRatio;
-   } else if (srcResolution != null) {
-      // src の resolution が 設定されている場合
-      srcAspectRatio = srcResolution.x / srcResolution.y;
-   } else if (src?.image) {
-      // TODO * VideoTextureも許容する
-      srcAspectRatio = src.image.width / src.image.height;
-   }
-
-   if (type === "fill") {
-      fitScale = new THREE.Vector2(1, 1);
-   } else if (type === "cover") {
-      fitScale = new THREE.Vector2(
-         Math.min(baseAspectRatio / srcAspectRatio, 1),
-         Math.min(srcAspectRatio / baseAspectRatio, 1)
-      );
-   } else if (type === "contain") {
-      fitScale = new THREE.Vector2(
-         Math.max(baseAspectRatio / srcAspectRatio, 1),
-         Math.max(srcAspectRatio / baseAspectRatio, 1)
-      );
-   }
-
-   return {
-      srcAspectRatio,
-      fitScale,
-   };
-}
-
-export function hasMatchingKeys(
-   target: { [key: string]: any } | null,
-   source: { [key: string]: { value: any } }
-) {
-   if (!target) return false;
-   return Object.keys(target).some((key) => Object.keys(source).includes(key));
 }

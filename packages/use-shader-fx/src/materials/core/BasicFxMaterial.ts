@@ -1,10 +1,10 @@
 import * as THREE from "three";
 import { FxMaterial, FxMaterialProps } from "./FxMaterial";
-import { mergeShaderLib } from "../../shaders/mergeShaderLib";
+import { mergeShaderLib } from "../../shaders/shaderUtils";
 import * as BasicFxLib from "./BasicFxLib";
 
 export class BasicFxMaterial extends FxMaterial {
-   fxFlag: BasicFxLib.FxFlag;
+   fxKey: BasicFxLib.FxKey;
    uniforms!: BasicFxLib.BasicFxUniforms;
    vertexShaderCache: string;
    vertexPrefixCache: string;
@@ -34,7 +34,7 @@ export class BasicFxMaterial extends FxMaterial {
       this.fragmentPrefixCache = "";
       this.programCache = 0;
 
-      this.fxFlag = this.setupDefaultFlag(uniformValues);
+      this.fxKey = this.setUpFxKey(this.uniforms);
 
       this.setupFxShaders(vertexShader, fragmentShader);
    }
@@ -49,7 +49,7 @@ export class BasicFxMaterial extends FxMaterial {
          fragmentShader
       );
 
-      super.setupDefaultShaders(vertex, fragment);
+      super.setupShaders(vertex, fragment);
 
       this.vertexShaderCache = this.vertexShader;
       this.fragmentShaderCache = this.fragmentShader;
@@ -64,14 +64,14 @@ export class BasicFxMaterial extends FxMaterial {
 
    private updateFxShaders() {
       // FxMaterialの初期化時にsetUniformValuesが呼ばれるが、isContainsBasicFxValuesがtrueを返すと、このメソッドが実行されてしまう。BasicFxMaterialの初期化前にはこの処理をスキップする。
-      if (!this.fxFlag) return;
+      if (!this.fxKey) return;
 
       const _cache = this.programCache;
 
-      const { validCount, updatedFlag } = this.handleUpdateFxShaders();
+      const { diffCount, newFxKey } = this.handleUpdateFxShaders();
 
-      this.programCache += validCount;
-      this.fxFlag = updatedFlag;
+      this.programCache += diffCount;
+      this.fxKey = newFxKey;
 
       if (_cache !== this.programCache) {
          this.updateFxShaderPrefixes();
@@ -82,10 +82,17 @@ export class BasicFxMaterial extends FxMaterial {
 
    /** SamplingFxMaterialで継承するため、handlerとして独立させる */
    handleUpdateFxShaders(): {
-      validCount: number;
-      updatedFlag: BasicFxLib.FxFlag;
+      diffCount: number;
+      newFxKey: BasicFxLib.FxKey;
    } {
-      return BasicFxLib.handleUpdateFxShaders(this.uniforms, this.fxFlag);
+      const newFxKey = BasicFxLib.getFxKeyFromUniforms(this.uniforms);
+      const diffCount = (
+         Object.keys(newFxKey) as (keyof BasicFxLib.FxKey)[]
+      ).filter((key) => this.fxKey[key] !== newFxKey[key]).length;
+      return {
+         diffCount,
+         newFxKey,
+      };
    }
 
    private compileFxShaders() {
@@ -104,23 +111,21 @@ export class BasicFxMaterial extends FxMaterial {
       vertex: string;
       fragment: string;
    } {
-      return BasicFxLib.handleUpdateFxShaderPrefixes(this.fxFlag);
+      return BasicFxLib.handleUpdateFxShaderPrefixes(this.fxKey);
    }
 
    isContainsBasicFxValues(
       target?: { [key: string]: any },
       source?: { [key: string]: any }
    ): boolean {
-      return BasicFxLib.hasMatchingKeys(
-         target ?? null,
-         source ?? BasicFxLib.BASICFX_VALUES
+      if (!target) return false;
+      return Object.keys(target).some((key) =>
+         Object.keys(source ?? BasicFxLib.BASICFX_VALUES).includes(key)
       );
    }
 
-   setupDefaultFlag(
-      uniformValues?: BasicFxLib.BasicFxValues
-   ): BasicFxLib.FxFlag {
-      return BasicFxLib.handleSetupDefaultFlag(uniformValues);
+   setUpFxKey(uniforms: BasicFxLib.BasicFxUniforms): BasicFxLib.FxKey {
+      return BasicFxLib.getFxKeyFromUniforms(uniforms);
    }
 
    /*===============================================
@@ -139,20 +144,18 @@ export class BasicFxMaterial extends FxMaterial {
    updateResolution(resolution: THREE.Vector2) {
       super.updateResolution(resolution);
 
-      const mixSrcAspect = BasicFxLib.calcAspectRatio({
+      const mixSrcAspect = this.calcAspectRatio({
          type: this.uniforms.mixSrc_fit.value,
          src: this.uniforms.mixSrc_src.value,
          srcResolution: this.uniforms.mixSrc_resolution.value,
-         baseAspectRatio: this.uniforms.aspectRatio.value,
       });
       this.uniforms.mixSrc_aspectRatio.value = mixSrcAspect.srcAspectRatio;
       this.uniforms.mixSrc_fitScale.value = mixSrcAspect.fitScale;
 
-      const mixDstAspect = BasicFxLib.calcAspectRatio({
+      const mixDstAspect = this.calcAspectRatio({
          type: this.uniforms.mixSrc_fit.value,
          src: this.uniforms.mixSrc_src.value,
          srcResolution: this.uniforms.mixSrc_resolution.value,
-         baseAspectRatio: this.uniforms.aspectRatio.value,
       });
       this.uniforms.mixDst_aspectRatio.value = mixDstAspect.srcAspectRatio;
       this.uniforms.mixDst_fitScale.value = mixDstAspect.fitScale;
@@ -163,5 +166,55 @@ export class BasicFxMaterial extends FxMaterial {
          this.updateFxShaders();
          onSet?.();
       });
+   }
+
+   /*===============================================
+	utils
+	===============================================*/
+   calcAspectRatio({
+      type,
+      src,
+      srcResolution,
+   }: {
+      type: BasicFxLib.FitType;
+      src: THREE.Texture;
+      srcResolution: BasicFxLib.TextureResolution;
+   }): {
+      srcAspectRatio: number;
+      fitScale: THREE.Vector2;
+   } {
+      let srcAspectRatio = 1;
+      let fitScale = new THREE.Vector2(1, 1);
+
+      const baseAspectRatio = this.uniforms.aspectRatio.value;
+
+      if (srcResolution != null) {
+         // src の resolution が 設定されている場合
+         srcAspectRatio = srcResolution.x / srcResolution.y;
+      } else if (src?.image) {
+         // TODO * VideoTextureも許容する
+         srcAspectRatio = src.image.width / src.image.height;
+      } else {
+         srcAspectRatio = baseAspectRatio;
+      }
+
+      if (type === "fill") {
+         fitScale = new THREE.Vector2(1, 1);
+      } else if (type === "cover") {
+         fitScale = new THREE.Vector2(
+            Math.min(baseAspectRatio / srcAspectRatio, 1),
+            Math.min(srcAspectRatio / baseAspectRatio, 1)
+         );
+      } else if (type === "contain") {
+         fitScale = new THREE.Vector2(
+            Math.max(baseAspectRatio / srcAspectRatio, 1),
+            Math.max(srcAspectRatio / baseAspectRatio, 1)
+         );
+      }
+
+      return {
+         srcAspectRatio,
+         fitScale,
+      };
    }
 }

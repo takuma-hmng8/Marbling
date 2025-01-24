@@ -1,18 +1,19 @@
 import * as THREE from "three";
 import { FxMaterialProps } from "./FxMaterial";
-import { TexturePipelineSrc } from "../../misc";
-import { NestUniformValues } from "../../shaders/uniformsUtils";
-import { joinShaderPrefix } from "../../shaders/mergeShaderLib";
+import {
+   NestUniformValues,
+   UniformParentKey,
+} from "../../shaders/uniformsUtils";
+import { mergeShaderCode, mergeShaderLib } from "../../shaders/shaderUtils";
 import { BasicFxMaterial } from "./BasicFxMaterial";
-import { DEFAULT_TEXTURE } from "../../libs/constants";
-import { mergeShaderLib } from "../../shaders/mergeShaderLib";
 import * as BasicFxLib from "./BasicFxLib";
 
 /*===============================================
 types
 ===============================================*/
 type SamplingFxUniformsUnique = {
-   texture_src: { value: TexturePipelineSrc };
+   texture: { value: UniformParentKey };
+   texture_src: { value: THREE.Texture };
    texture_resolution: { value: BasicFxLib.TextureResolution };
    texture_fit: { value: BasicFxLib.FitType };
    texture_aspectRatio: { value: number };
@@ -26,7 +27,8 @@ export type SamplingFxValues = NestUniformValues<SamplingFxUniforms>;
 constants
 ===============================================*/
 const SAMPLINGFX_VALUES: SamplingFxUniformsUnique = {
-   texture_src: { value: DEFAULT_TEXTURE },
+   texture: { value: true },
+   texture_src: { value: new THREE.Texture() },
    texture_resolution: { value: null },
    texture_fit: { value: "fill" },
    texture_aspectRatio: { value: 0 },
@@ -76,34 +78,31 @@ export class SamplingFxMaterial extends BasicFxMaterial {
    updateResolution(resolution: THREE.Vector2) {
       super.updateResolution(resolution);
 
-      const { srcAspectRatio, fitScale } = BasicFxLib.calcAspectRatio({
+      const { srcAspectRatio, fitScale } = this.calcAspectRatio({
          type: this.uniforms.texture_fit.value,
          src: this.uniforms.texture_src.value,
          srcResolution: this.uniforms.texture_resolution.value,
-         baseAspectRatio: this.uniforms.aspectRatio.value,
       });
 
       this.uniforms.texture_aspectRatio.value = srcAspectRatio;
       this.uniforms.texture_fitScale.value = fitScale;
    }
 
-   setupDefaultFlag(
-      uniformValues: BasicFxLib.BasicFxValues
-   ): BasicFxLib.FxFlag {
-      const flag = super.setupDefaultFlag(uniformValues);
-      flag.srcSystem = true;
-      return flag;
+   setUpFxKey(uniforms: BasicFxLib.BasicFxUniforms): BasicFxLib.FxKey {
+      const key = super.setUpFxKey(uniforms);
+      key.srcSystem = true;
+      return key;
    }
 
    handleUpdateFxShaders(): {
-      validCount: number;
-      updatedFlag: BasicFxLib.FxFlag;
+      diffCount: number;
+      newFxKey: BasicFxLib.FxKey;
    } {
-      const { validCount, updatedFlag } = super.handleUpdateFxShaders();
-      updatedFlag.srcSystem = true;
+      const { diffCount, newFxKey } = super.handleUpdateFxShaders();
+      newFxKey.srcSystem = true;
       return {
-         validCount,
-         updatedFlag,
+         diffCount,
+         newFxKey,
       };
    }
 
@@ -113,12 +112,12 @@ export class SamplingFxMaterial extends BasicFxMaterial {
    } {
       const prefix = super.handleUpdateFxShaderPrefixes();
       return {
-         vertex: joinShaderPrefix([
+         vertex: mergeShaderCode([
             prefix.vertex.trim(),
             SAMPLINGFX_SHADER_PREFIX.texture,
             "\n",
          ]),
-         fragment: joinShaderPrefix([
+         fragment: mergeShaderCode([
             prefix.fragment.trim(),
             SAMPLINGFX_SHADER_PREFIX.texture,
             "\n",

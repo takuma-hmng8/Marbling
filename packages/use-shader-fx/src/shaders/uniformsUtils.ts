@@ -4,6 +4,9 @@ import { THREE_TYPES } from "../libs/constants";
 
 export type Uniforms = { [uniform: string]: THREE.IUniform<any> };
 
+/** typescriptトリックで{}を許容しているが、実際にuniformに渡る際にはbooleanのみ */
+export type UniformParentKey = boolean | {};
+
 export type ShaderWithUniforms = {
    uniforms?: Uniforms;
    vertexShader?: string;
@@ -35,12 +38,14 @@ export type NestUniformValues<U extends Uniforms> = UnionToIntersection<
    { [K in keyof U]: Nest<Extract<K, string>, U[K]["value"]> }[keyof U]
 >;
 
-/**
- * {test:{test:1}} => {test_test:1}
- */
 function isTHREE(property: any) {
    return property && THREE_TYPES.has(property.constructor);
 }
+
+/**
+ * {test:{test:1}} => {test_test:1} に変換する
+ * この時、条件分岐用uniform値として親のkey{test:true}を追加する
+ */
 export function flattenUniformValues(
    obj: Record<string, any>
 ): Record<string, any> {
@@ -55,6 +60,7 @@ export function flattenUniformValues(
             !Array.isArray(val) &&
             !isTHREE(val)
          ) {
+            (flatObject[newKey] as UniformParentKey) = true; // 親のkey{test:true}を追加する
             flatten(val, newKey);
          } else {
             if (flatObject.hasOwnProperty(newKey)) {

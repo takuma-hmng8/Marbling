@@ -1,10 +1,14 @@
 import * as THREE from "three";
 import { useEffect, useState } from "react";
-import { useObject3D } from "./useObject3D";
 import { Size } from "../hooks/types";
 import { useResolution } from "./useResolution";
 import { FxMaterial, FxMaterialProps } from "../materials/core/FxMaterial";
 import { useCamera } from "./useCamera";
+
+type Object3DConstructor<T, M extends THREE.Material> = new (
+   geometry: THREE.BufferGeometry,
+   material: M
+) => T;
 
 type MaterialConstructor<M> = new (props: FxMaterialProps) => M;
 
@@ -13,7 +17,30 @@ type GeometryConstructor = new (
    height: number
 ) => THREE.BufferGeometry;
 
-export const useFxScene = <M extends FxMaterial>({
+/**
+ * Add geometry and material to Object3D and add them to scene.
+ */
+const useObject3D = <T extends THREE.Object3D, M extends THREE.Material>(
+   scene: THREE.Scene | false,
+   geometry: THREE.BufferGeometry,
+   material: M,
+   Proto: Object3DConstructor<T, M>
+) => {
+   const [object3D] = useState(() => new Proto(geometry, material));
+
+   useEffect(() => {
+      scene && scene.add(object3D);
+      return () => {
+         scene && scene.remove(object3D);
+         geometry.dispose();
+         material.dispose();
+      };
+   }, [scene, geometry, material, object3D]);
+
+   return object3D;
+};
+
+export const useSetup = <M extends FxMaterial>({
    size,
    dpr,
    material,

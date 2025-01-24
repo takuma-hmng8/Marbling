@@ -8,6 +8,7 @@ import {
    useNoise,
 } from "@/packages/use-shader-fx/src";
 import { useTexture } from "@react-three/drei";
+import { useRef } from "react";
 
 const FxMaterialImpl = createFxMaterialImpl();
 
@@ -21,7 +22,7 @@ export const Playground = () => {
    const noise = useNoise({
       size,
       dpr: 1,
-      scale: 0.02,
+      scale: 0.03,
       timeStrength: 0.4,
       mixDst: {
          src: app,
@@ -32,15 +33,21 @@ export const Playground = () => {
       },
    });
 
-   // noise.setValues({
-   //    mixDst: {
-   //       src: app,
-   //       colorFactor: 0.5,
-   //       uvFactor: 0.5,
-   //       alphaFactor: 0.5,
-   //       fit: "cover",
-   //    },
-   // });
+   const shadows = useRef(new THREE.Vector4(0.1, 0.5, 0.1, 0.1));
+
+   noise.setValues({
+      mixDst: {
+         src: app,
+         colorFactor: 0.5,
+         uvFactor: 0.5,
+         alphaFactor: 0.5,
+         fit: "cover",
+      },
+      levels: false,
+      contrast: {
+         factor: new THREE.Vector4(3, 0.1, 0.1, 1),
+      },
+   });
 
    useFrame((state) => {
       noise.render(state);
