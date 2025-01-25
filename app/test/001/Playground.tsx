@@ -18,6 +18,8 @@ export const Playground = () => {
    const { size } = useThree();
 
    const [app] = useTexture(["/funkun.jpg"]);
+   // app.source.data.width = 60;
+   // app.source.data.height = 2;
 
    const noise = useNoise({
       size,
@@ -26,10 +28,10 @@ export const Playground = () => {
       timeStrength: 0.4,
       mixDst: {
          src: app,
-         colorFactor: 0.5,
-         uvFactor: 0.5,
+         colorFactor: 0.05,
+         uvFactor: 0.05,
          alphaFactor: 0.5,
-         fit: "cover",
+         fit: "fill",
       },
    });
 
@@ -39,14 +41,19 @@ export const Playground = () => {
       mixDst: {
          src: app,
          colorFactor: 0.5,
-         uvFactor: 0.5,
+         uvFactor: 0.1,
          alphaFactor: 0.5,
-         fit: "cover",
+         fit: "contain",
       },
-      levels: false,
-      contrast: {
-         factor: new THREE.Vector4(3, 0.1, 0.1, 1),
-      },
+      // levels: {
+      //    shadows: shadows.current,
+      //    midtones: new THREE.Vector4(2.1, 0, 0, 1),
+      //    outputMin: new THREE.Vector4(1.3, 0.1, 0.1, 1),
+      // },
+      // contrast: {
+      //    factor: new THREE.Vector4(0.3, 0.2, 0.1, 1),
+      // },
+      // colorBalance: false,
    });
 
    useFrame((state) => {

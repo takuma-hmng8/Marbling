@@ -14,9 +14,7 @@ types
 type SamplingFxUniformsUnique = {
    texture: { value: UniformParentKey };
    texture_src: { value: THREE.Texture };
-   texture_resolution: { value: BasicFxLib.TextureResolution };
    texture_fit: { value: BasicFxLib.FitType };
-   texture_aspectRatio: { value: number };
    texture_fitScale: { value: THREE.Vector2 };
 };
 export type SamplingFxUniforms = SamplingFxUniformsUnique &
@@ -29,9 +27,7 @@ constants
 const SAMPLINGFX_VALUES: SamplingFxUniformsUnique = {
    texture: { value: true },
    texture_src: { value: new THREE.Texture() },
-   texture_resolution: { value: null },
    texture_fit: { value: "fill" },
-   texture_aspectRatio: { value: 0 },
    texture_fitScale: { value: new THREE.Vector2(1, 1) },
 };
 
@@ -77,15 +73,7 @@ export class SamplingFxMaterial extends BasicFxMaterial {
 
    updateResolution(resolution: THREE.Vector2) {
       super.updateResolution(resolution);
-
-      const { srcAspectRatio, fitScale } = this.calcAspectRatio({
-         type: this.uniforms.texture_fit.value,
-         src: this.uniforms.texture_src.value,
-         srcResolution: this.uniforms.texture_resolution.value,
-      });
-
-      this.uniforms.texture_aspectRatio.value = srcAspectRatio;
-      this.uniforms.texture_fitScale.value = fitScale;
+      this.updateFitScale("texture");
    }
 
    setUpFxKey(uniforms: BasicFxLib.BasicFxUniforms): BasicFxLib.FxKey {

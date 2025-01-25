@@ -13,3 +13,9 @@
 	usf_FragColor = clamp(((usf_FragColor-.5)*contrast_factor)+.5, 0., 1.);
 
 #endif
+
+#ifdef USF_USE_COLORBALANCE
+
+	usf_FragColor.rgb = clamp(usf_FragColor.rgb * colorBalance_factor, 0., 1.);
+
+#endif

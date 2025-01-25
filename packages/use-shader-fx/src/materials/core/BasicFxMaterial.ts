@@ -5,6 +5,7 @@ import * as BasicFxLib from "./BasicFxLib";
 
 export class BasicFxMaterial extends FxMaterial {
    fxKey: BasicFxLib.FxKey;
+
    uniforms!: BasicFxLib.BasicFxUniforms;
    vertexShaderCache: string;
    vertexPrefixCache: string;
@@ -37,6 +38,8 @@ export class BasicFxMaterial extends FxMaterial {
       this.fxKey = this.setUpFxKey(this.uniforms);
 
       this.setupFxShaders(vertexShader, fragmentShader);
+
+      this.updateResolution(this.uniforms.resolution.value);
    }
 
    private setupFxShaders(vertexShader?: string, fragmentShader?: string) {
@@ -135,7 +138,6 @@ export class BasicFxMaterial extends FxMaterial {
       const flattenedValues = super.setUniformValues(values);
       if (this.isContainsBasicFxValues(flattenedValues)) {
          this.updateFxShaders();
-         // calcAspectRatioの実行が必要な可能性があるので同時に実行する
          this.updateResolution(this.uniforms.resolution.value);
       }
       return flattenedValues;
@@ -143,22 +145,12 @@ export class BasicFxMaterial extends FxMaterial {
 
    updateResolution(resolution: THREE.Vector2) {
       super.updateResolution(resolution);
-
-      const mixSrcAspect = this.calcAspectRatio({
-         type: this.uniforms.mixSrc_fit.value,
-         src: this.uniforms.mixSrc_src.value,
-         srcResolution: this.uniforms.mixSrc_resolution.value,
-      });
-      this.uniforms.mixSrc_aspectRatio.value = mixSrcAspect.srcAspectRatio;
-      this.uniforms.mixSrc_fitScale.value = mixSrcAspect.fitScale;
-
-      const mixDstAspect = this.calcAspectRatio({
-         type: this.uniforms.mixSrc_fit.value,
-         src: this.uniforms.mixSrc_src.value,
-         srcResolution: this.uniforms.mixSrc_resolution.value,
-      });
-      this.uniforms.mixDst_aspectRatio.value = mixDstAspect.srcAspectRatio;
-      this.uniforms.mixDst_fitScale.value = mixDstAspect.fitScale;
+      if (this.fxKey?.mixSrc) {
+         this.updateFitScale("mixSrc");
+      }
+      if (this.fxKey?.mixDst) {
+         this.updateFitScale("mixDst");
+      }
    }
 
    defineUniformAccessors(onSet?: () => void) {
@@ -171,50 +163,42 @@ export class BasicFxMaterial extends FxMaterial {
    /*===============================================
 	utils
 	===============================================*/
-   calcAspectRatio({
-      type,
-      src,
-      srcResolution,
-   }: {
-      type: BasicFxLib.FitType;
-      src: THREE.Texture;
-      srcResolution: BasicFxLib.TextureResolution;
-   }): {
-      srcAspectRatio: number;
-      fitScale: THREE.Vector2;
-   } {
+   calcFitScale(
+      src: THREE.Texture,
+      fitType: BasicFxLib.FitType
+   ): THREE.Vector2 {
       let srcAspectRatio = 1;
-      let fitScale = new THREE.Vector2(1, 1);
-
+      const fitScale = new THREE.Vector2(1, 1);
       const baseAspectRatio = this.uniforms.aspectRatio.value;
+      const sourceData = src?.source?.data;
 
-      if (srcResolution != null) {
-         // src の resolution が 設定されている場合
-         srcAspectRatio = srcResolution.x / srcResolution.y;
-      } else if (src?.image) {
+      if (sourceData?.width && sourceData?.height) {
          // TODO * VideoTextureも許容する
-         srcAspectRatio = src.image.width / src.image.height;
+         srcAspectRatio = sourceData.width / sourceData.height;
       } else {
          srcAspectRatio = baseAspectRatio;
       }
 
-      if (type === "fill") {
-         fitScale = new THREE.Vector2(1, 1);
-      } else if (type === "cover") {
-         fitScale = new THREE.Vector2(
+      if (fitType === "cover") {
+         fitScale.set(
             Math.min(baseAspectRatio / srcAspectRatio, 1),
             Math.min(srcAspectRatio / baseAspectRatio, 1)
          );
-      } else if (type === "contain") {
-         fitScale = new THREE.Vector2(
+      } else if (fitType === "contain") {
+         fitScale.set(
             Math.max(baseAspectRatio / srcAspectRatio, 1),
             Math.max(srcAspectRatio / baseAspectRatio, 1)
          );
       }
 
-      return {
-         srcAspectRatio,
-         fitScale,
-      };
+      return fitScale;
+   }
+
+   updateFitScale(key: BasicFxLib.SrcSystemKey) {
+      const uniforms = this.uniforms as any;
+      uniforms[`${key}_fitScale`].value = this.calcFitScale(
+         uniforms[`${key}_src`].value,
+         uniforms[`${key}_fit`].value
+      );
    }
 }
