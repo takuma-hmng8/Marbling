@@ -3,23 +3,25 @@
 import * as THREE from "three";
 import { useFrame, useThree, extend } from "@react-three/fiber";
 import {
+   BASICFX_VALUES,
    createFxMaterialImpl,
    FxMaterialImplValues,
    useNoise,
 } from "@/packages/use-shader-fx/src";
 import { useTexture } from "@react-three/drei";
-import { useRef } from "react";
+import { useGUI } from "@/utils/useGUI";
+import GUI from "lil-gui";
 
 const FxMaterialImpl = createFxMaterialImpl();
 
 extend({ FxMaterialImpl });
 
+const BASICFX_CONFIG = BASICFX_VALUES;
+
 export const Playground = () => {
    const { size } = useThree();
 
    const [app] = useTexture(["/funkun.jpg"]);
-   // app.source.data.width = 60;
-   // app.source.data.height = 2;
 
    const noise = useNoise({
       size,
@@ -29,43 +31,61 @@ export const Playground = () => {
       mixDst: {
          src: app,
          colorFactor: 0.05,
-         uvFactor: 0.05,
-         alphaFactor: 0.5,
-         fit: "fill",
-      },
-   });
-
-   noise.setValues({
-      mixDst: {
-         src: app,
-         colorFactor: 0.5,
          uvFactor: 0.1,
          alphaFactor: 0.5,
          fit: "contain",
       },
-      posterize: false,
-      grayscale: {
-         weight: new THREE.Vector3(0, 0, 0),
-         threshold: 0.32,
-         duotone: {
-            color0: new THREE.Color("red"),
-            color1: new THREE.Color("blue"),
-         },
-      },
-      hsv: {
-         saturation: 1,
-      },
-      levels: false,
-      contrast: {
-         factor: new THREE.Vector4(2, 2, 0.1, 1),
-      },
-      colorBalance: {
-         factor: new THREE.Vector3(0.1, 2, 1),
-      },
    });
 
+   const updateGUI = useGUI((gui: GUI) => {
+      // levels
+      const levels = gui.addFolder("levels");
+      levels
+         .add(BASICFX_CONFIG.levels, "value")
+         .name("enabled")
+         .onChange((v: boolean) => noise.setValues({ levels: v }));
+      levels
+         .add(BASICFX_CONFIG.levels_shadows.value, "x", -1, 1, 0.01)
+         .name("shadows r");
+      levels
+         .add(BASICFX_CONFIG.levels_shadows.value, "y", -1, 1, 0.01)
+         .name("shadows g");
+      levels
+         .add(BASICFX_CONFIG.levels_shadows.value, "z", -1, 1, 0.01)
+         .name("shadows b");
+      // contrast
+      const contrast = gui.addFolder("contrast");
+      contrast
+         .add(BASICFX_CONFIG.contrast, "value")
+         .name("enabled")
+         .onChange((v: boolean) => noise.setValues({ contrast: v }));
+      contrast
+         .add(BASICFX_CONFIG.contrast_factor.value, "x", 0, 2, 0.01)
+         .name("r");
+      contrast
+         .add(BASICFX_CONFIG.contrast_factor.value, "y", 0, 2, 0.01)
+         .name("g");
+      contrast
+         .add(BASICFX_CONFIG.contrast_factor.value, "z", 0, 2, 0.01)
+         .name("b");
+   });
+
+   // noise.setValues({
+   //    mixDst: {
+   //       fit: "cover",
+   //    },
+   // });
+
    useFrame((state) => {
-      noise.render(state);
+      noise.render(state, {
+         levels: {
+            shadows: BASICFX_CONFIG.levels_shadows.value,
+         },
+         contrast: {
+            factor: BASICFX_CONFIG.contrast_factor.value,
+         },
+      });
+      updateGUI();
    });
 
    return (

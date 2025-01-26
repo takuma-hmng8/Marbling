@@ -75,7 +75,8 @@ export class SamplingFxMaterial extends BasicFxMaterial {
    }
 
    updateFitScale() {
-      super.updateFitScale(true);
+      super.updateFitScale();
+      this.setFitScale("texture");
    }
 
    setUpFxKey(uniforms: BasicFxLib.BasicFxUniforms): BasicFxLib.FxKey {

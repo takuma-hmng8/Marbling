@@ -1,3 +1,5 @@
+export * from "./core/BasicFxLib";
+
 export * from "./impl/FxMaterialImpl";
 export * from "./impl/BasicFxMaterialImpl";
 

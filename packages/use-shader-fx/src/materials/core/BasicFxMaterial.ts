@@ -38,8 +38,6 @@ export class BasicFxMaterial extends FxMaterial {
       this.fxKey = this.setUpFxKey(this.uniforms);
 
       this.setupFxShaders(vertexShader, fragmentShader);
-
-      this.updateFitScale();
    }
 
    private setupFxShaders(vertexShader?: string, fragmentShader?: string) {
@@ -141,6 +139,7 @@ export class BasicFxMaterial extends FxMaterial {
       let srcAspectRatio = 1;
       const fitScale = new THREE.Vector2(1, 1);
       const baseAspectRatio = this.uniforms.aspectRatio.value;
+
       const sourceData = src?.source?.data;
 
       if (sourceData?.width && sourceData?.height) {
@@ -165,7 +164,7 @@ export class BasicFxMaterial extends FxMaterial {
       return fitScale;
    }
 
-   private setFitScale(key: BasicFxLib.SrcSystemKey) {
+   setFitScale(key: BasicFxLib.SrcSystemKey) {
       const uniforms = this.uniforms as any;
       uniforms[`${key}_fitScale`].value = this.calcFitScale(
          uniforms[`${key}_src`].value,
@@ -173,10 +172,9 @@ export class BasicFxMaterial extends FxMaterial {
       );
    }
 
-   updateFitScale(isSamplingFx: boolean = false) {
+   updateFitScale() {
       if (this.fxKey?.mixSrc) this.setFitScale("mixSrc");
       if (this.fxKey?.mixDst) this.setFitScale("mixDst");
-      if (isSamplingFx) this.setFitScale("texture");
    }
 
    /*===============================================
@@ -202,5 +200,10 @@ export class BasicFxMaterial extends FxMaterial {
          this.updateFxShaders();
          onSet?.();
       });
+   }
+
+   updateResolution(resolution: THREE.Vector2): void {
+      super.updateResolution(resolution);
+      this.updateFitScale();
    }
 }
