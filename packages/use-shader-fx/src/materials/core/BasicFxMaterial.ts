@@ -39,7 +39,7 @@ export class BasicFxMaterial extends FxMaterial {
 
       this.setupFxShaders(vertexShader, fragmentShader);
 
-      this.updateResolution(this.uniforms.resolution.value);
+      this.updateFitScale();
    }
 
    private setupFxShaders(vertexShader?: string, fragmentShader?: string) {
@@ -132,38 +132,9 @@ export class BasicFxMaterial extends FxMaterial {
    }
 
    /*===============================================
-	super FxMaterial
+	Fit Scale
 	===============================================*/
-   setUniformValues(values?: { [key: string]: any }) {
-      const flattenedValues = super.setUniformValues(values);
-      if (this.isContainsBasicFxValues(flattenedValues)) {
-         this.updateFxShaders();
-         this.updateResolution(this.uniforms.resolution.value);
-      }
-      return flattenedValues;
-   }
-
-   updateResolution(resolution: THREE.Vector2) {
-      super.updateResolution(resolution);
-      if (this.fxKey?.mixSrc) {
-         this.updateFitScale("mixSrc");
-      }
-      if (this.fxKey?.mixDst) {
-         this.updateFitScale("mixDst");
-      }
-   }
-
-   defineUniformAccessors(onSet?: () => void) {
-      super.defineUniformAccessors(() => {
-         this.updateFxShaders();
-         onSet?.();
-      });
-   }
-
-   /*===============================================
-	utils
-	===============================================*/
-   calcFitScale(
+   private calcFitScale(
       src: THREE.Texture,
       fitType: BasicFxLib.FitType
    ): THREE.Vector2 {
@@ -194,11 +165,42 @@ export class BasicFxMaterial extends FxMaterial {
       return fitScale;
    }
 
-   updateFitScale(key: BasicFxLib.SrcSystemKey) {
+   private setFitScale(key: BasicFxLib.SrcSystemKey) {
       const uniforms = this.uniforms as any;
       uniforms[`${key}_fitScale`].value = this.calcFitScale(
          uniforms[`${key}_src`].value,
          uniforms[`${key}_fit`].value
       );
+   }
+
+   updateFitScale(isSamplingFx: boolean = false) {
+      if (this.fxKey?.mixSrc) this.setFitScale("mixSrc");
+      if (this.fxKey?.mixDst) this.setFitScale("mixDst");
+      if (isSamplingFx) this.setFitScale("texture");
+   }
+
+   /*===============================================
+	super FxMaterial
+	===============================================*/
+   /**
+    * @param needsUpdate default : `true`
+    */
+   setUniformValues(
+      values?: { [key: string]: any },
+      needsUpdate: boolean = true
+   ) {
+      const flattenedValues = super.setUniformValues(values);
+      if (needsUpdate && this.isContainsBasicFxValues(flattenedValues)) {
+         this.updateFxShaders();
+         this.updateFitScale();
+      }
+      return flattenedValues;
+   }
+
+   defineUniformAccessors(onSet?: () => void) {
+      super.defineUniformAccessors(() => {
+         this.updateFxShaders();
+         onSet?.();
+      });
    }
 }

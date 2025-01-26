@@ -63,14 +63,15 @@ export type HooksReturn<V = {}, M = BasicFxMaterial> = {
    /**
     * Functions to update parameters and render.
     * @param rootState RootState
-    * @param newValues params of fxHooks
+    * @param newValues params of fxHooks. basicFxの追加/削除による再コンパイルや、fitの変更によるresolutionの変更は伴わない。再コンパイルを伴う場合はsetValuesを使う。
     */
    render: (rootState: RootState, newValues?: V) => THREE.Texture;
    /**
     * Function to update parameters only.
     * @param newValues params of fxHooks
+    * @param needsUpdate basicFxの追加/削除による再コンパイルや、fitの変更によるresolutionの変更を伴うかどうか. default : `true`
     */
-   setValues: (newValues: V) => void;
+   setValues: (newValues: V, needsUpdate?: boolean) => void;
    texture: THREE.Texture;
    material: M;
    scene: THREE.Scene;

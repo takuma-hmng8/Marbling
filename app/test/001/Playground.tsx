@@ -35,8 +35,6 @@ export const Playground = () => {
       },
    });
 
-   const shadows = useRef(new THREE.Vector4(0.1, 0.5, 0.1, 0.1));
-
    noise.setValues({
       mixDst: {
          src: app,
@@ -45,15 +43,25 @@ export const Playground = () => {
          alphaFactor: 0.5,
          fit: "contain",
       },
-      // levels: {
-      //    shadows: shadows.current,
-      //    midtones: new THREE.Vector4(2.1, 0, 0, 1),
-      //    outputMin: new THREE.Vector4(1.3, 0.1, 0.1, 1),
-      // },
-      // contrast: {
-      //    factor: new THREE.Vector4(0.3, 0.2, 0.1, 1),
-      // },
-      // colorBalance: false,
+      posterize: false,
+      grayscale: {
+         weight: new THREE.Vector3(0, 0, 0),
+         threshold: 0.32,
+         duotone: {
+            color0: new THREE.Color("red"),
+            color1: new THREE.Color("blue"),
+         },
+      },
+      hsv: {
+         saturation: 1,
+      },
+      levels: false,
+      contrast: {
+         factor: new THREE.Vector4(2, 2, 0.1, 1),
+      },
+      colorBalance: {
+         factor: new THREE.Vector3(0.1, 2, 1),
+      },
    });
 
    useFrame((state) => {

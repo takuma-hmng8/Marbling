@@ -15,6 +15,8 @@ type SamplingFxUniformsUnique = {
    texture: { value: UniformParentKey };
    texture_src: { value: THREE.Texture };
    texture_fit: { value: BasicFxLib.FitType };
+};
+type SamplingFxUniformsFitScale = {
    texture_fitScale: { value: THREE.Vector2 };
 };
 export type SamplingFxUniforms = SamplingFxUniformsUnique &
@@ -24,12 +26,13 @@ export type SamplingFxValues = NestUniformValues<SamplingFxUniforms>;
 /*===============================================
 constants
 ===============================================*/
-const SAMPLINGFX_VALUES: SamplingFxUniformsUnique = {
-   texture: { value: true },
-   texture_src: { value: new THREE.Texture() },
-   texture_fit: { value: "fill" },
-   texture_fitScale: { value: new THREE.Vector2(1, 1) },
-};
+const SAMPLINGFX_VALUES: SamplingFxUniformsUnique & SamplingFxUniformsFitScale =
+   {
+      texture: { value: true },
+      texture_src: { value: new THREE.Texture() },
+      texture_fit: { value: "fill" },
+      texture_fitScale: { value: new THREE.Vector2(1, 1) },
+   };
 
 const SAMPLINGFX_SHADER_PREFIX = {
    texture: "#define USF_USE_TEXTURE",
@@ -71,9 +74,8 @@ export class SamplingFxMaterial extends BasicFxMaterial {
       });
    }
 
-   updateResolution(resolution: THREE.Vector2) {
-      super.updateResolution(resolution);
-      this.updateFitScale("texture");
+   updateFitScale() {
+      super.updateFitScale(true);
    }
 
    setUpFxKey(uniforms: BasicFxLib.BasicFxUniforms): BasicFxLib.FxKey {

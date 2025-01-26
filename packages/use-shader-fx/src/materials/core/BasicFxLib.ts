@@ -16,7 +16,6 @@ export type BasicFxUniformsUnique = {
    mixSrc: { value: UniformParentKey };
    mixSrc_src: { value: THREE.Texture };
    mixSrc_fit: { value: FitType };
-   mixSrc_fitScale: { value: THREE.Vector2 }; // TODO これをBasicFxValuesから削除する
    mixSrc_uvFactor: { value: number };
    mixSrc_alphaFactor: { value: number };
    mixSrc_colorFactor: { value: number };
@@ -24,7 +23,6 @@ export type BasicFxUniformsUnique = {
    mixDst: { value: UniformParentKey };
    mixDst_src: { value: THREE.Texture };
    mixDst_fit: { value: FitType };
-   mixDst_fitScale: { value: THREE.Vector2 };
    mixDst_uvFactor: { value: number };
    mixDst_alphaFactor: { value: number };
    mixDst_colorFactor: { value: number };
@@ -41,6 +39,27 @@ export type BasicFxUniformsUnique = {
    // colorBalance
    colorBalance: { value: UniformParentKey };
    colorBalance_factor: { value: THREE.Vector3 };
+   // hsv
+   hsv: { value: UniformParentKey };
+   hsv_hueShift: { value: number }; // 色相を +X 度分回転 (0.0~1.0 で0~360度)
+   hsv_saturation: { value: number }; // 彩度乗算 (1.0で変化なし)
+   hsv_brightness: { value: number }; // 明度乗算 (1.0で変化なし)
+   // posterize
+   posterize: { value: UniformParentKey };
+   posterize_levels: { value: THREE.Vector4 };
+   // grayscale
+   grayscale: { value: UniformParentKey };
+   grayscale_weight: { value: THREE.Vector3 };
+   grayscale_duotone: { value: UniformParentKey };
+   grayscale_duotone_color0: { value: THREE.Color };
+   grayscale_duotone_color1: { value: THREE.Color };
+   grayscale_threshold: { value: number }; // 0~1 負の値は処理をスキップする
+};
+
+// BasicFxValuesの型からfitScaleを排除する
+type BasicFxUniformsFitScale = {
+   mixSrc_fitScale: { value: THREE.Vector2 };
+   mixDst_fitScale: { value: THREE.Vector2 };
 };
 
 export type BasicFxUniforms = BasicFxUniformsUnique & DefaultUniforms;
@@ -54,6 +73,9 @@ export type FxKey = {
    levels: boolean;
    contrast: boolean;
    colorBalance: boolean;
+   hsv: boolean;
+   posterize: boolean;
+   grayscale: boolean;
 };
 
 export type SrcSystemKey = "mixSrc" | "mixDst" | "texture";
@@ -61,7 +83,7 @@ export type SrcSystemKey = "mixSrc" | "mixDst" | "texture";
 /*===============================================
 constants
 ===============================================*/
-export const BASICFX_VALUES: BasicFxUniformsUnique = {
+export const BASICFX_VALUES: BasicFxUniformsUnique & BasicFxUniformsFitScale = {
    // mixSrc
    mixSrc: { value: false },
    mixSrc_src: { value: new THREE.Texture() },
@@ -91,6 +113,21 @@ export const BASICFX_VALUES: BasicFxUniformsUnique = {
    // colorBalance
    colorBalance: { value: false },
    colorBalance_factor: { value: new THREE.Vector3(1, 1, 1) },
+   // hsv
+   hsv: { value: false },
+   hsv_hueShift: { value: 0 },
+   hsv_saturation: { value: 1 },
+   hsv_brightness: { value: 1 },
+   // posterize
+   posterize: { value: false },
+   posterize_levels: { value: new THREE.Vector4(0, 0, 0, 0) },
+   // grayscale
+   grayscale: { value: false },
+   grayscale_weight: { value: new THREE.Vector3(0, 0, 0) },
+   grayscale_duotone: { value: false },
+   grayscale_duotone_color0: { value: new THREE.Color(0x000000) },
+   grayscale_duotone_color1: { value: new THREE.Color(0xffffff) },
+   grayscale_threshold: { value: -1 },
 };
 
 export const BASICFX_SHADER_PREFIX = {
@@ -100,6 +137,9 @@ export const BASICFX_SHADER_PREFIX = {
    levels: "#define USF_USE_LEVELS",
    contrast: "#define USF_USE_CONTRAST",
    colorBalance: "#define USF_USE_COLORBALANCE",
+   hsv: "#define USF_USE_HSV",
+   posterize: "#define USF_USE_POSTERIZE",
+   grayscale: "#define USF_USE_GRAYSCALE",
 };
 
 /*===============================================
@@ -109,7 +149,17 @@ export function handleUpdateFxShaderPrefixes(fxKey: FxKey): {
    vertex: string;
    fragment: string;
 } {
-   const { mixSrc, mixDst, srcSystem, levels, contrast, colorBalance } = fxKey;
+   const {
+      mixSrc,
+      mixDst,
+      srcSystem,
+      levels,
+      contrast,
+      colorBalance,
+      hsv,
+      posterize,
+      grayscale,
+   } = fxKey;
    return {
       vertex: mergeShaderCode([
          srcSystem ? BASICFX_SHADER_PREFIX.srcSystem : "",
@@ -124,6 +174,9 @@ export function handleUpdateFxShaderPrefixes(fxKey: FxKey): {
          levels ? BASICFX_SHADER_PREFIX.levels : "",
          contrast ? BASICFX_SHADER_PREFIX.contrast : "",
          colorBalance ? BASICFX_SHADER_PREFIX.colorBalance : "",
+         hsv ? BASICFX_SHADER_PREFIX.hsv : "",
+         posterize ? BASICFX_SHADER_PREFIX.posterize : "",
+         grayscale ? BASICFX_SHADER_PREFIX.grayscale : "",
          "\n",
       ]),
    };
@@ -141,5 +194,8 @@ export function getFxKeyFromUniforms(uniforms: BasicFxUniformsUnique): FxKey {
       levels: uniforms.levels.value ? true : false,
       contrast: uniforms.contrast.value ? true : false,
       colorBalance: uniforms.colorBalance.value ? true : false,
+      hsv: uniforms.hsv.value ? true : false,
+      posterize: uniforms.posterize.value ? true : false,
+      grayscale: uniforms.grayscale.value ? true : false,
    };
 }

@@ -43,8 +43,8 @@ export const useNoise = ({
    });
 
    const setValues = useCallback(
-      (newValues: NoiseValues) => {
-         material.setUniformValues(newValues);
+      (newValues: NoiseValues, needsUpdate: boolean = true) => {
+         material.setUniformValues(newValues, needsUpdate);
       },
       [material]
    );
@@ -52,7 +52,7 @@ export const useNoise = ({
    const render = useCallback(
       (rootState: RootState, newValues?: NoiseValues) => {
          const { gl, clock } = rootState;
-         newValues && setValues(newValues);
+         newValues && setValues(newValues, false);
          material.uniforms.tick.value =
             newValues?.tick || clock.getElapsedTime();
          return updateRenderTarget({ gl });
