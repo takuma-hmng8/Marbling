@@ -23,9 +23,19 @@ export type BasicFxUniformsUnique = {
    mixDst: { value: UniformParentKey };
    mixDst_src: { value: THREE.Texture };
    mixDst_fit: { value: FitType };
-   mixDst_uvFactor: { value: number };
-   mixDst_alphaFactor: { value: number };
-   mixDst_colorFactor: { value: number };
+   mixDst_uv: { value: UniformParentKey };
+   mixDst_uv_factor: { value: number };
+   mixDst_uv_offset: { value: THREE.Vector2 };
+   mixDst_uv_radius: { value: number }; // 負の値は画面全体
+   mixDst_uv_position: { value: THREE.Vector2 };
+   mixDst_color: { value: UniformParentKey };
+   mixDst_color_factor: { value: number };
+   mixDst_color_radius: { value: number }; // 負の値は画面全体
+   mixDst_color_position: { value: THREE.Vector2 };
+   mixDst_alpha: { value: UniformParentKey };
+   mixDst_alpha_factor: { value: number };
+   mixDst_alpha_radius: { value: number }; // 負の値は画面全体
+   mixDst_alpha_position: { value: THREE.Vector2 };
    // levels
    levels: { value: UniformParentKey };
    levels_shadows: { value: THREE.Vector4 };
@@ -95,11 +105,21 @@ export const BASICFX_VALUES: BasicFxUniformsUnique & BasicFxUniformsFitScale = {
    // mixDst
    mixDst: { value: false },
    mixDst_src: { value: new THREE.Texture() },
-   mixDst_uvFactor: { value: 0 },
-   mixDst_alphaFactor: { value: 0 },
-   mixDst_colorFactor: { value: 0 },
    mixDst_fit: { value: "fill" },
    mixDst_fitScale: { value: new THREE.Vector2(1, 1) },
+   mixDst_uv: { value: false },
+   mixDst_uv_factor: { value: 0 },
+   mixDst_uv_offset: { value: new THREE.Vector2(0, 0) },
+   mixDst_uv_radius: { value: 0.5 },
+   mixDst_uv_position: { value: new THREE.Vector2(0.5, 0.5) },
+   mixDst_color: { value: false },
+   mixDst_color_factor: { value: 0 },
+   mixDst_color_radius: { value: 0.5 },
+   mixDst_color_position: { value: new THREE.Vector2(0.5, 0.5) },
+   mixDst_alpha: { value: false },
+   mixDst_alpha_factor: { value: 0 },
+   mixDst_alpha_radius: { value: 0.5 },
+   mixDst_alpha_position: { value: new THREE.Vector2(0.5, 0.5) },
    // levels
    levels: { value: false },
    levels_shadows: { value: new THREE.Vector4(0, 0, 0, 0) },

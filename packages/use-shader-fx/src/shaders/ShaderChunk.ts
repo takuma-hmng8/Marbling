@@ -1,5 +1,6 @@
 import plane_vertex from "./ShaderChunk/plane_vertex.glsl";
-import src_libs_vertex from "./ShaderChunk/src_libs_vertex.glsl";
+import srcSystem_pars_vertex from "./ShaderChunk/srcSystem_pars_vertex.glsl";
+import srcSystem_pars_fragment from "./ShaderChunk/srcSystem_pars_fragment.glsl";
 import default_vertex from "./ShaderChunk/default_vertex.glsl";
 import default_pars_vertex from "./ShaderChunk/default_pars_vertex.glsl";
 import default_pars_fragment from "./ShaderChunk/default_pars_fragment.glsl";
@@ -20,7 +21,8 @@ import adjustments_pars_fragment from "./ShaderChunk/adjustments_pars_fragment.g
 
 export type ShaderChunkTypes =
    | "default_pars_fragment"
-   | "src_libs_vertex"
+   | "srcSystem_pars_vertex"
+   | "srcSystem_pars_fragment"
    | "default_pars_vertex"
    | "default_vertex"
    | "plane_vertex"
@@ -41,7 +43,8 @@ export type ShaderChunkTypes =
 
 export const ShaderChunk: { [K in ShaderChunkTypes]: string } = Object.freeze({
    plane_vertex,
-   src_libs_vertex,
+   srcSystem_pars_vertex,
+   srcSystem_pars_fragment,
    default_vertex,
    default_pars_vertex,
    default_pars_fragment,

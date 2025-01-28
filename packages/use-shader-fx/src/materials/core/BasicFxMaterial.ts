@@ -35,7 +35,7 @@ export class BasicFxMaterial extends FxMaterial {
       this.fragmentPrefixCache = "";
       this.programCache = 0;
 
-      this.fxKey = this.setUpFxKey(this.uniforms);
+      this.fxKey = this.setupFxKey(this.uniforms);
 
       this.setupFxShaders(vertexShader, fragmentShader);
    }
@@ -125,7 +125,7 @@ export class BasicFxMaterial extends FxMaterial {
       );
    }
 
-   setUpFxKey(uniforms: BasicFxLib.BasicFxUniforms): BasicFxLib.FxKey {
+   setupFxKey(uniforms: BasicFxLib.BasicFxUniforms): BasicFxLib.FxKey {
       return BasicFxLib.getFxKeyFromUniforms(uniforms);
    }
 

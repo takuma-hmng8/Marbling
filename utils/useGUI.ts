@@ -1,17 +1,29 @@
 import { useCallback, useEffect, useState } from "react";
 import GUI from "lil-gui";
 
-export const useGUI = (setGUI: (gui: GUI) => void) => {
-   const [gui] = useState(() => new GUI({ closeFolders: true, width: 240 }));
+export const useGUI = (setupGUI: (gui: GUI) => void, title?: string) => {
+   const [gui, setGUIState] = useState<GUI | null>(null);
 
    useEffect(() => {
-      setGUI(gui);
+      if (!gui) {
+         const newGui = new GUI({
+            closeFolders: true,
+            width: 240,
+            title,
+         });
+         setGUIState(newGui);
+         setupGUI(newGui);
+      }
       return () => {
-         gui.destroy();
+         if (gui) {
+            gui?.destroy();
+            setGUIState(null);
+         }
       };
-   }, [gui, setGUI]);
+   }, [gui, setupGUI, title]);
+
    const updateDisplays = useCallback(() => {
-      gui.folders.forEach((folder) =>
+      gui?.folders.forEach((folder) =>
          folder.controllers.forEach((controller) => controller.updateDisplay())
       );
    }, [gui]);

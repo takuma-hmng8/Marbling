@@ -86,12 +86,13 @@ export const noiseFragment = `
 		${ShaderLib.basicFx_fragment_begin}
 
 		float noise = warp(usf_Uv * scale ,warpStrength,tick * timeStrength);
+
 		vec4 noiseColor = vec4(vec3(noise),1.0);
 
 		vec4 usf_FragColor = noiseColor;
 
 		${ShaderLib.basicFx_fragment_end}
-		
+
 		gl_FragColor = usf_FragColor;
 
 	}
