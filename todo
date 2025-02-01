@@ -3,3 +3,6 @@
 MaterialImpl / basicFxのhook化
 - useBasicFx/BasicFxMaterialImplはSamplingFxMaterialを拡張してつくる
 - FxMaterialImpl
+
+
+- useTextureTransition

@@ -41,12 +41,3 @@ export const Playground = () => {
       </mesh>
    );
 };
-
-declare global {
-   namespace JSX {
-      interface IntrinsicElements {
-         fxMaterialImpl: FxMaterialImplValues &
-            JSX.IntrinsicElements["shaderMaterial"];
-      }
-   }
-}

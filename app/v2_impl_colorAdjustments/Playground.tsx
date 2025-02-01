@@ -187,10 +187,8 @@ export const Playground = () => {
 declare global {
    namespace JSX {
       interface IntrinsicElements {
-         fxMaterialImpl: FxMaterialImplValues &
-            JSX.IntrinsicElements["shaderMaterial"];
-         BasicFxMaterialImpl: BasicFxMaterialImplValues &
-            JSX.IntrinsicElements["shaderMaterial"];
+         fxMaterialImpl: any;
+         BasicFxMaterialImpl: any;
       }
    }
 }

@@ -10,7 +10,7 @@ import {
    BasicFxMaterialImplValues,
    useRGBShift,
    useGaussianBlur,
-   useBoxBlur
+   useBoxBlur,
 } from "@/packages/use-shader-fx/src";
 import { Float, OrbitControls, useTexture } from "@react-three/drei";
 import { useCoverTexture } from "@/packages/use-shader-fx/src/hooks/useCoverTexture";
@@ -37,56 +37,56 @@ export const Playground = () => {
 
    // const coverTexture = useCoverTexture({
    //    size,
-   //    dpr: 1,      
-   //    src: app,       
+   //    dpr: 1,
+   //    src: app,
    //    textureResolution: new THREE.Vector2(app.image.width, app.image.height),
-   // })   
+   // })
 
    const noise = useNoise({
       size,
       dpr: 1,
       scale: 0.005,
       timeOffset: 0,
-   })
+   });
 
    const noise2 = useNoise({
       size,
       dpr: 1,
-      scale: 0.005,      
-      timeOffset: .03,
-   })
+      scale: 0.005,
+      timeOffset: 0.03,
+   });
 
    const noise3 = useNoise({
       size,
       dpr: 1,
-      scale: 0.005,            
-      timeOffset: .06,
-   })
+      scale: 0.005,
+      timeOffset: 0.06,
+   });
 
    const rgbShift = useRGBShift({
       size,
       dpr: 2,
-      shiftScale: .03,      
+      shiftScale: 0.03,
       shiftPower: new THREE.Vector2(2, 2),
-      shiftPowerSrcR: noise.texture,      
-      shiftPowerSrcG: noise2.texture,      
-      shiftPowerSrcB: noise3.texture,      
+      shiftPowerSrcR: noise.texture,
+      shiftPowerSrcG: noise2.texture,
+      shiftPowerSrcB: noise3.texture,
       isUseShiftPowerSrcR: true,
       isUseShiftPowerSrcG: true,
       isUseShiftPowerSrcB: true,
       texture: {
          src: app,
-         fit: 'contain',
-      }
-   })
+         fit: "contain",
+      },
+   });
 
    // const gbBur = useGaussianBlur({
    //    size,
    //    dpr: 1,
-   //    radius: 2,      
+   //    radius: 2,
    //    sigma: new THREE.Vector2(0, 0),
    //    texture: {
-   //       src: rgbShift.texture,         
+   //       src: rgbShift.texture,
    //    }
    // });
 
@@ -95,7 +95,7 @@ export const Playground = () => {
       dpr: 1,
       texture: {
          src: rgbShift.texture,
-      }
+      },
    });
 
    useFrame((state) => {
@@ -103,9 +103,9 @@ export const Playground = () => {
       noise.render(state);
       noise2.render(state);
       noise3.render(state);
-      rgbShift.render(state);         
+      rgbShift.render(state);
       // gbBur.render(state);
-      motionBlur.render(state);      
+      motionBlur.render(state);
    });
 
    return (
@@ -115,14 +115,3 @@ export const Playground = () => {
       </mesh>
    );
 };
-
-declare global {
-   namespace JSX {
-      interface IntrinsicElements {
-         fxMaterialImpl: FxMaterialImplValues &
-            JSX.IntrinsicElements["shaderMaterial"];
-         BasicFxMaterialImpl: BasicFxMaterialImplValues &
-            JSX.IntrinsicElements["shaderMaterial"];
-      }
-   }
-}
