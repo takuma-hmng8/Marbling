@@ -143,7 +143,6 @@ export class BasicFxMaterial extends FxMaterial {
       const sourceData = src?.source?.data;
 
       if (sourceData?.width && sourceData?.height) {
-         // TODO * VideoTextureも許容する
          srcAspectRatio = sourceData.width / sourceData.height;
       } else {
          srcAspectRatio = baseAspectRatio;

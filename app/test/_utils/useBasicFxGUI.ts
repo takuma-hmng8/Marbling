@@ -6,7 +6,7 @@ import {
    BasicFxValues,
    FitType,
 } from "@/packages/use-shader-fx/src";
-import { useTexture } from "@react-three/drei";
+import { useTexture, useVideoTexture } from "@react-three/drei";
 import { useCallback } from "react";
 
 const BASICFX_CONFIG: BasicFxUniformsUnique = BASICFX_VALUES;
@@ -14,6 +14,10 @@ const FIT_TYPE: FitType[] = ["fill", "cover", "contain"];
 
 export const useBasicFxGUI = (setValues: (v: BasicFxValues) => void) => {
    const [funkun] = useTexture(["/funkun.jpg"]);
+   const funkunVideo = useVideoTexture("/FT_Ch02.mp4", {
+      width: 1280,
+      height: 720,
+   });
    const setupGUI = useCallback(
       (gui: GUI) => {
          /*===============================================
@@ -262,7 +266,7 @@ export const useBasicFxGUI = (setValues: (v: BasicFxValues) => void) => {
             .add(BASICFX_CONFIG.grayscale_threshold, "value", -0.01, 1, 0.01)
             .name("threshold");
       },
-      [setValues, funkun]
+      [setValues, funkun, funkunVideo]
    );
 
    const updateBasicFxGUI = useGUI(setupGUI, "BasicFx");

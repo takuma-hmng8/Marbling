@@ -34,4 +34,5 @@ export const THREE_TYPES = new Set([
    THREE.Light,
    THREE.Object3D,
    THREE.Bone,
+   THREE.VideoTexture,
 ]);
