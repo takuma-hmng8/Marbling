@@ -35,54 +35,54 @@ export class BasicFxMaterial extends FxMaterial {
       this.fragmentPrefixCache = "";
       this.programCache = 0;
 
-      this.fxKey = this.setupFxKey(this.uniforms);
+      this.fxKey = this._setupFxKey(this.uniforms);
 
-      this.setupFxShaders(vertexShader, fragmentShader);
+      this._setupFxShaders(vertexShader, fragmentShader);
    }
 
-   private setupFxShaders(vertexShader?: string, fragmentShader?: string) {
+   private _setupFxShaders(vertexShader?: string, fragmentShader?: string) {
       if (!vertexShader && !fragmentShader) return;
 
-      this.updateFxShaderPrefixes();
+      this._updateFxShaderPrefixes();
 
-      const [vertex, fragment] = this.handleMergeShaderLib(
+      const [vertex, fragment] = this._handleMergeShaderLib(
          vertexShader,
          fragmentShader
       );
 
-      super.setupShaders(vertex, fragment);
+      super._setupShaders(vertex, fragment);
 
       this.vertexShaderCache = this.vertexShader;
       this.fragmentShaderCache = this.fragmentShader;
 
-      this.compileFxShaders();
+      this._compileFxShaders();
    }
 
    /** SamplingFxMaterialで継承するため、handlerとして独立させる */
-   handleMergeShaderLib(vertexShader?: string, fragmentShader?: string) {
+   _handleMergeShaderLib(vertexShader?: string, fragmentShader?: string) {
       return mergeShaderLib(vertexShader, fragmentShader, "basicFx");
    }
 
-   private updateFxShaders() {
+   private _updateFxShaders() {
       // FxMaterialの初期化時にsetUniformValuesが呼ばれるが、isContainsBasicFxValuesがtrueを返すと、このメソッドが実行されてしまう。BasicFxMaterialの初期化前にはこの処理をスキップする。
       if (!this.fxKey) return;
 
       const _cache = this.programCache;
 
-      const { diffCount, newFxKey } = this.handleUpdateFxShaders();
+      const { diffCount, newFxKey } = this._handleUpdateFxShaders();
 
       this.programCache += diffCount;
       this.fxKey = newFxKey;
 
       if (_cache !== this.programCache) {
-         this.updateFxShaderPrefixes();
-         this.compileFxShaders();
+         this._updateFxShaderPrefixes();
+         this._compileFxShaders();
          this.version++; // same as this.needsUpdate = true;
       }
    }
 
    /** SamplingFxMaterialで継承するため、handlerとして独立させる */
-   handleUpdateFxShaders(): {
+   protected _handleUpdateFxShaders(): {
       diffCount: number;
       newFxKey: BasicFxLib.FxKey;
    } {
@@ -96,26 +96,26 @@ export class BasicFxMaterial extends FxMaterial {
       };
    }
 
-   private compileFxShaders() {
+   private _compileFxShaders() {
       this.vertexShader = this.vertexPrefixCache + this.vertexShaderCache;
       this.fragmentShader = this.fragmentPrefixCache + this.fragmentShaderCache;
    }
 
-   private updateFxShaderPrefixes() {
-      const prefix = this.handleUpdateFxShaderPrefixes();
+   private _updateFxShaderPrefixes() {
+      const prefix = this._handleUpdateFxShaderPrefixes();
       this.vertexPrefixCache = prefix.vertex;
       this.fragmentPrefixCache = prefix.fragment;
    }
 
    /** SamplingFxMaterialで継承するため、handlerとして独立させる */
-   handleUpdateFxShaderPrefixes(): {
+   protected _handleUpdateFxShaderPrefixes(): {
       vertex: string;
       fragment: string;
    } {
       return BasicFxLib.handleUpdateFxShaderPrefixes(this.fxKey);
    }
 
-   isContainsBasicFxValues(
+   protected _isContainsBasicFxValues(
       target?: { [key: string]: any },
       source?: { [key: string]: any }
    ): boolean {
@@ -125,14 +125,16 @@ export class BasicFxMaterial extends FxMaterial {
       );
    }
 
-   setupFxKey(uniforms: BasicFxLib.BasicFxUniforms): BasicFxLib.FxKey {
+   protected _setupFxKey(
+      uniforms: BasicFxLib.BasicFxUniforms
+   ): BasicFxLib.FxKey {
       return BasicFxLib.getFxKeyFromUniforms(uniforms);
    }
 
    /*===============================================
 	Fit Scale
 	===============================================*/
-   private calcFitScale(
+   private _calcFitScale(
       src: THREE.Texture,
       fitType: BasicFxLib.FitType
    ): THREE.Vector2 {
@@ -163,17 +165,17 @@ export class BasicFxMaterial extends FxMaterial {
       return fitScale;
    }
 
-   setFitScale(key: BasicFxLib.SrcSystemKey) {
+   protected _setFitScale(key: BasicFxLib.SrcSystemKey) {
       const uniforms = this.uniforms as any;
-      uniforms[`${key}_fitScale`].value = this.calcFitScale(
+      uniforms[`${key}_fitScale`].value = this._calcFitScale(
          uniforms[`${key}_src`].value,
          uniforms[`${key}_fit`].value
       );
    }
 
-   updateFitScale() {
-      if (this.fxKey?.mixSrc) this.setFitScale("mixSrc");
-      if (this.fxKey?.mixDst) this.setFitScale("mixDst");
+   protected _updateFitScale() {
+      if (this.fxKey?.mixSrc) this._setFitScale("mixSrc");
+      if (this.fxKey?.mixDst) this._setFitScale("mixDst");
    }
 
    /*===============================================
@@ -182,27 +184,27 @@ export class BasicFxMaterial extends FxMaterial {
    /**
     * @param needsUpdate default : `true`
     */
-   setUniformValues(
+   public setUniformValues(
       values?: { [key: string]: any },
       needsUpdate: boolean = true
    ) {
       const flattenedValues = super.setUniformValues(values);
-      if (needsUpdate && this.isContainsBasicFxValues(flattenedValues)) {
-         this.updateFxShaders();
-         this.updateFitScale();
+      if (needsUpdate && this._isContainsBasicFxValues(flattenedValues)) {
+         this._updateFxShaders();
+         this._updateFitScale();
       }
       return flattenedValues;
    }
 
-   defineUniformAccessors(onSet?: () => void) {
-      super.defineUniformAccessors(() => {
-         this.updateFxShaders();
+   protected _defineUniformAccessors(onSet?: () => void) {
+      super._defineUniformAccessors(() => {
+         this._updateFxShaders();
          onSet?.();
       });
    }
 
-   updateResolution(resolution: THREE.Vector2): void {
+   public updateResolution(resolution: THREE.Vector2): void {
       super.updateResolution(resolution);
-      this.updateFitScale();
+      this._updateFitScale();
    }
 }

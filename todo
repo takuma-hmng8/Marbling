@@ -4,5 +4,11 @@ MaterialImpl / basicFxのhook化
 - useBasicFx/BasicFxMaterialImplはSamplingFxMaterialを拡張してつくる
 - FxMaterialImpl
 
-
 - useTextureTransition
+- useGrid
+
+
+タッチデザイナーを履修して構想を練る
+- srs systemにtransformを持たせる
+https://github.com/FunTechInc/webgloo/issues/5#issuecomment-2630245651
+

@@ -63,33 +63,40 @@ export class SamplingFxMaterial extends BasicFxMaterial {
       });
    }
 
-   handleMergeShaderLib(vertexShader?: string, fragmentShader?: string) {
+   protected _handleMergeShaderLib(
+      vertexShader?: string,
+      fragmentShader?: string
+   ) {
       return mergeShaderLib(vertexShader, fragmentShader, "samplingFx");
    }
 
-   isContainsBasicFxValues(values?: { [key: string]: any }): boolean {
-      return super.isContainsBasicFxValues(values, {
+   protected _isContainsBasicFxValues(values?: {
+      [key: string]: any;
+   }): boolean {
+      return super._isContainsBasicFxValues(values, {
          ...BasicFxLib.BASICFX_VALUES,
          ...SAMPLINGFX_VALUES,
       });
    }
 
-   updateFitScale() {
-      super.updateFitScale();
-      this.setFitScale("texture");
+   protected _updateFitScale() {
+      super._updateFitScale();
+      this._setFitScale("texture");
    }
 
-   setupFxKey(uniforms: BasicFxLib.BasicFxUniforms): BasicFxLib.FxKey {
-      const key = super.setupFxKey(uniforms);
+   protected _setupFxKey(
+      uniforms: BasicFxLib.BasicFxUniforms
+   ): BasicFxLib.FxKey {
+      const key = super._setupFxKey(uniforms);
       key.srcSystem = true;
       return key;
    }
 
-   handleUpdateFxShaders(): {
+   protected _handleUpdateFxShaders(): {
       diffCount: number;
       newFxKey: BasicFxLib.FxKey;
    } {
-      const { diffCount, newFxKey } = super.handleUpdateFxShaders();
+      const { diffCount, newFxKey } = super._handleUpdateFxShaders();
       newFxKey.srcSystem = true;
       return {
          diffCount,
@@ -97,11 +104,11 @@ export class SamplingFxMaterial extends BasicFxMaterial {
       };
    }
 
-   handleUpdateFxShaderPrefixes(): {
+   protected _handleUpdateFxShaderPrefixes(): {
       vertex: string;
       fragment: string;
    } {
-      const prefix = super.handleUpdateFxShaderPrefixes();
+      const prefix = super._handleUpdateFxShaderPrefixes();
       return {
          vertex: mergeShaderCode([
             prefix.vertex.trim(),

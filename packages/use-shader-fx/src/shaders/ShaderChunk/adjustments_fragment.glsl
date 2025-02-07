@@ -28,5 +28,6 @@
 	float grayscale = dot(usf_FragColor.rgb, vec3(0.299 + grayscale_weight.r, 0.587 + grayscale_weight.g, 0.114 + grayscale_weight.b));
 	grayscale = grayscale_threshold > 0.0 ? step(grayscale_threshold, grayscale) : grayscale;
 	vec3 duotoneColor = mix(grayscale_duotone_color0, grayscale_duotone_color1, grayscale);
+	// TODO grayscale_duotoneのとこ普通に三項演算子にする
 	usf_FragColor.rgb = mix(vec3(grayscale), duotoneColor, float(grayscale_duotone));
 #endif

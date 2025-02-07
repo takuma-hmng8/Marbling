@@ -43,15 +43,15 @@ export class FxMaterial extends THREE.ShaderMaterial {
          uniforms || {},
       ]) as DefaultUniforms;
 
-      this.setupShaders(vertexShader, fragmentShader);
+      this._setupShaders(vertexShader, fragmentShader);
 
       this.setUniformValues(uniformValues);
 
-      this.defineUniformAccessors();
+      this._defineUniformAccessors();
    }
 
    /** This is updated in useFxScene */
-   updateResolution(resolution: THREE.Vector2) {
+   public updateResolution(resolution: THREE.Vector2) {
       const { width, height } = resolution;
       const maxAspect = Math.max(width, height);
       this.uniforms.resolution.value.set(width, height);
@@ -60,7 +60,7 @@ export class FxMaterial extends THREE.ShaderMaterial {
       this.uniforms.maxAspect.value.set(maxAspect / width, maxAspect / height);
    }
 
-   setupShaders(vertexShader?: string, fragmentShader?: string) {
+   protected _setupShaders(vertexShader?: string, fragmentShader?: string) {
       if (!vertexShader && !fragmentShader) return;
 
       const [vertex, fragment] = mergeShaderLib(
@@ -74,7 +74,7 @@ export class FxMaterial extends THREE.ShaderMaterial {
          : this.fragmentShader;
    }
 
-   setUniformValues(values?: { [key: string]: any }) {
+   public setUniformValues(values?: { [key: string]: any }) {
       if (values === undefined) return;
       const flattenedValues = flattenUniformValues(values);
 
@@ -98,7 +98,7 @@ export class FxMaterial extends THREE.ShaderMaterial {
    }
 
    /** define getter/setters　*/
-   defineUniformAccessors(onSet?: () => void) {
+   protected _defineUniformAccessors(onSet?: () => void) {
       for (const key of Object.keys(this.uniforms)) {
          if (this.hasOwnProperty(key)) {
             warn(`'${key}' is already defined in ${this.type}.`);

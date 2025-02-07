@@ -1,9 +1,5 @@
 uniform vec2 force;
-uniform vec2 center;
 
 void main(){
-	vec2 circle = (vUv - 0.5) * 2.0;
-	float d = 1.0-min(length(circle), 1.0);
-	d *= d;
-	gl_FragColor = vec4(force * d, 0., 1.);
+	gl_FragColor = vec4(force * pow(1.0 - clamp(2.0 * distance(vUv, vec2(0.5)), 0.0, 1.0), 2.0), 0.0, 1.0);
 }
