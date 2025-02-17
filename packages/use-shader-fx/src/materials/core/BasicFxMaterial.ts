@@ -59,7 +59,10 @@ export class BasicFxMaterial extends FxMaterial {
    }
 
    /** SamplingFxMaterialで継承するため、handlerとして独立させる */
-   _handleMergeShaderLib(vertexShader?: string, fragmentShader?: string) {
+   protected _handleMergeShaderLib(
+      vertexShader?: string,
+      fragmentShader?: string
+   ) {
       return mergeShaderLib(vertexShader, fragmentShader, "basicFx");
    }
 

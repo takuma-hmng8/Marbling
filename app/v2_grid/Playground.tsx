@@ -13,7 +13,12 @@ import {
    BasicFxMaterialImplValues,
    useFluid,
 } from "@/packages/use-shader-fx/src";
-import { Float, OrbitControls, useTexture } from "@react-three/drei";
+import {
+   Float,
+   OrbitControls,
+   useTexture,
+   useVideoTexture,
+} from "@react-three/drei";
 
 /*===============================================
 idea of useGrid
@@ -54,11 +59,11 @@ const FxMaterialImpl = createFxMaterialImpl({
 
 	void main() {
 		float u_lineWidth = .01; // 0.01 ~
-		vec2 u_gridCount = vec2(40.);
+		vec2 u_gridCount = vec2(50.);
 		vec2 u_target = vec2(450., 500.);
 		vec3 u_fillColor = vec3(.0, 1.0, 0.0);
 		vec3 u_backgroundColor = vec3(0.0, 0.0, 0.0);
-		vec3 u_gridColor = vec3(0.2, 0.2, 0.2);
+		vec3 u_gridColor = vec3(0., 0., 0.);
 
 		// 現在のセルのインデックスを計算（例：(3, 5) など）
 		u_gridCount.x *= aspectRatio;
@@ -84,13 +89,13 @@ const FxMaterialImpl = createFxMaterialImpl({
 		// vec3 fillColor = (len >= 0.8) ? texture2D(celltxture,cellPos).rgb : u_backgroundColor;
 		// 3. spriteテクスチャ
 		float spriteCount = 10.0;
-		float spritePos = fract(cellHash + time * 1.);
+		float spritePos = fract(cellHash + time * 0.4);
 		float spriteIndex = floor(spritePos * spriteCount);
 		float spriteSize = 1.0 / spriteCount;
 		float spriteOffset = spriteIndex * spriteSize;
 		float spriteU = spriteOffset + cellPos.x * spriteSize;
 		vec2 spriteUV = vec2(spriteU, cellPos.y);
-		vec3 fillColor = (len >= 0.8) ? texture2D(spriteTexture, spriteUV).rgb : u_backgroundColor;
+		vec3 fillColor = (len >= 0.1) ? texture2D(spriteTexture, spriteUV).rgb : u_backgroundColor;
 		// 4. マッピングに使うテクスチャのカラーをそのままレンダリング
 		// vec3 fillColor = (len >= 0.8) ? texColor.rgb : u_backgroundColor;
 
@@ -125,6 +130,10 @@ export const Playground = () => {
    const { size, viewport, camera } = useThree();
 
    const [funkun, sprite] = useTexture(["/momo.jpg", "/sprite.jpg"]);
+   const funkunVideo = useVideoTexture("/FT_Ch02.mp4", {
+      width: 1280,
+      height: 720,
+   });
 
    const fluid = useFluid({
       size,
@@ -147,7 +156,7 @@ export const Playground = () => {
          <fxMaterialImpl
             ref={material}
             key={FxMaterialImpl.key}
-            src={fluid.texture}
+            src={funkunVideo}
             celltxture={funkun}
             spriteTexture={sprite}
          />

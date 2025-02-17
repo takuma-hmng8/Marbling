@@ -5,6 +5,7 @@ MaterialImpl / basicFxのhook化
 - FxMaterialImpl
 
 - useTextureTransition
+	- smoothSquareWaveとmodでautoモードつくってもいいね
 - useGrid
 
 
